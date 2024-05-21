@@ -1,0 +1,20 @@
+{
+  "name": "test-dax-sdkv3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.577.0",
+    "@aws-sdk/lib-dynamodb": "^3.577.0",
+    "antlr4": "4.8.x",
+    "bignumber.js": "^3.0.0",
+    "jmespath": "^0.15.0",
+    "uuid": "^3.3.2"
+  }
+}
