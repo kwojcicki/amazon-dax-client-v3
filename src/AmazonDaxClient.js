@@ -30,9 +30,7 @@ const Cluster = require('./Cluster');
 const DaxClient = require('./DaxClient');
 const DaxClientError = require('./DaxClientError');
 const DaxErrorCode = require('./DaxErrorCode');
-
-const AWS = require('aws-sdk');
-const jmespath = require('jmespath');
+const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
 
 const ERROR_CODES_WRITE_FAILURE_AMBIGUOUS = [[1, 37, 38, 53], [1, 37, 38, 55], ['*', 37, '*', 39, 47]];
 const ERROR_CODES_THROTTLING = [
@@ -42,17 +40,111 @@ const ERROR_CODES_THROTTLING = [
   DaxErrorCode.Throttling,
 ];
 
-// Shim class to work with inheirtance model expected by DocumentClient
-const _AmazonDaxClient = AWS.util.inherit({
-  constructor: function AmazonDaxClient(config, cluster) {
-    if(!config) {
-      config = AWS.config;
-    } else {
-      let localConfig = config;
-      config = new AWS.Config(AWS.config);
-      config.update(localConfig, true); // Allow the use of unknown keys
+// https://github.com/aws/aws-sdk-js/blob/880e811e857c34e4ad983c37837767cd5eddb98f/lib/util.js#L515
+const abort = {};
+
+// https://github.com/aws/aws-sdk-js/blob/880e811e857c34e4ad983c37837767cd5eddb98f/lib/util.js#L517C3-L524C4
+function each(object, iterFunction) {
+  for (var key in object) {
+    if (Object.prototype.hasOwnProperty.call(object, key)) {
+      var ret = iterFunction.call(this, key, object[key]);
+      if (ret === abort) break;
     }
+  }
+}
+
+//  https://github.com/aws/aws-sdk-js/blob/880e811e857c34e4ad983c37837767cd5eddb98f/lib/util.js#L535C3-L540C4
+function update(obj1, obj2) {
+  each(obj2, function iterator(key, item) {
+    obj1[key] = item;
+  });
+  return obj1;
+}
+
+// https://github.com/aws/aws-sdk-js/blob/880e811e857c34e4ad983c37837767cd5eddb98f/lib/util.js#L639C12-L664C4
+function inherit(klass, features) {
+  var newObject = null;
+  if (features === undefined) {
+    features = klass;
+    klass = Object;
+    newObject = {};
+  } else {
+    var ctor = function ConstructorWrapper() { };
+    ctor.prototype = klass.prototype;
+    newObject = new ctor();
+  }
+
+  // constructor not supplied, create pass-through ctor
+  if (features.constructor === Object) {
+    features.constructor = function () {
+      if (klass !== Object) {
+        return klass.apply(this, arguments);
+      }
+    };
+  }
+
+  features.constructor.prototype = newObject;
+  update(features.constructor.prototype, features);
+  features.constructor.__super__ = klass;
+  return features.constructor;
+}
+
+// Shim class to work with inheirtance model expected by DocumentClient
+const _AmazonDaxClient = inherit({
+  constructor: function AmazonDaxClient(config, cluster) {
+    this.middlewareStack = config.client.middlewareStack;
+
+    // flag indicating if the underlying connection to DAX has been created/ready to use
+    this._ready = false;
+    var isDocumentClient = config.client instanceof DynamoDBDocumentClient;
+    // using the passed in DDBs client config to configure DAX
+    config = config.client.config;
+
     this.config = config;
+    this._textDecoder = new TextDecoder();
+    this._textEncoder = new TextEncoder("utf-8");
+
+    // entry point when DAX client is wrapped into a DynamoDBClient or DynamoDBDocumentClient
+    this.config.requestHandler = {
+      handle: async (request, _context) => {
+        if (!this._ready) {
+          await this._clusterReady;
+          this._ready = true;
+        }
+
+        // amz-target will be something like DynamoDB_20120810.Query
+        var target = request.headers['x-amz-target'].split(".")[1];
+        if (!this[target]) {
+          throw new Error('this operation is not supported currently', target);
+        }
+
+        var resp = await this[target](JSON.parse(request.body));
+        return {
+          response: {
+            output: {
+              body: resp
+            },
+            body: resp,
+            headers: {},
+            statusCode: 200
+          }
+        }
+      }
+    }
+
+    // the sdkv3 middleware expects the response from its clients to be a stream 
+    // (and for this method to turn that stream into an array of bytes)
+    // the DAXRequest object directly returns a parsed response, so we restringify and encode it
+    // ideally we modify DAXRequest to return a stream instead so we don't have to this round trip of parsing
+    this.config.streamCollector = (stream) => {
+      return new Promise((resolve) => {
+        resolve(this._textEncoder.encode(JSON.stringify(stream)));
+      })
+    };
+
+    this.config.utf8Encoder = (input) => {
+      return this._textDecoder.decode(input);
+    }
 
     // no redirects in DAX
     this.config.maxRedirects = 0;
@@ -65,31 +157,48 @@ const _AmazonDaxClient = AWS.util.inherit({
      */
     this.skipHostnameVerification = config.skipHostnameVerification != null ? config.skipHostnameVerification : false;
 
-    // There should be a better way than this, but the SDK API loading methods are internal
-    this.api = AWS.util.copy(new AWS.DynamoDB().api);
-
     let requestTimeout = config.requestTimeout || 60000;
-    this._cluster = cluster ? cluster : new Cluster(config, {createDaxClient: (pool, region, el) => {
-      return new DaxClient(pool, region, el, requestTimeout);
-    }});
+    this._clusterReady = new Promise((resolve, reject) => {
+      Promise.all([config.credentials(), config.region(), config.endpoint()]).then((deasyncedValues) => {
+        if (!isDocumentClient) config.credentials = deasyncedValues[0];
+        config.region = deasyncedValues[1];
+        config.endpoint = `dax://${deasyncedValues[2].hostname}`
+        this._cluster = cluster ? cluster : new Cluster(config, {
+          createDaxClient: (pool, region, el) => {
+            return new DaxClient(pool, region, el, requestTimeout);
+          }
+        });
 
-    // precedence: write/read retry > ddb maxRetries > AWS config maxRetries > default(1 same as JAVA)
-    if(!config.maxRetries && config.maxRetries !== 0) {
-      config.maxRetries = 1;
-    }
-    this._writeRetries = config.writeRetries ? config.writeRetries : config.maxRetries;
-    this._readRetries = config.readRetries ? config.readRetries : config.maxRetries;
-    this._maxRetryDelay = config.maxRetryDelay ? config.maxRetryDelay : 7000;
-    this._readClientFactory = {getClient: (previous) => {
-      return this._cluster.readClient(previous);
-    }};
-    this._writeClientFactory = {getClient: (previous) => {
-      return this._cluster.leaderClient(previous);
-    }};
+        // precedence: write/read retry > ddb maxRetries > AWS config maxRetries > default(1 same as JAVA)
+        if (!config.maxRetries && config.maxRetries !== 0) {
+          config.maxRetries = 1;
+        }
+        this._writeRetries = config.writeRetries ? config.writeRetries : config.maxRetries;
+        this._readRetries = config.readRetries ? config.readRetries : config.maxRetries;
+        this._maxRetryDelay = config.maxRetryDelay ? config.maxRetryDelay : 7000;
+        this._readClientFactory = {
+          getClient: (previous) => {
+            return this._cluster.readClient(previous);
+          }
+        };
+        this._writeClientFactory = {
+          getClient: (previous) => {
+            return this._cluster.leaderClient(previous);
+          }
+        };
 
-    this._cluster.startup();
-    this._readOperationsRetryHandler = new RetryHandler(this._cluster, this._maxRetryDelay, this._readRetries);
-    this._writeOperationsRetryHandler = new WriteOperationsRetryHandler(this._cluster, this._maxRetryDelay, this._writeRetries);
+        this._cluster.startup();
+        this._readOperationsRetryHandler = new RetryHandler(this._cluster, this._maxRetryDelay, this._readRetries);
+        this._writeOperationsRetryHandler = new WriteOperationsRetryHandler(this._cluster, this._maxRetryDelay, this._writeRetries);
+        resolve(true)
+      }).catch((err) => {
+        reject(err);
+      });
+    });
+  },
+
+  destroy: function destroy() {
+    this.shutdown();
   },
 
   shutdown: function shutdown() {
@@ -97,59 +206,106 @@ const _AmazonDaxClient = AWS.util.inherit({
   },
 
   // vv Supported DDB methods vv
+  // upper cased methods are called as part of the DynamoDocumentDB/DynamoDB flow
+  // lower cased methods are caleld directly as part of the DynamoClientDB flow
 
-  batchGetItem: function batchGetItem(params, callback) {
+  BatchGetItem: function batchGetItem(params) {
     return this._makeReadRequestWithRetries('batchGetItem', params, (client, newParams) => {
       return client.batchGetItem(newParams);
-    }, callback);
+    });
   },
 
-  batchWriteItem: function batchWriteItem(params, callback) {
+  batchGetItem: async function batchGetItem(params) {
+    await this.awaitCluster();
+    return this.BatchGetItem(params);
+  },
+
+  BatchWriteItem: function batchWriteItem(params) {
     return this._makeWriteRequestWithRetries('batchWriteItem', params, (client, newParams) => {
       return client.batchWriteItem(newParams);
-    }, callback);
+    });
   },
 
-  deleteItem: function deleteItem(params, callback) {
+  batchWriteItem: async function batchWriteItem(params) {
+    await this.awaitCluster();
+    return this.BatchWriteItem(params);
+  },
+
+  DeleteItem: function deleteItem(params) {
     return this._makeWriteRequestWithRetries('deleteItem', params, (client, newParams) => {
       return client.deleteItem(newParams);
-    }, callback);
+    });
   },
 
-  getItem: function getItem(params, callback) {
+  deleteItem: async function deleteItem(params) {
+    await this.awaitCluster();
+    return this.DeleteItem(params);
+  },
+
+  GetItem: function getItem(params) {
     return this._makeReadRequestWithRetries('getItem', params, (client, newParams) => {
       return client.getItem(newParams);
-    }, callback);
+    });
   },
 
-  putItem: function putItem(params, callback) {
+  getItem: async function getItem(params) {
+    await this.awaitCluster();
+    return this.GetItem(params);
+  },
+
+  PutItem: function putItem(params) {
     return this._makeWriteRequestWithRetries('putItem', params, (client, newParams) => {
       return client.putItem(newParams);
-    }, callback);
+    });
   },
 
-  query: function query(params, callback) {
+  putItem: async function putItem(params) {
+    await this.awaitCluster();
+    return this.PutItem(params);
+  },
+
+  Query: function query(params) {
     return this._makeReadRequestWithRetries('query', params, (client, newParams) => {
       return client.query(newParams);
-    }, callback);
+    });
   },
 
-  scan: function scan(params, callback) {
+  query: async function query(params) {
+    await this.awaitCluster();
+    return this.query(params);
+  },
+
+  Scan: function scan(params) {
     return this._makeReadRequestWithRetries('scan', params, (client, newParams) => {
       return client.scan(newParams);
-    }, callback);
+    });
   },
 
-  transactGetItems: function transactGetItems(params, callback) {
+  scan: async function scan(params) {
+    await this.awaitCluster();
+    return this.Scan(params);
+  },
+
+  TransactGetItems: function transactGetItems(params) {
     return this._makeReadRequestWithRetries('transactGetItems', params, (client, newParams) => {
       return client.transactGetItems(newParams);
-    }, callback);
+    });
   },
 
-  updateItem: function updateItem(params, callback) {
+  transactGetItems: async function transactGetItems(params) {
+    await this.awaitCluster();
+    return this.Scan(params);
+  },
+
+  UpdateItem: function updateItem(params) {
     return this._makeWriteRequestWithRetries('updateItem', params, (client, newParams) => {
       return client.updateItem(newParams);
-    }, callback);
+    });
+  },
+
+  updateItem: async function updateItem(params) {
+    await this.awaitCluster();
+    return this.UpdateItem(params);
   },
 
   // vv Unsupported DDB methods vv
@@ -186,10 +342,15 @@ const _AmazonDaxClient = AWS.util.inherit({
     throw new DaxClientError('tagResource is not support for DAX. Use AWS.DynamoDB instead.', DaxErrorCode.Validation, false);
   },
 
-  transactWriteItems: function transactWriteItems(params, callback) {
+  TransactWriteItems: function transactWriteItems(params) {
     return this._makeWriteRequestWithRetries('transactWriteItems', params, (client, newParams) => {
       return client.transactWriteItems(newParams);
-    }, callback);
+    });
+  },
+
+  transactWriteItems: async function transactWriteItems(params) {
+    await this.awaitCluster();
+    return this.TransactWriteItems(params);
   },
 
   untagResource: function untagResource(params, callback) {
@@ -208,76 +369,57 @@ const _AmazonDaxClient = AWS.util.inherit({
     throw new DaxClientError('waitFor is not support for DAX. Use AWS.DynamoDB instead.', DaxErrorCode.Validation, false);
   },
 
-  // vv Private methods vv
-
-  makeRequest: function makeRequest(operation, params, callback) {
-    return this[operation](params, callback);
-  },
-
-  /**
-   * @api private
-   */
-  numRetries: function numRetries() {
-    // ** Copied from JS SDK **
-    if(this.config.maxRetries !== undefined && this.config.maxRetries !== null) {
-      return this.config.maxRetries;
+  // js version of https://github.com/smithy-lang/smithy-typescript/blob/main/packages/smithy-client/src/client.ts
+  // utilized when the DAX client is typed to a DynamoDB type
+  // under the hood this will eventually call the requestHandler specified in the constructor
+  send: function (command, optionsOrCb, cb) {
+    var options = typeof optionsOrCb !== "function" ? optionsOrCb : undefined;
+    var callback = typeof optionsOrCb === "function" ? optionsOrCb : cb;
+    var handler = command.resolveMiddleware(this.middlewareStack, this.config, options);
+    if (callback) {
+      handler(command).then(function (result) {
+        return callback(null, result.output);
+      }, function (err) { return callback(err); })
+        .catch(function () { });
     } else {
-      return this.defaultRetryCount;
+      return handler(command).then(function (result) { return result.output });
+    }
+  },
+
+  awaitCluster: async function () {
+    if (!this._ready) {
+      await this._clusterReady;
+      this._ready = true;
     }
   },
 
   /**
    * @api private
    */
-  paginationConfig: function paginationConfig(operation, throwException) {
-    // ** Copied from JS SDK **
-    let paginator = this.api.operations[operation].paginator;
-    if(!paginator) {
-      if(throwException) {
-        let e = new Error();
-        throw AWS.util.error(e, 'No pagination configuration for ' + operation);
-      }
-      return null;
-    }
-
-    return paginator;
-  },
-
-  /**
-   * @api private
-   */
-  _makeReadRequestWithRetries: function _makeReadRequestWithRetries(opname, params, operation, callback) {
+  _makeReadRequestWithRetries: function _makeReadRequestWithRetries(opname, params, operation) {
     let request = new DaxRequest(this, opname, params,
       (newParams) => this._readOperationsRetryHandler.makeRequestWithRetries(
         operation, newParams, this._readClientFactory, this._readRetries)
     );
 
-    if(callback && typeof(callback) == 'function') {
-      request.send(callback);
-    }
-
-    return request;
+    return request.promise();
   },
 
   /**
    * @api private
    */
-  _makeWriteRequestWithRetries: function _makeWriteRequestWithRetries(opname, params, operation, callback) {
+  _makeWriteRequestWithRetries: function _makeWriteRequestWithRetries(opname, params, operation) {
     let request = new DaxRequest(this, opname, params,
       (newParams) => this._writeOperationsRetryHandler.makeRequestWithRetries(
         operation, newParams, this._writeClientFactory, this._writeRetries)
     );
 
-    if(callback && typeof(callback) == 'function') {
-      request.send(callback);
-    }
-
-    return request;
+    return request.promise();
   },
 });
 
 // Exists only to work with DocumentClient
-const AmazonDaxClient = AWS.util.inherit(_AmazonDaxClient, {});
+const AmazonDaxClient = inherit(_AmazonDaxClient, {});
 
 class RetryHandler {
   constructor(cluster, retryDelay, retries) {
@@ -294,21 +436,21 @@ class RetryHandler {
     }).then((newClient) => {
       return operation(newClient, params);
     }).catch((err) => {
-      if(this._cluster.startupComplete() === false && err.code === DaxErrorCode.NoRoute) {
+      if (this._cluster.startupComplete() === false && err.code === DaxErrorCode.NoRoute) {
         retries++;
       }
 
-      if(retries <= 0) {
+      if (retries <= 0) {
         return Promise.reject(this.check(err));
       }
 
-      if(!this.isRetryable(err)) {
+      if (!this.isRetryable(err)) {
         return Promise.reject(this.check(err));
       }
 
       let maybeWait;
 
-      if(err.code === DaxErrorCode.NoRoute) {
+      if (err.code === DaxErrorCode.NoRoute) {
         maybeWait = this.waitForRoutesRebuilt();
       } else {
         maybeWait = this.isWaitForClusterRecoveryBeforeRetrying(err) ?
@@ -328,7 +470,7 @@ class RetryHandler {
   }
 
   _exponentialBackOff(err, n) {
-    if(!ERROR_CODES_THROTTLING.includes(err.code)) {
+    if (!ERROR_CODES_THROTTLING.includes(err.code)) {
       return Promise.resolve();
     }
     return new Promise((resolve, reject) => {
@@ -347,7 +489,7 @@ class RetryHandler {
   }
 
   check(err) {
-    if(!err) {
+    if (!err) {
       err = new Error('No cluster endpoints available');
     }
 
@@ -373,7 +515,7 @@ class WriteOperationsRetryHandler extends RetryHandler {
   }
 
   isRetryable(err) {
-    if(this._isWriteFailureAmbiguous(err)) {
+    if (this._isWriteFailureAmbiguous(err)) {
       return false;
     }
 
@@ -388,18 +530,18 @@ class WriteOperationsRetryHandler extends RetryHandler {
    * @return {boolean}
    */
   _isWriteFailureAmbiguous(err) {
-    if(err.code === DaxErrorCode.Decoder
+    if (err.code === DaxErrorCode.Decoder
       || err.code === DaxErrorCode.MalformedResult
       || err.code === DaxErrorCode.EndOfStream
       || err.code === 'EPIPE') {
       return true;
     }
 
-    if(err.codeSeq && this._listContain(err.codeSeq, ERROR_CODES_WRITE_FAILURE_AMBIGUOUS)) {
+    if (err.codeSeq && this._listContain(err.codeSeq, ERROR_CODES_WRITE_FAILURE_AMBIGUOUS)) {
       return true;
     }
 
-    if(err instanceof ReferenceError || err instanceof TypeError) {
+    if (err instanceof ReferenceError || err instanceof TypeError) {
       return true;
     }
 
@@ -407,12 +549,12 @@ class WriteOperationsRetryHandler extends RetryHandler {
   }
 
   _listContain(targetList, lists) {
-    checkList: for(let list of lists) {
-      if(list.length !== targetList.length) {
+    checkList: for (let list of lists) {
+      if (list.length !== targetList.length) {
         continue;
       }
-      for(let i = 0; i < list.length; ++i) {
-        if(list[i] !== '*' && list[i] !== targetList[i]) {
+      for (let i = 0; i < list.length; ++i) {
+        if (list[i] !== '*' && list[i] !== targetList[i]) {
           continue checkList;
         }
       }
@@ -422,7 +564,7 @@ class WriteOperationsRetryHandler extends RetryHandler {
   }
 
   check(err) {
-    if(this._isWriteFailureAmbiguous(err)) {
+    if (this._isWriteFailureAmbiguous(err)) {
       let newError = new Error('Write operation failed without negative acknowledgement ');
       // err.stack = newError.stack + '\n' + err.stack;
       err.message = newError.message + '\n' + err.message;
@@ -439,16 +581,17 @@ class DaxRequest extends EventEmitter {
     this.service = service;
     this.operation = opname;
     this.params = params;
-    this.response = new AWS.Response(this);
-    this.startTime = AWS.util.date.getDate();
+    this.response = {};
+    // https://github.com/aws/aws-sdk-js/blob/880e811e857c34e4ad983c37837767cd5eddb98f/lib/util.js#L288
+    this.startTime = new Date();
 
     this._op = op;
     this._fired = false;
 
     // add a no-op listeners so that validate is an array
     // only needed for DocumentClient
-    this.addListener('validate', () => {});
-    this.addListener('validate', () => {});
+    this.addListener('validate', () => { });
+    this.addListener('validate', () => { });
   }
 
   abort() {
@@ -460,65 +603,8 @@ class DaxRequest extends EventEmitter {
     throw new DaxClientError('createReadStream is not supported in DAX.', DaxErrorCode.Validation, false);
   }
 
-  eachPage(callback) {
-    // ** Copied from JS SDK **
-    // Make all callbacks async-ish
-    callback = AWS.util.fn.makeAsync(callback, 3);
-
-    function wrappedCallback(response) {
-      callback.call(response, response.error, response.data, function(result) {
-        if(result === false) {
-          return;
-        }
-
-        if(response.hasNextPage()) {
-          response.nextPage().on('complete', wrappedCallback).send();
-        } else {
-          callback.call(response, null, null, AWS.util.fn.noop);
-        }
-      });
-    }
-
-    this.on('complete', wrappedCallback).send();
-  }
-
-  eachItem(callback) {
-    // ** Copied from JS SDK **
-    let self = this;
-    function wrappedCallback(err, data) {
-      if(err) {
-        return callback(err, null);
-      }
-      if(data === null) {
-        return callback(null, null);
-      }
-
-      let config = self.service.paginationConfig(self.operation);
-      let resultKey = config.resultKey;
-      if(Array.isArray(resultKey)) {
-        resultKey = resultKey[0];
-      }
-      let items = jmespath.search(data, resultKey);
-      let continueIteration = true;
-      AWS.util.arrayEach(items, function(item) {
-        continueIteration = callback(null, item);
-        if(continueIteration === false) {
-          return AWS.util.abort;
-        }
-      });
-      return continueIteration;
-    }
-
-    this.eachPage(wrappedCallback);
-  }
-
-  isPageable() {
-    // ** Copied from JS SDK **
-    return this.service.paginationConfig(this.operation) ? true : false;
-  }
-
   promise() {
-    if(this._fired) {
+    if (this._fired) {
       // Request object can only be used once
       throw new DaxClientError('Request object already used.', DaxErrorCode.Validation, false);
     }
@@ -534,10 +620,9 @@ class DaxRequest extends EventEmitter {
       self.emit('extractData', self.response);
 
       self.emit('success', self.response);
-    }, (err) => {
+    }).catch((err) => {
       self.response.error = err;
       self.emit('extractError', self.response);
-
       self.emit('error', self.response.error, self.response);
     }).then(() => {
       self.emit('complete', self.response);
@@ -545,19 +630,6 @@ class DaxRequest extends EventEmitter {
     });
 
     return resultP;
-  }
-
-  send(callback) {
-    if(this._fired) {
-      throw new DaxClientError('Request object already used.', DaxErrorCode.Validation, false);
-    }
-
-    let resultP = this.promise();
-    if(callback) {
-      resultP.then(
-        (data) => callback(null, data),
-        (err) => callback(err, null));
-    }
   }
 }
 

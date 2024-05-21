@@ -22,22 +22,44 @@ const SocketTubePool = require('./Tube').SocketTubePool;
 const ClientTube = require('./Tube').ClientTube;
 const Connector = require('./Tube').Connector;
 const Util = require('./Util');
-const {ENCRYPTED_SCHEME} = require('./Util');
+const { ENCRYPTED_SCHEME } = require('./Util');
 const DaxClientError = require('./DaxClientError');
 const DaxErrorCode = require('./DaxErrorCode');
-const AWS = require('aws-sdk');
 
 const IDLE_CONNECTION_REAP_DELAY_MS = 5000;
 const ClusterHealthyEvent = 'health';
 const ROUTE_UPDATE_EVENT = 'Routes Update';
 const LEADER_ROUTE_UPDATE_EVENT = 'Routes of Leader Update';
 
-class StaticCredentialProvider extends AWS.Credentials {
-  constructor(options) {
-    super(options);
+// adapted from https://github.com/aws/aws-sdk-js/blob/880e811e857c34e4ad983c37837767cd5eddb98f/lib/credentials.js
+class StaticCredentialProvider {
+  constructor() {
+    this.expired = false;
+    this.expireTime = null;
+    this.refreshCallbacks = [];
+    if (arguments.length === 1 && typeof arguments[0] === 'object') {
+      let creds = arguments[0].credentials || arguments[0];
+      this.accessKeyId = creds.accessKeyId;
+      this.secretAccessKey = creds.secretAccessKey;
+      this.sessionToken = creds.sessionToken;
+    } else {
+      // DynamoDBDocumentClient path
+      this.creds = arguments[0];
+      this.accessKeyId = arguments[0];
+      this.secretAccessKey = arguments[1];
+      this.sessionToken = arguments[2];
+    }
   }
 
   resolvePromise() {
+    const outerThis = this;
+    if (this.creds) return this.creds().then((creds) => {
+      outerThis.creds = undefined;
+      this.accessKeyId = creds.accessKeyId;
+      this.secretAccessKey = creds.secretAccessKey;
+      this.sessionToken = creds.sessionToken;
+    })
+
     return Promise.resolve(this);
   }
 }
@@ -61,10 +83,10 @@ class Cluster {
     this._maxRetryDelay = config.maxRetryDelay || 7000;
     this._threadKeepAlive = config.threadKeepAlive || 10000;
     this._skipHostnameVerification = config.skipHostnameVerification != null ? config.skipHostnameVerification : false;
-    if(config.credentials) {
+    if (config.credentials) {
       this._credProvider = new StaticCredentialProvider(config.credentials);
     } else {
-      this._credProvider = (config.credentialProvider ? config.credentialProvider : new AWS.CredentialProviderChain());
+      throw new Error("Expecting DAX to use static credentials");
     }
     this._region = config.region || this._resolveRegion(); // FIXME default region
     this._seeds = config.endpoints ? Util.parseHostPorts(config.endpoints) : (config.endpoint ? Util.parseHostPorts(config.endpoint) : null);
@@ -87,11 +109,11 @@ class Cluster {
   }
 
   startup() {
-    if(this._closed) {
+    if (this._closed) {
       throw new Error('Cluster closed');
     }
 
-    if(!this._source) {
+    if (!this._source) {
       this._source = Source.autoconf(this, this._seeds);
     }
 
@@ -99,9 +121,9 @@ class Cluster {
     // to bootstrap cluster in case the refresh() call fails.
     let refreshIntervalMs = this._clusterUpdateInterval;
     this._refreshJob = setInterval(() => {
-      if(!this._closed) {
+      if (!this._closed) {
         this.refresh(true, (err) => {
-          if(err) { // FIXME this err not need to throw error or pass out, just handle at here
+          if (err) { // FIXME this err not need to throw error or pass out, just handle at here
             console.error('caught exception during cluster refresh:', err);
             console.error(err.stack);
           }
@@ -111,7 +133,7 @@ class Cluster {
     this._refreshJob.unref(); // unref to let Lambda finish
 
     this.refresh(false, (err) => {
-      if(err) {
+      if (err) {
         // maybe change it to logging
         console.error(err);
       }
@@ -132,7 +154,7 @@ class Cluster {
 
   leaderClient(prev) {
     let routes = this._routes;
-    if(!routes) {
+    if (!routes) {
       throw new DaxClientError('No endpoints available', DaxErrorCode.NoRoute, true);
     }
 
@@ -141,7 +163,7 @@ class Cluster {
 
   readClient(prev) {
     let routes = this._routes;
-    if(!routes) {
+    if (!routes) {
       // return null
       throw new DaxClientError('No endpoints available', DaxErrorCode.NoRoute, true);
     }
@@ -149,14 +171,14 @@ class Cluster {
   }
 
   close() {
-    if(this._closed) {
+    if (this._closed) {
       return;
     }
     this._closed = true;
-    if(this._refreshJob) {
+    if (this._refreshJob) {
       clearInterval(this._refreshJob);
     }
-    if(this._reapJob) {
+    if (this._reapJob) {
       clearInterval(this._reapJob);
     }
 
@@ -172,7 +194,7 @@ class Cluster {
 
   refresh(forced, callback) {
     let now = Date.now();
-    if(this._closed || (now - this._lastUpdate < this._clusterUpdateThreshold && !forced) || !this._source) {
+    if (this._closed || (now - this._lastUpdate < this._clusterUpdateThreshold && !forced) || !this._source) {
       return;
     }
     this._lastUpdate = now;
@@ -183,7 +205,7 @@ class Cluster {
   }
 
   update(cfg) {
-    if(cfg && cfg.length > 0) {
+    if (cfg && cfg.length > 0) {
       this._cfg = cfg;
       this._updateEndpoints();
     }
@@ -204,7 +226,7 @@ class Cluster {
     Object.keys(newBackends).forEach((key) => {
       let be = backends[key];
       let newbe = newBackends[key];
-      if(be) {
+      if (be) {
         // update existing backends. node may have changed role or other
         // metadata affecting routing.
         rebuild |= be.update(newbe);
@@ -218,13 +240,13 @@ class Cluster {
       this._connect(newbe);
     });
 
-    if(rebuild) {
+    if (rebuild) {
       this._rebuildRoutes();
     }
 
     // clear out removed backends.
     Object.keys(backends).forEach((key) => {
-      if(!newBackends[key]) {
+      if (!newBackends[key]) {
         // backend no longer exists in the new configuration.
         // remove and close it.
         let old = backends[key];
@@ -236,8 +258,8 @@ class Cluster {
     // Refresh completed successfully.
     // We are using Endpoints API call for health check.
     // Signal all threads waiting for cluster to be healthy.
-    for(let ep of se) {
-      if(ep.role == 1) { // leader
+    for (let ep of se) {
+      if (ep.role == 1) { // leader
         this._leaderSessionId = ep.leaderSessionId;
         // mClusterHealthy.signalAll();
         // trigger TODO
@@ -255,12 +277,12 @@ class Cluster {
     let routes;
     let p = new Promise((resolve, reject) => {
       let waitjob = setInterval(() => {
-        if((routes = this._routes) && routes.size() >= minumum && routes.leadersCount() >= leadersMin) {
+        if ((routes = this._routes) && routes.size() >= minumum && routes.leadersCount() >= leadersMin) {
           clearInterval(waitjob);
           return resolve();
         }
 
-        if(++pollingCount >= maxPollingCount) {
+        if (++pollingCount >= maxPollingCount) {
           clearInterval(waitjob);
           return reject(new Error('failed to wait for routes'));
         }
@@ -275,8 +297,8 @@ class Cluster {
       let polling = 0;
 
       let pollJob = setInterval(() => {
-        if(this._alive.has(be) ^ aliveOrDead) {
-          if(++polling >= maxPolling) {
+        if (this._alive.has(be) ^ aliveOrDead) {
+          if (++polling >= maxPolling) {
             clearInterval(pollJob);
             return reject(new Error('max polling exceed'));
           }
@@ -297,12 +319,12 @@ class Cluster {
   }
 
   waitForRecovery(leaderSessionId, time) {
-    if(time <= 0) {
+    if (time <= 0) {
       return Promise.resolve();
     }
 
     // Quick check before blocking on health lock.
-    if(this._leaderSessionId != leaderSessionId) {
+    if (this._leaderSessionId != leaderSessionId) {
       // Endpoints updated.
       return Promise.resolve();
     }
@@ -313,7 +335,7 @@ class Cluster {
   }
 
   _connect(be) {
-    if(be.connect) {
+    if (be.connect) {
       throw new Error('backend already been connected');
     }
 
@@ -336,11 +358,11 @@ class Cluster {
 
   _onHealthCheck(be, session, tube, e) {
     let current = this._backends[be.addr + ':' + be.port];
-    if(this._closed || current !== be) {
+    if (this._closed || current !== be) {
       // stale notification. backend no longer exists in the current known set.
       // close the backend and created tube.
       be.close();
-      if(tube) {
+      if (tube) {
         tube.close();
       }
       return;
@@ -349,18 +371,18 @@ class Cluster {
     // try and allow the tube to be used to bootstrap the pool for this backend.
     let closeTube = true;
     try {
-      if(session != be.session) {
+      if (session != be.session) {
         // check was initiated during previous session. don't change
         // any health status. allow check to be scheduled again with
         // the new version to make the determination.
         return;
       }
 
-      if(e && be.healthy) {
+      if (e && be.healthy) {
         // remove backend from active set.
         be.healthy = false;
         be.down();
-      } else if(!e && !be.healthy && !be.closed) {
+      } else if (!e && !be.healthy && !be.closed) {
         // add backend to active set.
         try {
           // build new client, giving it the tube established
@@ -370,18 +392,18 @@ class Cluster {
           be.up(this.newClient(be.addr, be.port, session, tube, be));
 
           closeTube = false;
-        } catch(ie) {
+        } catch (ie) {
           be.healthy = false;
           be.down();
           throw new Error('client creation failed for backend: ' + be +
             ' exception = ' + ie);
         }
-      } else if(!e) {
+      } else if (!e) {
         // host is healthy, reset the error counts from piling up and prevent host from going down unnecessarily.
         be.errorCount = 0;
       }
     } finally {
-      if(closeTube && tube) {
+      if (closeTube && tube) {
         tube.close();
       }
     }
@@ -390,7 +412,7 @@ class Cluster {
   _rebuildRoutes() {
     let bes = this._alive;
     let sz = bes.size;
-    if(sz === 0) {
+    if (sz === 0) {
       this._routes = null;
       return;
     }
@@ -398,7 +420,7 @@ class Cluster {
     let ldr = 0;
     let cs = [];
     bes.forEach((be) => {
-      if(be.leader()) {
+      if (be.leader()) {
         cs[ldr++] = be.client;
       } else {
         cs[--sz] = be.client;
@@ -407,20 +429,20 @@ class Cluster {
 
     this._routes = new Router(cs, ldr);
     this._daxHealthAgent.resolveEvent(ROUTE_UPDATE_EVENT);
-    if(ldr > 0) {
+    if (ldr > 0) {
       this._daxHealthAgent.resolveEvent(LEADER_ROUTE_UPDATE_EVENT);
     }
   }
 
   addRoute(be) {
-    if(!this._alive.has(be)) { // Set is reference check, can be used here
+    if (!this._alive.has(be)) { // Set is reference check, can be used here
       this._alive.add(be);
       this._rebuildRoutes();
     }
   }
 
   removeRoute(be) {
-    if(this._alive.has(be)) {
+    if (this._alive.has(be)) {
       this._alive.delete(be);
       this._rebuildRoutes();
     }
@@ -428,7 +450,7 @@ class Cluster {
 
   _expand(se) {
     let backends = {};
-    for(let ep of se) {
+    for (let ep of se) {
       let be = new Backend(this, ep, this._maxPendingConnectsPerHost);
       backends[be.addr + ':' + be.port] = be;
     }
