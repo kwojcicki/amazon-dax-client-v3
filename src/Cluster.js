@@ -58,7 +58,8 @@ class StaticCredentialProvider {
       this.accessKeyId = creds.accessKeyId;
       this.secretAccessKey = creds.secretAccessKey;
       this.sessionToken = creds.sessionToken;
-    })
+      return outerThis;
+    });
 
     return Promise.resolve(this);
   }

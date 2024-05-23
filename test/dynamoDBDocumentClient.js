@@ -2,6 +2,10 @@ import AmazonDaxClient from "amazon-dax-client";
 import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 
+const expect = (x, y, errorMessage) => {
+    if (x != y) throw new Error(`expected ${x} to be equal to ${y}, ${errorMessage}`);
+}
+
 export const dynamoDBDocumentClientExamples = async () => {
     let id = Date.now();
 
@@ -37,6 +41,8 @@ export const dynamoDBDocumentClientExamples = async () => {
 
         const resp = await realDynamoClient.send(getItem);
         console.log(JSON.stringify(resp));
+
+        expect(resp.Item["CommonName"]["S"], id, "documentClientPutTest");
     }
 
     await putExample();

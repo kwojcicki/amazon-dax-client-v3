@@ -160,9 +160,10 @@ const _AmazonDaxClient = inherit({
     let requestTimeout = config.requestTimeout || 60000;
     this._clusterReady = new Promise((resolve, reject) => {
       Promise.all([config.credentials(), config.region(), config.endpoint()]).then((deasyncedValues) => {
-        if (!isDocumentClient) config.credentials = deasyncedValues[0];
+        // not sure why I used to have to do this? Is it being memoized from a promise to directly returning the value???
+        // if (!isDocumentClient) config.credentials = deasyncedValues[0];
         config.region = deasyncedValues[1];
-        config.endpoint = `dax://${deasyncedValues[2].hostname}`
+        config.endpoint = `${deasyncedValues[2].protocol}//${deasyncedValues[2].hostname}`
         this._cluster = cluster ? cluster : new Cluster(config, {
           createDaxClient: (pool, region, el) => {
             return new DaxClient(pool, region, el, requestTimeout);
