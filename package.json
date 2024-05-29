@@ -15,13 +15,16 @@
     "amazon"
   ],
   "main": "src/AmazonDaxClient.js",
+  "types": "src/AmazonDaxClient.d.ts",
   "files": [
     "src",
     "generated-src"
   ],
   "scripts": {},
-  "devDependencies": {},
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.585.0",
+    "@aws-sdk/lib-dynamodb": "^3.585.0",
+    "@smithy/smithy-client": "^3.0.1",
     "antlr4": "4.8.x",
     "bignumber.js": "^3.0.0",
     "uuid": "^3.3.2"

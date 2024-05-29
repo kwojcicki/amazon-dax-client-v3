@@ -1,4 +1,4 @@
-import AmazonDaxClient from "amazon-dax-client";
+import AmazonDaxClient from "amazon-dax-client-sdkv3";
 import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 

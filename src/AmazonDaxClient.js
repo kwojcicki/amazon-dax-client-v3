@@ -208,7 +208,7 @@ const _AmazonDaxClient = inherit({
 
   // vv Supported DDB methods vv
   // upper cased methods are called as part of the DynamoDocumentDB/DynamoDB flow
-  // lower cased methods are caleld directly as part of the DynamoClientDB flow
+  // lower cased methods are called directly as part of the DynamoClientDB flow
 
   BatchGetItem: function batchGetItem(params) {
     return this._makeReadRequestWithRetries('batchGetItem', params, (client, newParams) => {

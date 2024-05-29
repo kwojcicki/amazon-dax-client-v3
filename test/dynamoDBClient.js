@@ -1,4 +1,4 @@
-import AmazonDaxClient from "amazon-dax-client";
+import AmazonDaxClient from "amazon-dax-client-sdkv3";
 import { DynamoDBClient, PutItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
 
 const expect = (x, y, errorMessage) => {

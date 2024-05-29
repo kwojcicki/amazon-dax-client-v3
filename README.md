@@ -21,7 +21,7 @@ https://www.npmjs.com/package/amazon-dax-client-sdkv3
 ## Usage and Getting Started
 
 ```javascript
-import AmazonDaxClient from "amazon-dax-client";
+import AmazonDaxClient from "amazon-dax-client-sdkv3";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 
 const documentDaxClient = new AmazonDaxClient({
