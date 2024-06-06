@@ -30,7 +30,7 @@ const Cluster = require('./Cluster');
 const DaxClient = require('./DaxClient');
 const DaxClientError = require('./DaxClientError');
 const DaxErrorCode = require('./DaxErrorCode');
-const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, ScanCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");
 
 const ERROR_CODES_WRITE_FAILURE_AMBIGUOUS = [[1, 37, 38, 53], [1, 37, 38, 55], ['*', 37, '*', 39, 47]];
 const ERROR_CODES_THROTTLING = [
@@ -89,7 +89,7 @@ function inherit(klass, features) {
   return features.constructor;
 }
 
-// Shim class to work with inheirtance model expected by DocumentClient
+// Shim class to work with inheritance model expected by DocumentClient
 const _AmazonDaxClient = inherit({
   constructor: function AmazonDaxClient(config, cluster) {
     this.middlewareStack = config.client.middlewareStack;
@@ -115,7 +115,7 @@ const _AmazonDaxClient = inherit({
         // amz-target will be something like DynamoDB_20120810.Query
         var target = request.headers['x-amz-target'].split(".")[1];
         if (!this[target]) {
-          throw new Error('this operation is not supported currently', target);
+          throw new Error('this operation is not supported currently: ' + target);
         }
 
         var resp = await this[target](JSON.parse(request.body));
@@ -204,6 +204,45 @@ const _AmazonDaxClient = inherit({
 
   shutdown: function shutdown() {
     this._cluster.close();
+  },
+
+  // copied lib-dynamodb utility pagination methods
+  paginateQuery: async function* paginateQuery(config, input, ...additionalArguments) {
+    const makePagedClientRequest = async (client, input, ...args) => {
+      return await client.send(new QueryCommand(input), ...args);
+    };
+
+    let token = config.startingToken || undefined;
+    let hasNext = true;
+    let page;
+    while (hasNext) {
+      input.ExclusiveStartKey = token;
+      input["Limit"] = config.pageSize;
+      page = await makePagedClientRequest(this, input, ...additionalArguments);
+      yield page;
+      token = page.LastEvaluatedKey;
+      hasNext = !!token;
+    }
+    return undefined;
+  },
+
+  paginateScan: async function* paginateScan(config, input, ...additionalArguments) {
+    const makePagedClientRequest = async (client, input, ...args) => {
+      return await client.send(new ScanCommand(input), ...args);
+    }
+
+    let token = config.startingToken || undefined;
+    let hasNext = true;
+    let page;
+    while (hasNext) {
+      input.ExclusiveStartKey = token;
+      input["Limit"] = config.pageSize;
+      page = await makePagedClientRequest(this, input, ...additionalArguments);
+      yield page;
+      token = page.LastEvaluatedKey;
+      hasNext = !!token;
+    }
+    return undefined;
   },
 
   // vv Supported DDB methods vv
