@@ -15,7 +15,10 @@ export const dynamoDBDocumentClientExamples = async () => {
         client: DynamoDBDocumentClient.from(new DynamoDBClient({
             endpoint: process.env.dax,
             region: 'us-east-2'
-        }))
+        })),
+        config: {
+            connectTimeout: 10_001
+        }
     });
 
     const putExample = async () => {

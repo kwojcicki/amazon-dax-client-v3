@@ -91,14 +91,14 @@ function inherit(klass, features) {
 
 // Shim class to work with inheritance model expected by DocumentClient
 const _AmazonDaxClient = inherit({
-  constructor: function AmazonDaxClient(config, cluster) {
+  constructor: function AmazonDaxClient(config) {
     this.middlewareStack = config.client.middlewareStack;
 
     // flag indicating if the underlying connection to DAX has been created/ready to use
     this._ready = false;
     var isDocumentClient = config.client instanceof DynamoDBDocumentClient;
     // using the passed in DDBs client config to configure DAX
-    config = config.client.config;
+    config = { ...config.client.config, ...config.config };
 
     this.config = config;
     this._textDecoder = new TextDecoder();
@@ -164,7 +164,7 @@ const _AmazonDaxClient = inherit({
         // if (!isDocumentClient) config.credentials = deasyncedValues[0];
         config.region = deasyncedValues[1];
         config.endpoint = `${deasyncedValues[2].protocol}//${deasyncedValues[2].hostname}`
-        this._cluster = cluster ? cluster : new Cluster(config, {
+        this._cluster = new Cluster(config, {
           createDaxClient: (pool, region, el) => {
             return new DaxClient(pool, region, el, requestTimeout);
           }
