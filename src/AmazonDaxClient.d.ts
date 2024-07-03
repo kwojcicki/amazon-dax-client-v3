@@ -54,10 +54,6 @@ declare class AmazonDaxClient extends smithy.Client<any, ddb.ServiceInputTypes |
       /**
        * defaults to 60_000
        *  */
-      requestTimeout?: number;
-      /**
-       * defaults to 5_000
-       *  */
       healthCheckInterval?: number;
       /**
        * defaults to 1_000
@@ -65,10 +61,6 @@ declare class AmazonDaxClient extends smithy.Client<any, ddb.ServiceInputTypes |
       healthCheckTimeout?: number;
       /**
        * defaults to 7_000
-       *  */
-      maxRetryDelay?: number;
-      /**
-       * defaults to 10_000
        *  */
       threadKeepAlive?: number;
     }
