@@ -5,7 +5,8 @@ import * as smithy from "@smithy/smithy-client"
 
 declare class AmazonDaxClient extends smithy.Client<any, ddb.ServiceInputTypes | libddb.ServiceInputTypes, ddb.ServiceOutputTypes | libddb.ServiceOutputTypes, any> {
   constructor(props: {
-    client: ddb.DynamoDBClient, config: {
+    client: ddb.DynamoDBClient | libddb.DynamoDBDocumentClient,
+    config?: {
       /**
        *  defaults to false
        *  */
@@ -65,8 +66,8 @@ declare class AmazonDaxClient extends smithy.Client<any, ddb.ServiceInputTypes |
       threadKeepAlive?: number;
     }
   });
-  paginateScan: (config: { startingToken: string | undefined, pageSize: number | undefined }, input: libddb.ScanCommandInput, ...additionalArguments: any) => AsyncGenerator<libddb.ScanCommandOutput>;
-  paginateQuery: (config: { startingToken: string | undefined, pageSize: number | undefined }, input: libddb.QueryCommandInput, ...additionalArguments: any) => AsyncGenerator<libddb.QueryCommandOutput>;
+  paginateScan: (config: { startingToken?: string | undefined, pageSize?: number | undefined }, input: libddb.ScanCommandInput, ...additionalArguments: any) => AsyncGenerator<libddb.ScanCommandOutput>;
+  paginateQuery: (config: { startingToken?: string | undefined, pageSize?: number | undefined }, input: libddb.QueryCommandInput, ...additionalArguments: any) => AsyncGenerator<libddb.QueryCommandOutput>;
 }
 
 export = AmazonDaxClient;
