@@ -1,6 +1,6 @@
 ### DynamoDBDocumentClient
 
-https://github.com/kwojcicki/amazon-dax-client-v3/blob/main/test/dynamoDBDocumentClient.js shows examples for using this library with DynamoDBDocumentClient.
+https://github.com/kwojcicki/amazon-dax-client-v3/blob/main/test/dynamoDBDocumentClient.ts shows examples for using this library with DynamoDBDocumentClient.
 
 High level example:
 
@@ -24,7 +24,7 @@ await documentDaxClient.send(putItem);
 
 ### DynamoDBClient
 
-https://github.com/kwojcicki/amazon-dax-client-v3/blob/main/test/dynamoDBClient.js shows examples for using this library with DynamoDBClient. 
+https://github.com/kwojcicki/amazon-dax-client-v3/blob/main/test/dynamoDBClient.ts shows examples for using this library with DynamoDBClient. 
 
 ```javascript
 

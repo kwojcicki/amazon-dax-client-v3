@@ -1,6 +1,6 @@
 {
   "name": "amazon-dax-client-sdkv3",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Amazon DAX Client for JavaScript",
   "license": "Apache-2.0",
   "homepage": "https://github.com/kwojcicki/amazon-dax-client-v3",
