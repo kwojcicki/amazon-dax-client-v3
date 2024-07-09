@@ -122,11 +122,17 @@ const _AmazonDaxClient = inherit({
         return {
           response: {
             output: {
-              body: resp
+              body: resp,
+              $metadata: {}
             },
             body: resp,
             headers: {},
+            $metadata: {},
             statusCode: 200
+          },
+          output: {
+            ...resp,
+            $metadata: {}
           }
         }
       }
@@ -136,15 +142,18 @@ const _AmazonDaxClient = inherit({
     // (and for this method to turn that stream into an array of bytes)
     // the DAXRequest object directly returns a parsed response, so we restringify and encode it
     // ideally we modify DAXRequest to return a stream instead so we don't have to this round trip of parsing
-    this.config.streamCollector = (stream) => {
-      return new Promise((resolve) => {
-        resolve(this._textEncoder.encode(JSON.stringify(stream)));
-      })
-    };
+    // this.config.streamCollector = (stream) => {
+    //   console.trace();
+    //   return new Promise((resolve) => {
+    //     // resolve(this._textEncoder.encode(JSON.stringify(stream)));
+    //     resolve(stream);
+    //   })
+    // };
 
-    this.config.utf8Encoder = (input) => {
-      return this._textDecoder.decode(input);
-    }
+    // this.config.utf8Encoder = (input) => {
+    //   return JSON.stringify(input);
+    //   // return this._textDecoder.decode(input);
+    // }
 
     // no redirects in DAX
     this.config.maxRedirects = 0;
@@ -334,7 +343,7 @@ const _AmazonDaxClient = inherit({
 
   transactGetItems: async function transactGetItems(params) {
     await this.awaitCluster();
-    return this.Scan(params);
+    return this.TransactGetItems(params);
   },
 
   UpdateItem: function updateItem(params) {
@@ -415,6 +424,28 @@ const _AmazonDaxClient = inherit({
   send: function (command, optionsOrCb, cb) {
     var options = typeof optionsOrCb !== "function" ? optionsOrCb : undefined;
     var callback = typeof optionsOrCb === "function" ? optionsOrCb : cb;
+    var cmd = command.clientCommand ? command.clientCommand : command;
+    var oldResolveMiddlewareWithContext = command.resolveMiddlewareWithContext;
+    cmd.resolveMiddlewareWithContext = function (_1, _2, _3, _4) {
+      cmd.resolveMiddlewareWithContext = oldResolveMiddlewareWithContext;
+      const oldMiddlewareFn = _4.middlewareFn;
+      _4.middlewareFn = function (_5, _6, _7, _8) {
+        const middlewares = oldMiddlewareFn.bind(this)(_5, _6, _7, _8);
+        return [{
+          applyToStack: (commandStack) => {
+            for (const mw of middlewares) {
+              commandStack.use(mw);
+            }
+            commandStack.removeByTag("DESERIALIZER");
+            commandStack.add((next, _context) => async (args) => {
+              const result = await next(args);
+              return result;
+            }, { step: "deserialize", name: "deserializerMiddleware" });
+          }
+        }];
+      }
+      return cmd.resolveMiddlewareWithContext(_1, _2, _3, _4);
+    }
     var handler = command.resolveMiddleware(this.middlewareStack, this.config, options);
     if (callback) {
       handler(command).then(function (result) {

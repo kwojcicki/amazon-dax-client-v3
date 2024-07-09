@@ -1,11 +1,60 @@
 
 import * as ddb from "@aws-sdk/client-dynamodb";
 import * as libddb from "@aws-sdk/lib-dynamodb";
-import * as smithy from "@smithy/smithy-client"
+import * as smithyTypes from "@smithy/types";
 
-declare class AmazonDaxClient extends smithy.Client<any, ddb.ServiceInputTypes | libddb.ServiceInputTypes, ddb.ServiceOutputTypes | libddb.ServiceOutputTypes, any> {
+type allowServiceInputTypes = ddb.BatchGetItemCommandInput |
+  ddb.BatchWriteItemCommandInput |
+  ddb.DeleteItemCommandInput |
+  ddb.GetItemCommandInput |
+  ddb.PutItemCommandInput |
+  ddb.QueryCommandInput |
+  ddb.ScanCommandInput |
+  ddb.TransactGetItemsCommandInput |
+  ddb.UpdateItemCommandInput |
+  libddb.BatchGetCommandInput |
+  libddb.BatchWriteCommandInput |
+  libddb.DeleteCommandInput |
+  libddb.GetCommandInput |
+  libddb.PutCommandInput |
+  libddb.QueryCommandInput |
+  libddb.ScanCommandInput |
+  libddb.TransactGetCommandInput |
+  libddb.UpdateCommandInput
+
+type allowedServiceOutputTypes = ddb.BatchGetItemCommandOutput |
+  ddb.BatchWriteItemCommandOutput |
+  ddb.DeleteItemCommandOutput |
+  ddb.GetItemCommandOutput |
+  ddb.PutItemCommandOutput |
+  ddb.QueryCommandOutput |
+  ddb.ScanCommandOutput |
+  ddb.TransactGetItemsCommandOutput |
+  ddb.UpdateItemCommandOutput |
+  libddb.BatchGetCommandOutput |
+  libddb.BatchWriteCommandOutput |
+  libddb.DeleteCommandOutput |
+  libddb.GetCommandOutput |
+  libddb.PutCommandOutput |
+  libddb.QueryCommandOutput |
+  libddb.ScanCommandOutput |
+  libddb.TransactGetCommandOutput |
+  libddb.UpdateCommandOutput
+
+export declare class Client<HandlerOptions, ClientInput extends object, ClientOutput extends MetadataBearer, ResolvedClientConfiguration extends SmithyResolvedConfiguration<HandlerOptions>> implements smithyTypes.Client<ClientInput, ClientOutput, ResolvedClientConfiguration> {
+  middlewareStack: MiddlewareStack<ddb.ServiceInputTypes, ddb.ServiceOutputTypes>;
+  readonly config: ResolvedClientConfiguration;
+  constructor(config: ResolvedClientConfiguration);
+  send<InputType extends ClientInput, OutputType extends ClientOutput>(command: smithyTypes.Command<ddb.ServiceInputTypes, InputType, ddb.ServiceOutputTypes, OutputType, SmithyResolvedConfiguration<HandlerOptions>>, options?: HandlerOptions): Promise<OutputType>;
+  send<InputType extends ClientInput, OutputType extends ClientOutput>(command: smithyTypes.Command<ddb.ServiceInputTypes, InputType, ddb.ServiceOutputTypes, OutputType, SmithyResolvedConfiguration<HandlerOptions>>, cb: (err: any, data?: OutputType) => void): void;
+  send<InputType extends ClientInput, OutputType extends ClientOutput>(command: smithyTypes.Command<ddb.ServiceInputTypes, InputType, ddb.ServiceOutputTypes, OutputType, SmithyResolvedConfiguration<HandlerOptions>>, options: HandlerOptions, cb: (err: any, data?: OutputType) => void): void;
+  destroy(): void;
+}
+
+declare class AmazonDaxClient extends Client<any, allowServiceInputTypes, allowedServiceOutputTypes, any> {
   constructor(props: {
-    client: ddb.DynamoDBClient, config: {
+    client: ddb.DynamoDBClient | libddb.DynamoDBDocumentClient,
+    config?: {
       /**
        *  defaults to false
        *  */
@@ -65,8 +114,8 @@ declare class AmazonDaxClient extends smithy.Client<any, ddb.ServiceInputTypes |
       threadKeepAlive?: number;
     }
   });
-  paginateScan: (config: { startingToken: string | undefined, pageSize: number | undefined }, input: libddb.ScanCommandInput, ...additionalArguments: any) => AsyncGenerator<libddb.ScanCommandOutput>;
-  paginateQuery: (config: { startingToken: string | undefined, pageSize: number | undefined }, input: libddb.QueryCommandInput, ...additionalArguments: any) => AsyncGenerator<libddb.QueryCommandOutput>;
+  paginateScan: (config: { startingToken?: string | undefined, pageSize?: number | undefined }, input: libddb.ScanCommandInput, ...additionalArguments: any) => AsyncGenerator<libddb.ScanCommandOutput>;
+  paginateQuery: (config: { startingToken?: string | undefined, pageSize?: number | undefined }, input: libddb.QueryCommandInput, ...additionalArguments: any) => AsyncGenerator<libddb.QueryCommandOutput>;
 }
 
 export = AmazonDaxClient;
