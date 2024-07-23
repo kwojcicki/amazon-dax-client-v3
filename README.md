@@ -20,6 +20,7 @@ https://www.npmjs.com/package/amazon-dax-client-sdkv3
 
 ## Usage and Getting Started
 
+### Using Document Client
 ```javascript
 import AmazonDaxClient from "amazon-dax-client-sdkv3";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
@@ -39,6 +40,31 @@ const putItem = new PutCommand({
 });
 
 await documentDaxClient.send(putItem);
+```
+
+### Using Low Level Client
+```javascript
+import AmazonDaxClient from "amazon-dax-client-sdkv3";
+import { GetItemCommand } from "@aws-sdk/client-dynamodb";
+
+const daxEndpoint = process.env.dax;
+const lowLevelDaxClient = new AmazonDaxClient({
+    client: new DynamoDBClient({
+        region: 'us-east-1',
+        endpoint: daxEndpoint
+    })
+});
+
+const params = {
+    TableName: 'test',
+    Key: {
+        CommonName: { S: 'example-id' }
+    }
+};
+
+const getItemCommand = new GetItemCommand(params);
+const response = await daxClient.send(getItemCommand);
+console.log(response.Item);
 ```
 
 You can see more examples under the [test folder](https://github.com/kwojcicki/amazon-dax-client-v3/tree/main/test)
