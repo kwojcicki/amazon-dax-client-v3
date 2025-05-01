@@ -17,5 +17,8 @@
     "jmespath": "^0.15.0",
     "typescript": "^5.5.3",
     "uuid": "^3.3.2"
+  },
+  "dependencies": {
+    "@aws-sdk/credential-providers": "^3.614.0"
   }
 }

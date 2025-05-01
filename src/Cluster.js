@@ -37,27 +37,17 @@ class StaticCredentialProvider {
     this.expired = false;
     this.expireTime = null;
     this.refreshCallbacks = [];
-    if (arguments.length === 1 && typeof arguments[0] === 'object') {
-      let creds = arguments[0].credentials || arguments[0];
-      this.accessKeyId = creds.accessKeyId;
-      this.secretAccessKey = creds.secretAccessKey;
-      this.sessionToken = creds.sessionToken;
-    } else {
-      // DynamoDBDocumentClient path
-      this.creds = arguments[0];
-      this.accessKeyId = arguments[0];
-      this.secretAccessKey = arguments[1];
-      this.sessionToken = arguments[2];
-    }
   }
 
   resolvePromise() {
     const outerThis = this;
-    if (this.creds) return this.creds().then((creds) => {
-      outerThis.creds = undefined;
+    var EXPIRATION_MS = 3e5;
+    if (!this.accessKeyId || (this.expiration && this.expiration.getTime() - Date.now() < EXPIRATION_MS)) return this.creds().then((creds) => {
+      // if (this.expiration && this.expiration.getTime() - Date.now() < EXPIRATION_MS) console.log("refreshing creds");
       this.accessKeyId = creds.accessKeyId;
       this.secretAccessKey = creds.secretAccessKey;
       this.sessionToken = creds.sessionToken;
+      this.expiration = creds.expiration;
       return outerThis;
     });
 

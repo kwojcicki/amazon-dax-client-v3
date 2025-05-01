@@ -139,7 +139,7 @@ class ClientTube {
       return this._credProvider.resolvePromise().then((creds) => {
         this._checkAndUpdateAccessKeyId(creds.accessKeyId);
         this._lastPoolAuth = currTime;
-        this._authExp = currTime + this._authTTLMillis;
+        this._authExp = Math.min(currTime + this._authTTLMillis, creds.expiration.getTime());
 
         this._authHandler(creds);
 
