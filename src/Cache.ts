@@ -14,18 +14,20 @@
  */
 'use strict';
 
-const Util = require('./Util');
+import { Util } from './Util';
 
-class CacheFactory {
+export class CacheFactory {
   static create(CacheType, size) {
-    if(!CacheType) {
+    if (!CacheType) {
       throw new Error('not support Cache type');
     }
     return new CacheType();
   }
 }
 
-class Cache {
+export class Cache {
+  _size: any;
+  _cache: {};
   // plain object cache
   constructor(size) {
     this._size = size;
@@ -47,12 +49,14 @@ class Cache {
   }
 }
 
-class StringListCache {
-// internal storage structure { _hash: [ [key, value], ...] }
-// when insert an string-list key into JS object, it will automatically
-// convert into string seperated by comma e.g. ['1', '2'] => '1,2'
-// to solve the conflicts we have to store its real value
-// For performance, arrays are compared as if they are sorted
+export class StringListCache {
+  _size: any;
+  _cache: {};
+  // internal storage structure { _hash: [ [key, value], ...] }
+  // when insert an string-list key into JS object, it will automatically
+  // convert into string seperated by comma e.g. ['1', '2'] => '1,2'
+  // to solve the conflicts we have to store its real value
+  // For performance, arrays are compared as if they are sorted
   constructor(size) {
     this._size = size;
     this._cache = {};
@@ -64,14 +68,14 @@ class StringListCache {
 
   get(key) {
     let keyValuePairs = this._cache[this._hash(key)];
-    if(!keyValuePairs) {
+    if (!keyValuePairs) {
       return null;
     }
     // compare real key
-    for(let keyValuePair of keyValuePairs) {
+    for (let keyValuePair of keyValuePairs) {
       let storedKey = keyValuePair[0];
-      if(Util.sortedArrayEquals(key, storedKey)) {
-      // if we agree on sort first then check cache, we can use in order compare, which will save a lot
+      if (Util.sortedArrayEquals(key, storedKey)) {
+        // if we agree on sort first then check cache, we can use in order compare, which will save a lot
         return keyValuePair[1];
       }
     }
@@ -82,13 +86,13 @@ class StringListCache {
   put(key, val) {
     let old = this.get(key);
     let hashedKey = this._hash(key);
-    if(!this._cache[hashedKey]) {
+    if (!this._cache[hashedKey]) {
       this._cache[hashedKey] = [];
     }
     let keyValuePairs = this._cache[hashedKey];
-    if(old !== null && old !== undefined) {
-      for(let pair of keyValuePairs) {
-        if(Util.sortedArrayEquals(pair[0], key)) {
+    if (old !== null && old !== undefined) {
+      for (let pair of keyValuePairs) {
+        if (Util.sortedArrayEquals(pair[0], key)) {
           pair[1] = val;
           return old;
         }
@@ -101,10 +105,10 @@ class StringListCache {
   remove(key) {
     let hashKey = this._hash(key);
     let keyValuePairs = this._cache[hashKey];
-    if(keyValuePairs) {
-      for(let i = 0; i < keyValuePairs.length; ++i) {
+    if (keyValuePairs) {
+      for (let i = 0; i < keyValuePairs.length; ++i) {
         let pair = keyValuePairs[i];
-        if(Util.sortedArrayEquals(pair[0], key)) {
+        if (Util.sortedArrayEquals(pair[0], key)) {
           // delete this entry
           this._cache[hashKey].splice(i, 1);
           return;
@@ -114,14 +118,7 @@ class StringListCache {
   }
 }
 
-const CacheType = {
+export const CacheType = {
   Cache: Cache,
   StringListCache: StringListCache,
-};
-
-module.exports = {
-  Cache: Cache,
-  StringListCache: StringListCache,
-  CacheType: CacheType,
-  CacheFactory: CacheFactory,
 };

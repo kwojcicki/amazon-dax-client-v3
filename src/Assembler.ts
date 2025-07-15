@@ -13,25 +13,29 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const BigDecimal = require('./BigDecimal');
-const BigNumber = require('bignumber.js');
-const CborDecoder = require('./CborDecoder');
-const CborSkipper = require('./CborSkipper');
-const CborTypes = require('./CborTypes');
-const Constants = require('./Constants');
-const DaxCborDecoder = require('./DaxCborDecoder');
-const DaxCborTypes = require('./DaxCborTypes');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
-const DaxResponseParam = require('./Constants').DaxResponseParam;
-const DaxServiceError = require('./DaxServiceError');
-const ItemBuilder = require('./ItemBuilder');
-const LexDecimal = require('./LexDecimal');
-const StreamBuffer = require('./ByteStreamBuffer');
+import { BigDecimal } from './BigDecimal';
+import BigNumber from 'bignumber.js';
+import { CborDecoder } from './CborDecoder';
+import { CborSkipper, skipCbor } from './CborSkipper';
+import * as CborTypes from './CborTypes';
+import * as Constants from './Constants';
+import { DaxCborDecoder } from './DaxCborDecoder';
+import * as DaxCborTypes from './DaxCborTypes';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
+import { DaxServiceError } from './DaxServiceError';
+import { ItemBuilder } from './ItemBuilder';
+import { LexDecimal } from './LexDecimal';
+import { ByteStreamBuffer as StreamBuffer } from './ByteStreamBuffer';
+import { Buffer } from 'buffer';
 
 const SUCCESS = CborTypes.TYPE_ARRAY + 0;
 
-class Assembler {
+export class Assembler {
+  _request: any;
+  _keySchema: any;
+  _buffer: any;
+  dec: DaxCborDecoder;
   constructor(request, buffer) {
     this._request = request;
     this._keySchema = request ? this._request._keySchema : null;
@@ -43,16 +47,16 @@ class Assembler {
   feed(data) {
     this._buffer.write(data);
 
-    const valueCount = CborSkipper.skipCbor(this._buffer.buf, this._buffer._pos, this._buffer._end);
-    if(valueCount === null || valueCount < 1) {
+    const valueCount = skipCbor(this._buffer.buf, this._buffer._pos, this._buffer._end);
+    if (valueCount === null || valueCount < 1) {
       // Need at least 1 value to determine whether response is error or success
       return;
     }
 
-    if(this._buffer.buf[this._buffer._pos] === SUCCESS) {
+    if (this._buffer.buf[this._buffer._pos] === SUCCESS) {
       // If first value indicates success, then we'll need additional value(s) for the response
       // payload
-      if(valueCount >= 1 + this._expectedResponseValues()) {
+      if (valueCount >= 1 + this._expectedResponseValues()) {
         this.dec = new DaxCborDecoder(this._buffer.readSlice());
         this.dec._consume(1); // advance past the SUCCESS we saw
         return this._assembleResult();
@@ -60,7 +64,7 @@ class Assembler {
     } else {
       // DaxServer always sends 3 items in case of exception
       // [responseCodes, errorMessage and DDB error details]
-      if(valueCount >= 3) {
+      if (valueCount >= 3) {
         this.dec = new DaxCborDecoder(this._buffer.readSlice());
         throw this._assembleError();
       }
@@ -90,21 +94,24 @@ class Assembler {
     let errorCode;
     let statusCode = -1;
     let cancellationReasons;
-    if(!this.dec.tryDecodeNull()) {
+    if (!this.dec.tryDecodeNull()) {
       let length = this.dec.decodeArrayLength();
       requestId = this.dec.decodeObject();
       errorCode = this.dec.decodeObject();
       statusCode = this.dec.decodeObject();
-      if(length === 4) {
+      if (length === 4) {
         cancellationReasons = [];
         let cancellationReasonsLength = this.dec.decodeArrayLength() / 3;
-        for(let i = 0; i < cancellationReasonsLength; ++i) {
+        for (let i = 0; i < cancellationReasonsLength; ++i) {
           let cancellationReasonCode = this.dec.decodeObject();
           let cancellationReasonMsg = this.dec.decodeObject();
           let cancellationReasonItem = null;
-          if(!this.dec.tryDecodeNull()) {
+          if (!this.dec.tryDecodeNull()) {
+            // @ts-ignore
             cancellationReasonItem = Assembler._decodeStreamItem(this.dec.decodeCbor());
-            if(cancellationReasonItem._attrListId) {
+            // @ts-ignore
+            if (cancellationReasonItem._attrListId) {
+              // @ts-ignore
               cancellationReasonItem = Object.assign(cancellationReasonItem, this._request._keysPerRequest[i]);
             }
           }
@@ -122,7 +129,7 @@ class Assembler {
 
   _decodeNormalOperation() {
     let result = {};
-    if(this.dec.tryDecodeNull()) {
+    if (this.dec.tryDecodeNull()) {
       return result;
     }
 
@@ -137,7 +144,10 @@ class Assembler {
      * If a user has requested for ConsumedCapacity, and our result doesn't provide one, then we default to 0.
      * It follows similar logic as: https://code.amazon.com/packages/DaxJavaClient/blobs/919d32616b8971c4bf2930aa322aa39a2b38ac13/--/src/com/amazon/dax/client/dynamodbv2/DaxClient.java#L772
      */
-    if(this._request.ReturnConsumedCapacity != null && this._request.ReturnConsumedCapacity !== 'NONE' && result.ConsumedCapacity == null) {
+    // @ts-ignore
+    if (this._request.ReturnConsumedCapacity != null && this._request.ReturnConsumedCapacity !== 'NONE' && result.ConsumedCapacity == null) {
+
+      // @ts-ignore
       result.ConsumedCapacity = {
         TableName: this._request.TableName,
         CapacityUnits: 0,
@@ -147,36 +157,36 @@ class Assembler {
   }
 
   _decodeResponseItem(param, result) {
-    switch(param) {
-      case DaxResponseParam.Item:
+    switch (param) {
+      case Constants.DaxResponseParam.Item:
         this._decodeItem(result);
         break;
 
-      case DaxResponseParam.ConsumedCapacity:
+      case Constants.DaxResponseParam.ConsumedCapacity:
         this._decodeConsumedCapacity(result);
         break;
 
-      case DaxResponseParam.Attributes:
+      case Constants.DaxResponseParam.Attributes:
         this._decodeAttributes(result);
         break;
 
-      case DaxResponseParam.ItemCollectionMetrics:
+      case Constants.DaxResponseParam.ItemCollectionMetrics:
         this._decodeItemCollectionMetrics(result);
         break;
 
-      case DaxResponseParam.Items:
+      case Constants.DaxResponseParam.Items:
         this._decodeItems(result);
         break;
 
-      case DaxResponseParam.Count:
+      case Constants.DaxResponseParam.Count:
         this._decodeCount(result);
         break;
 
-      case DaxResponseParam.LastEvaluatedKey:
+      case Constants.DaxResponseParam.LastEvaluatedKey:
         this._decodeLastEvaluatedKey(result);
         break;
 
-      case DaxResponseParam.ScannedCount:
+      case Constants.DaxResponseParam.ScannedCount:
         this._decodeScannedCount(result);
         break;
 
@@ -192,31 +202,36 @@ class Assembler {
   }
 
   _decodeConsumedCapacity(result) {
-    if(this.dec.tryDecodeNull()) {
+    if (this.dec.tryDecodeNull()) {
       return;
     }
 
     let consumedCapacity = Assembler._decodeConsumedCapacityData(this.dec.decodeCbor());
-    if(this._request.ReturnConsumedCapacity && this._request.ReturnConsumedCapacity !== 'NONE') {
+    if (this._request.ReturnConsumedCapacity && this._request.ReturnConsumedCapacity !== 'NONE') {
       result.ConsumedCapacity = consumedCapacity;
     }
   }
 
   static _decodeConsumedCapacityData(dec) {
     let consumedCapacity = {};
+    // @ts-ignore
     consumedCapacity.TableName = dec.decodeString();
+    // @ts-ignore
     consumedCapacity.CapacityUnits = dec.decodeNumber();
-    if(!dec.tryDecodeNull()) {
+    if (!dec.tryDecodeNull()) {
+      // @ts-ignore
       consumedCapacity.Table = {
         CapacityUnits: dec.decodeNumber(),
       };
     }
 
-    if(!dec.tryDecodeNull()) {
+    if (!dec.tryDecodeNull()) {
+      // @ts-ignore
       consumedCapacity.GlobalSecondaryIndexes = Assembler._decodeIndexConsumedCapacity(dec);
     }
 
-    if(!dec.tryDecodeNull()) {
+    if (!dec.tryDecodeNull()) {
+      // @ts-ignore
       consumedCapacity.LocalSecondaryIndexes = Assembler._decodeIndexConsumedCapacity(dec);
     }
 
@@ -228,7 +243,7 @@ class Assembler {
       let indexName = dec.decodeString();
       let units = dec.decodeNumber();
 
-      return [indexName, {CapacityUnits: units}];
+      return [indexName, { CapacityUnits: units }];
     });
 
     return indexConsumedCapacity;
@@ -239,7 +254,7 @@ class Assembler {
     let isProjection = returnValues && (returnValues === 'UPDATED_NEW' || returnValues === 'UPDATED_OLD');
 
     let item;
-    if(isProjection) {
+    if (isProjection) {
       item = Assembler._decodeStreamItemProjection(this.dec.decodeCbor());
     } else {
       item = Assembler._decodeStreamItem(this.dec.decodeCbor());
@@ -250,7 +265,7 @@ class Assembler {
   }
 
   _decodeItemCollectionMetrics(result) {
-    if(this.dec.tryDecodeNull()) {
+    if (this.dec.tryDecodeNull()) {
       return;
     }
 
@@ -263,7 +278,7 @@ class Assembler {
     let sizeUpper = dec.decodeFloat();
 
     let itemCollectionMetrics = {
-      ItemCollectionKey: {[keySchema[0].AttributeName]: keyAV},
+      ItemCollectionKey: { [keySchema[0].AttributeName]: keyAV },
       SizeEstimateRangeGB: [sizeLower, sizeUpper],
     };
 
@@ -285,7 +300,7 @@ class Assembler {
 
   _decodeLastEvaluatedKey(result) {
     let lastEvalKey;
-    if(this._request.hasOwnProperty('IndexName')) {
+    if (this._request.hasOwnProperty('IndexName')) {
       lastEvalKey = Assembler._decodeCompoundKey(this.dec.decodeCbor());
     } else {
       lastEvalKey = Assembler._decodeKeyBytes(this.dec, this._keySchema);
@@ -301,15 +316,15 @@ class Assembler {
 
   _reinsertKey(item) {
     // Handle GetItem, UpdateItem, DeleteItem
-    if(this._request.Key && !this._request._projectionOrdinals) {
+    if (this._request.Key && !this._request._projectionOrdinals) {
       Object.assign(item, this._request.Key); // The key attributes are only added if it's NOT a projection
       return item;
     }
 
     // Handle PutItem
-    if(this._request.Item) {
-      for(let keyAttr of this._keySchema) {
-        if(!(keyAttr.AttributeName in this._request.Item)) {
+    if (this._request.Item) {
+      for (let keyAttr of this._keySchema) {
+        if (!(keyAttr.AttributeName in this._request.Item)) {
           throw new DaxClientError(`Request Item is missing key attribute "${keyAttr.AttributeName}".`,
             DaxErrorCode.MalformedResult);
         }
@@ -322,13 +337,13 @@ class Assembler {
   }
 
   static _decodeItemInternal(dec, keySchema, projOrdinals) {
-    if(dec.tryDecodeNull()) {
+    if (dec.tryDecodeNull()) {
       return null;
     }
 
     let t = dec.peek();
     let item;
-    switch(CborTypes.majorType(t)) {
+    switch (CborTypes.majorType(t)) {
       case CborTypes.TYPE_MAP:
         item = Assembler._decodeProjection(dec, projOrdinals);
         break;
@@ -379,6 +394,7 @@ class Assembler {
     let anonAttrValues = [];
     dec.processMap(() => {
       let ordinal = dec.decodeInt();
+      // @ts-ignore
       anonAttrValues[ordinal] = Assembler._decodeAttributeValue(dec);
     });
 
@@ -386,7 +402,7 @@ class Assembler {
     // Pretend that there is no attrListId
     // This will result in an empty Attributes list, which is not what DDB proper does
     // It returns the changed attributes, even if the attributes didn't actually change
-    if(anonAttrValues.length > 0) {
+    if (anonAttrValues.length > 0) {
       return {
         _attrListId: attrListId,
         _anonymousAttributeValues: anonAttrValues,
@@ -398,7 +414,8 @@ class Assembler {
 
   static _decodeScanResult(dec, keySchema) {
     let size = dec.decodeArrayLength();
-    if(size != 2) {
+    if (size != 2) {
+      // @ts-ignore
       throw new DaxClientError('Invalid scan item length {} (expected 2)'.format(size), DaxErrorCode.MalformedResult);
     }
 
@@ -422,18 +439,19 @@ class Assembler {
     // There is no delimiter on the item attributes; the AVs are concatenated
     // and must be read until there is no more data.
     let values = [];
-    while(true) {
+    while (true) {
       let av;
       try {
         av = Assembler._decodeAttributeValue(dec);
-      } catch(e) {
-        if(e instanceof CborDecoder.NeedMoreData) {
+      } catch (e) {
+        if (e instanceof CborDecoder.NeedMoreData) {
           break;
         } else {
           throw e;
         }
       }
 
+      // @ts-ignore
       values.push(av);
     }
 
@@ -443,41 +461,41 @@ class Assembler {
   static _decodeAttributeValue(dec) {
     let t = dec.peek();
     let mt = CborTypes.majorType(t);
-    switch(mt) {
+    switch (mt) {
       case CborTypes.TYPE_ARRAY:
-        return {L: dec.buildArray(() => Assembler._decodeAttributeValue(dec))};
+        return { L: dec.buildArray(() => Assembler._decodeAttributeValue(dec)) };
 
       case CborTypes.TYPE_MAP:
-        return {M: dec.buildMap(() => [dec.decodeString(), Assembler._decodeAttributeValue(dec)])};
+        return { M: dec.buildMap(() => [dec.decodeString(), Assembler._decodeAttributeValue(dec)]) };
 
       default: {
         let v = dec.decodeObject();
-        if(v === null) {
-          return {NULL: true};
+        if (v === null) {
+          return { NULL: true };
         }
 
-        if(v === true || v === false) {
-          return {BOOL: v};
+        if (v === true || v === false) {
+          return { BOOL: v };
         }
 
-        let tv = typeof(v);
-        switch(tv) {
+        let tv = typeof (v);
+        switch (tv) {
           case 'number':
-            return {N: v.toString()};
+            return { N: v.toString() };
 
           case 'string':
-            return {S: v};
+            return { S: v };
 
           default:
-            if(v instanceof String) {
-              return {S: v};
-            } else if(v instanceof Buffer) {
-              return {B: v};
-            } else if(v instanceof Number || v instanceof BigNumber || v instanceof BigDecimal) {
-              return {N: v.toString()};
-            } else if(v instanceof Array) {
-              return {L: v};
-            } else if(v instanceof DaxCborTypes._DdbSet) {
+            if (v instanceof String) {
+              return { S: v };
+            } else if (v instanceof Buffer) {
+              return { B: v };
+            } else if (v instanceof Number || v instanceof BigNumber || v instanceof BigDecimal) {
+              return { N: v.toString() };
+            } else if (v instanceof Array) {
+              return { L: v };
+            } else if (v instanceof DaxCborTypes._DdbSet) {
               return v.toAV();
             } else {
               throw new DaxClientError('Unknown type: ' + (tv === 'object' ? v.constructor.name : tv), DaxErrorCode.MalformedResult);
@@ -507,9 +525,9 @@ class Assembler {
     let hashAttrType = hashAttr['AttributeType'];
     let hashAttrName = hashAttr['AttributeName'];
 
-    if(keySchema.length == 1) {
+    if (keySchema.length == 1) {
       let value;
-      switch(hashAttrType) {
+      switch (hashAttrType) {
         case 'S':
           value = dec.decodeBytes().toString('utf8');
           break;
@@ -526,11 +544,11 @@ class Assembler {
           throw new DaxClientError('Hash key must be S, B or N, got ' + hashAttrType, DaxErrorCode.MalformedResult);
       }
 
-      key[hashAttrName] = {[hashAttrType]: value};
-    } else if(keySchema.length == 2) {
+      key[hashAttrName] = { [hashAttrType]: value };
+    } else if (keySchema.length == 2) {
       let keyDec = dec.decodeCbor();
       let hashValue;
-      switch(hashAttrType) {
+      switch (hashAttrType) {
         case 'S':
           hashValue = keyDec.decodeString();
           break;
@@ -547,14 +565,14 @@ class Assembler {
           throw new DaxClientError('Hash key must be S, B or N, got ' + hashAttrType, DaxErrorCode.MalformedResult);
       }
 
-      key[hashAttrName] = {[hashAttrType]: hashValue};
+      key[hashAttrName] = { [hashAttrType]: hashValue };
 
       let rangeAttr = keySchema[1];
       let rangeAttrType = rangeAttr['AttributeType'];
       let rangeAttrName = rangeAttr['AttributeName'];
 
       let rangeValue;
-      switch(rangeAttrType) {
+      switch (rangeAttrType) {
         case 'S':
           rangeValue = keyDec.drainAsString('utf8');
           break;
@@ -563,6 +581,7 @@ class Assembler {
           let ref = [];
           let used = LexDecimal.decode(keyDec.buffer, keyDec.start, ref);
           keyDec._consume(used);
+          // @ts-ignore
           rangeValue = ref[0].toString();
           break;
 
@@ -574,7 +593,7 @@ class Assembler {
           throw new DaxClientError('Range key must be S, B or N, got ' + rangeAttrType, DaxErrorCode.MalformedResult);
       }
 
-      key[rangeAttrName] = {[rangeAttrType]: rangeValue};
+      key[rangeAttrName] = { [rangeAttrType]: rangeValue };
     } else {
       throw new DaxClientError(
         `Key schema must be of length 1 or 2; got ${keySchema.length} (${keySchema})`,
@@ -587,7 +606,7 @@ class Assembler {
   // Reads consumed capacity, recursively converting keys from enum values
   // to names.
   static _decodeConsumedCapacityExtended(dec) {
-    if(dec.tryDecodeNull()) {
+    if (dec.tryDecodeNull()) {
       return null;
     }
 
@@ -595,17 +614,17 @@ class Assembler {
       let k;
       // If the key is a string, it must be an index name. Every other key
       // is an unsigned int.
-      if(CborTypes.majorType(dec.peek()) === CborTypes.TYPE_UTF) {
+      if (CborTypes.majorType(dec.peek()) === CborTypes.TYPE_UTF) {
         k = dec.decodeString();
       } else {
         let enumVal = dec.decodeInt();
         k = Constants.ConsumedCapacityValues[enumVal];
-        if(k === undefined) {
+        if (k === undefined) {
           throw new DaxClientError('Invalid consumed capacity key: ' + k, DaxErrorCode.Decoder);
         }
       }
       let v;
-      if(CborTypes.majorType(dec.peek()) === CborTypes.TYPE_MAP) {
+      if (CborTypes.majorType(dec.peek()) === CborTypes.TYPE_MAP) {
         v = dec.buildMap(_decodeConsumedCapacityEntry);
       } else {
         v = dec.decodeObject();
@@ -616,5 +635,3 @@ class Assembler {
     return dec.buildMap(_decodeConsumedCapacityEntry);
   }
 }
-
-module.exports = Assembler;

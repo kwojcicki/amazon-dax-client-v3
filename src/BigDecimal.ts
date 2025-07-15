@@ -13,41 +13,44 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const BigNumber = require('bignumber.js');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { BigNumber } from 'bignumber.js'
+import { DaxClientError } from './DaxClientError'
+import { DaxErrorCode } from './DaxErrorCode'
 const TEN = new BigNumber(10);
 const ONE_TENTH = new BigNumber(0.1);
 const EXPREP_DEFAULT = 6;
 
-class BigDecimal {
-  constructor(obj, scale) {
+export class BigDecimal {
+  _EXPREP: number;
+  unscaledValue: any;
+  scale: number;
+  constructor(obj, scale?) {
     this._EXPREP = EXPREP_DEFAULT;
-    if(obj instanceof BigNumber) {
+    if (obj instanceof BigNumber) {
       this.unscaledValue = obj;
       this.scale = parseInt(scale);
       return;
-    } else if(typeof obj !== 'string') {
+    } else if (typeof obj !== 'string') {
       throw new DaxClientError('should be initialized by either string or unscaledValue and scale', DaxErrorCode.IllegalArgument);
     }
     let str = obj;
     let exppoint = str.length;
-    let decimalpoint = undefined;
-    for(let i = 0; i < str.length; ++i) {
-      if(str[i] === '.') {
+    let decimalpoint: number | undefined = undefined;
+    for (let i = 0; i < str.length; ++i) {
+      if (str[i] === '.') {
         decimalpoint = i;
-      } else if(str[i] === 'e' || str[i] === 'E') {
+      } else if (str[i] === 'e' || str[i] === 'E') {
         exppoint = i;
       }
     }
     let escale = 0;
-    if(decimalpoint === undefined) { // no decimal point
+    if (decimalpoint === undefined) { // no decimal point
       decimalpoint = exppoint;
       this.scale = 0;
     } else {
       this.scale = exppoint - decimalpoint - 1;
     }
-    if(exppoint !== str.length) {
+    if (exppoint !== str.length) {
       escale = parseInt(str.slice(exppoint + 1, str.length));
     }
     // at this step scale will always be non-negative
@@ -57,48 +60,48 @@ class BigDecimal {
   }
 
   config(obj) {
-    if(!obj['EXPREP']) {
+    if (!obj['EXPREP']) {
       this._EXPREP = obj['EXPREP'];
     }
   }
 
   toString() {
-    if(this.unscaledValue.equals(0)) {
+    if (this.unscaledValue.equals(0)) {
       return '0';
     }
 
     // get plain string of unscaledValue
     let str = this.unscaledValue.toPrecision(this.unscaledValue.e + 1);
-    if(this.scale === 0) {
+    if (this.scale === 0) {
       return str;
     }
     let sign = ''; // sign
-    if(str[0] === '-') {
+    if (str[0] === '-') {
       sign = '-';
       str = str.slice(1);
     }
-    if(this.scale < 0) { // add positive "E" afterwards
+    if (this.scale < 0) { // add positive "E" afterwards
       let afterDecimal = '.' + str.slice(1);
-      if(afterDecimal === '.') {
+      if (afterDecimal === '.') {
         afterDecimal = '';
       }
       return sign + str[0] + afterDecimal + `E${str.length - this.scale - 1}`;
-    } else if(this.scale < str.length) {
+    } else if (this.scale < str.length) {
       // put decimal point somewhere in between
       let afterDecimal = '.' + str.slice(str.length - this.scale);
-      if(afterDecimal === '.') {
+      if (afterDecimal === '.') {
         afterDecimal = '';
       }
       return sign + str.slice(0, str.length - this.scale) + afterDecimal;
     } else {
       // put decimal point in front of, which means add 'E' back
       let escale = str.length - this.scale - 1;
-      if(-escale <= this._EXPREP) {
+      if (-escale <= this._EXPREP) {
         // use decimal instead of scientific representation
         return sign + this._precedingZeros(-escale) + str;
       } else {
         let afterDecimal = '.' + str.slice(1);
-        if(afterDecimal === '.') {
+        if (afterDecimal === '.') {
           afterDecimal = '';
         }
         afterDecimal += `E${escale}`;
@@ -112,10 +115,10 @@ class BigDecimal {
   }
 
   equals(obj) { // equal means not only value but also precision is the same
-    if(!(obj instanceof BigDecimal)) {
+    if (!(obj instanceof BigDecimal)) {
       return false;
     }
-    if(this.unscaledValue.isZero()) {
+    if (this.unscaledValue.isZero()) {
       return obj.unscaledValue.isZero();
     }
     return this.unscaledValue.equals(obj.unscaledValue) && this.scale === obj.scale;
@@ -170,11 +173,9 @@ class BigDecimal {
 
   _precedingZeros(n) {
     let str = '0.';
-    for(let i = 1; i < n; ++i) {
+    for (let i = 1; i < n; ++i) {
       str += '0';
     }
     return str;
   }
 }
-
-module.exports = BigDecimal;

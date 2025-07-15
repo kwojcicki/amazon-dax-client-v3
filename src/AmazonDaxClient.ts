@@ -25,12 +25,12 @@
  */
 process.removeAllListeners('warning');
 
-const EventEmitter = require('events');
-const Cluster = require('./Cluster');
-const DaxClient = require('./DaxClient');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
-const { DynamoDBDocumentClient, ScanCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");
+import EventEmitter from 'events';
+import { Cluster } from './Cluster';
+import { DaxClient } from './DaxClient';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
+import { DynamoDBDocumentClient, ScanCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 const ERROR_CODES_WRITE_FAILURE_AMBIGUOUS = [[1, 37, 38, 53], [1, 37, 38, 55], ['*', 37, '*', 39, 47]];
 const ERROR_CODES_THROTTLING = [
@@ -62,8 +62,8 @@ function update(obj1, obj2) {
 }
 
 // https://github.com/aws/aws-sdk-js/blob/880e811e857c34e4ad983c37837767cd5eddb98f/lib/util.js#L639C12-L664C4
-function inherit(klass, features) {
-  var newObject = null;
+function inherit(klass, features?) {
+  var newObject: any = null;
   if (features === undefined) {
     features = klass;
     klass = Object;
@@ -102,6 +102,7 @@ const _AmazonDaxClient = inherit({
 
     this.config = config;
     this._textDecoder = new TextDecoder();
+    // @ts-ignore
     this._textEncoder = new TextEncoder("utf-8");
 
     // entry point when DAX client is wrapped into a DynamoDBClient or DynamoDBDocumentClient
@@ -493,6 +494,9 @@ const _AmazonDaxClient = inherit({
 const AmazonDaxClient = inherit(_AmazonDaxClient, {});
 
 class RetryHandler {
+  _cluster: any;
+  _maxRetryDelay: any;
+  _maxRetries: any;
   constructor(cluster, retryDelay, retries) {
     this._cluster = cluster;
     this._maxRetryDelay = retryDelay;
@@ -546,6 +550,7 @@ class RetryHandler {
     }
     return new Promise((resolve, reject) => {
       setTimeout(() => {
+        // @ts-ignore
         resolve();
       }, this._jitter(70 << n));
     });
@@ -646,6 +651,13 @@ class WriteOperationsRetryHandler extends RetryHandler {
 }
 
 class DaxRequest extends EventEmitter {
+  service: any;
+  operation: any;
+  params: any;
+  response: {};
+  startTime: Date;
+  _op: any;
+  _fired: boolean;
   constructor(service, opname, params, op) {
     super();
 
@@ -687,16 +699,20 @@ class DaxRequest extends EventEmitter {
     // skip 'build' and 'sign' as they are not meaningful for DAX
 
     let resultP = this._op(this.params).then((data) => {
+      // @ts-ignore
       self.response.data = data;
       self.emit('extractData', self.response);
 
       self.emit('success', self.response);
     }).catch((err) => {
+      // @ts-ignore
       self.response.error = err;
       self.emit('extractError', self.response);
+      // @ts-ignore
       self.emit('error', self.response.error, self.response);
     }).then(() => {
       self.emit('complete', self.response);
+      // @ts-ignore
       return self.response.data;
     });
 

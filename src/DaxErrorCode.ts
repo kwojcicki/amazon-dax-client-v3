@@ -14,8 +14,9 @@
  */
 'use strict';
 
-const DaxErrorCode = {
+export const DaxErrorCode = {
   Decoder: 'DecoderException',
+  Encoder: 'EncoderException',
   Unrecognized: 'UnrecognizedClientException',
   Authentication: 'MissingAuthenticationTokenException',
   MalformedResult: 'MalformedResultException',
@@ -34,5 +35,3 @@ const DaxErrorCode = {
   Throttling: 'ThrottlingException',
   Connection: 'ConnectionException',
 };
-
-module.exports = DaxErrorCode;

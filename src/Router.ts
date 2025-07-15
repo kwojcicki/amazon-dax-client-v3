@@ -13,18 +13,20 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { DaxClientError } from './DaxClientError'
+import { DaxErrorCode } from './DaxErrorCode'
 
 /**
  * Randomized router over an array of entries.
  */
-class Router {
+export class Router {
+  _values: any;
+  _leaderCnt: any;
   constructor(values, leaderCnt) {
-    if(!values) {
+    if (!values) {
       throw new DaxClientError('routes must not be null', DaxErrorCode.IllegalArgument, false);
     }
-    if(leaderCnt > values.length) {
+    if (leaderCnt > values.length) {
       throw new DaxClientError('leader count must be <= routes', DaxErrorCode.IllegalArgument, false);
     }
 
@@ -39,7 +41,7 @@ class Router {
    */
   nextLeader(prev) {
     let next = this._next(prev, this._leaderCnt);
-    if(!next || next === prev) {
+    if (!next || next === prev) {
       return this.nextAny(prev);
     }
     return next;
@@ -55,15 +57,15 @@ class Router {
   }
 
   _next(prev, len) {
-    if(len === 0) {
+    if (len === 0) {
       return null;
     }
-    if(len === 1) {
+    if (len === 1) {
       return this._values[0];
     }
     let idx = Math.floor(Math.random() * len);
-    if(this._values[idx] === prev) {
-      if(++idx >= len) {
+    if (this._values[idx] === prev) {
+      if (++idx >= len) {
         idx -= len;
       }
     }
@@ -79,5 +81,3 @@ class Router {
     return this._leaderCnt;
   }
 }
-
-module.exports = Router;

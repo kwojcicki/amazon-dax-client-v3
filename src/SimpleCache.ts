@@ -14,12 +14,15 @@
  */
 'use strict';
 
-const CacheType = require('./Cache').CacheType;
-const CacheFactory = require('./Cache').CacheFactory;
+import { CacheType, CacheFactory } from './Cache'
 
-class SimpleCache {
-  constructor(size, fetch, type) {
-    if(!type) { // default choose obj literal Cache
+export class SimpleCache {
+  _size: any;
+  _fetch: any;
+  _cache: any;
+  _reqOnFly: {};
+  constructor(size, fetch, type?) {
+    if (!type) { // default choose obj literal Cache
       type = CacheType.Cache;
     }
     this._size = size;
@@ -30,11 +33,11 @@ class SimpleCache {
 
   get(key) {
     let value = this._cache.get(key);
-    if(value !== null && value !== undefined) {
+    if (value !== null && value !== undefined) {
       // already have at local
       return Promise.resolve(value);
     } else {
-      if(!this._reqOnFly[key]) {
+      if (!this._reqOnFly[key]) {
         // no request on fly
         let p = this._fetch(key).then((val) => {
           this._cache.put(key, val);
@@ -55,7 +58,7 @@ class SimpleCache {
 
   contain(key) {
     let value = this._cache.get(key);
-    if(value !== null && value !== undefined) {
+    if (value !== null && value !== undefined) {
       return value;
     } else {
       return false;
@@ -70,5 +73,3 @@ class SimpleCache {
     this._cache.remove(key);
   }
 }
-
-module.exports = SimpleCache;

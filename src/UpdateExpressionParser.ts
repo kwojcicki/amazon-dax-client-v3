@@ -13,9 +13,9 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const AbstractTwoStageExpressionParser = require('./AbstractTwoStageExpressionParser');
+import { AbstractTwoStageExpressionParser } from './AbstractTwoStageExpressionParser';
 
-class UpdateExpressionParser extends AbstractTwoStageExpressionParser {
+export class UpdateExpressionParser extends AbstractTwoStageExpressionParser {
   constructor() {
     super();
   }
@@ -24,5 +24,3 @@ class UpdateExpressionParser extends AbstractTwoStageExpressionParser {
     return parser.update_();
   }
 }
-
-module.exports = UpdateExpressionParser;

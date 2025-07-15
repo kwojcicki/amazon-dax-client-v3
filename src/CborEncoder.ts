@@ -13,12 +13,13 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const StreamBuffer = require('./ByteStreamBuffer');
-const CborTypes = require('./CborTypes');
-const BigNumber = require('bignumber.js');
-const BigDecimal = require('./BigDecimal');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { Buffer } from 'buffer';
+import { ByteStreamBuffer as StreamBuffer } from './ByteStreamBuffer';
+import * as CborTypes from './CborTypes';
+import { BigNumber } from 'bignumber.js';
+import { BigDecimal } from './BigDecimal';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
 
 const SHIFT32 = Math.pow(2, 32);
 const STRING_STREAM_HEADER = Buffer.from([CborTypes.TYPE_UTF_STREAM]);
@@ -34,11 +35,12 @@ const buf_4 = Buffer.allocUnsafe(4);
 const buf_8 = Buffer.allocUnsafe(8);
 const buf_1024 = Buffer.alloc(1024);
 
-class CborEncoder {
-// the encode method can be modified as static function in the future
-// when find a good way to handle storage issue
-// Cbor package won't support direct Map, List, Object encoding but offer
-// header encoding method for flexibility
+export class CborEncoder {
+  private _mInOut: any;
+  // the encode method can be modified as static function in the future
+  // when find a good way to handle storage issue
+  // Cbor package won't support direct Map, List, Object encoding but offer
+  // header encoding method for flexibility
   constructor() {
     this._mInOut = new StreamBuffer();
   }
@@ -47,12 +49,12 @@ class CborEncoder {
     return this._mInOut.read();
   }
 
-  _write(data, length) {
+  _write(data, length?) {
     // length write only support for buffer
-    if(typeof data === 'number') {
+    if (typeof data === 'number') {
       this._writeUInt8(data);
     } else {
-      if(length !== null && length !== undefined) {
+      if (length !== null && length !== undefined) {
         this._mInOut.write(data, length);
       } else {
         this._mInOut.write(data);
@@ -61,7 +63,7 @@ class CborEncoder {
   }
 
   _writeString(str) {
-    if(str.length <= 256) {
+    if (str.length <= 256) {
       // if str can fit into the pre-allocate buffer, then use it.
       let length = buf_1024.write(str, 0, 'utf8');
       this._writeType(CborTypes.TYPE_UTF, length);
@@ -74,7 +76,7 @@ class CborEncoder {
   }
 
   encodeString(str) {
-    if(typeof str !== 'string') {
+    if (typeof str !== 'string') {
       throw new DaxClientError(`unsupported type to encode for string: ${typeof str}`, DaxErrorCode.Encoder);
     }
     this._writeString(str);
@@ -82,7 +84,7 @@ class CborEncoder {
   }
 
   _writeBinary(obj) {
-    if(!(obj instanceof Buffer)) {
+    if (!(obj instanceof Buffer)) {
       obj = Buffer.from(obj);
     } // convert into a Buffer then write, it's safer
     // since conversion from str to buf may lead to length change, and after all
@@ -92,7 +94,7 @@ class CborEncoder {
   }
 
   encodeBinary(str) {
-    if(typeof str !== 'string' && !(str instanceof Buffer)) {
+    if (typeof str !== 'string' && !(str instanceof Buffer)) {
       throw new DaxClientError(`unsupported type to encode for Binary: ${typeof str}`, DaxErrorCode.Encoder);
     }
     this._writeBinary(str);
@@ -104,7 +106,7 @@ class CborEncoder {
   }
 
   encodeBoolean(b) {
-    if(typeof b !== 'boolean') {
+    if (typeof b !== 'boolean') {
       throw new DaxClientError('unsupported type to encode for Boolean', DaxErrorCode.Encoder);
     }
     this._writeBoolean(b);
@@ -121,22 +123,22 @@ class CborEncoder {
   }
 
   _writeInt(str) {
-    if(typeof str === 'number') {
+    if (typeof str === 'number') {
       let num = str;
-      if(num >= 0) {
+      if (num >= 0) {
         this._writeType(CborTypes.TYPE_POSINT, num);
       } else {
         this._writeType(CborTypes.TYPE_NEGINT, -num - 1);
       }
-    } else if((str instanceof BigNumber) || (typeof str === 'string' && str.length > 0)) {
+    } else if ((str instanceof BigNumber) || (typeof str === 'string' && str.length > 0)) {
       let num = new BigNumber(str);
-      if(num.gte(0)) {
+      if (num.gte(0)) {
         this._writeType(CborTypes.TYPE_POSINT, num.toNumber());
       } else {
         this._writeType(CborTypes.TYPE_NEGINT, num.neg().sub(1).toNumber());
       }
     } else {
-      throw new DaxClientError('not supported type for Int: ' + typeof(str) + ' ' + str, DaxErrorCode.Encoder);
+      throw new DaxClientError('not supported type for Int: ' + typeof (str) + ' ' + str, DaxErrorCode.Encoder);
     }
   }
 
@@ -158,17 +160,17 @@ class CborEncoder {
   }
 
   _writeBigInt(str) {
-    if(str === '-0') {
+    if (str === '-0') {
       str = '0';
     }
     let bi = str instanceof BigNumber ? str : new BigNumber(str);
     let tag = CborTypes.TAG_POSBIGINT;
-    if(bi.isNeg()) {
+    if (bi.isNeg()) {
       bi = bi.neg().sub(1);
       tag = CborTypes.TAG_NEGBIGINT;
     }
     let hexstr = bi.toString(16);
-    if(hexstr.length % 2) {
+    if (hexstr.length % 2) {
       hexstr = '0' + hexstr;
     }
 
@@ -187,7 +189,7 @@ class CborEncoder {
     this._writeTag(CborTypes.TAG_DECIMAL);
     this._writeType(CborTypes.TYPE_ARRAY, 2);
     this._writeInt(-bd.scale + '');
-    if(bd.unscaledValue.abs().comparedTo(Number.MAX_SAFE_INTEGER) <= 0) {
+    if (bd.unscaledValue.abs().comparedTo(Number.MAX_SAFE_INTEGER) <= 0) {
       this._writeInt(bd.unscaledValue.toString());
     } else {
       this._writeBigInt(bd.unscaledValue.toString());
@@ -200,23 +202,25 @@ class CborEncoder {
   }
 
   _writeNumber(str) {
-    if(typeof str !== 'string') {
-      throw new DaxClientError('Numbers must be passed as strings, got ' + typeof(str), DaxErrorCode.Encoder);
+    if (typeof str !== 'string') {
+      throw new DaxClientError('Numbers must be passed as strings, got ' + typeof (str), DaxErrorCode.Encoder);
     }
 
-    if(isNaN(str)) {
+    // @ts-ignore
+    if (isNaN(str)) {
       throw new DaxClientError('NaN is not a supported number', DaxErrorCode.IllegalArgument);
-    } else if(!isFinite(str)) {
+      // @ts-ignore:
+    } else if (!isFinite(str)) {
       throw new DaxClientError('Infinity is not a supported number', DaxErrorCode.IllegalArgument);
-    } else if(this._isDecimal(str)) {
-      if(this._tryWriteFloat(str)) {
+    } else if (this._isDecimal(str)) {
+      if (this._tryWriteFloat(str)) {
         // already written for float
       } else {
         this._writeBigDecimal(str);
       }
     } else {
       let num = new BigNumber(str);
-      if(num.lte(Number.MAX_SAFE_INTEGER) && num.gte(Number.MIN_SAFE_INTEGER)) {
+      if (num.lte(Number.MAX_SAFE_INTEGER) && num.gte(Number.MIN_SAFE_INTEGER)) {
         this._writeInt(num);
       } else {
         this._writeBigInt(num);
@@ -271,8 +275,8 @@ class CborEncoder {
 
   _writeArray(items) {
     this._writeType(CborTypes.TYPE_ARRAY, items.length);
-    for(let item of items) {
-      if(typeof item !== 'string') {
+    for (let item of items) {
+      if (typeof item !== 'string') {
         // the only arrays used by DAX are string arrays
         throw new DaxClientError('Arrays can only contain strings', DaxErrorCode.Encoder);
       }
@@ -292,9 +296,9 @@ class CborEncoder {
   }
 
   _writeType(majorType, val) {
-    if(val instanceof Buffer) {
+    if (val instanceof Buffer) {
       let ai;
-      switch(val.length) {
+      switch (val.length) {
         case 1:
           ai = CborTypes.SIZE_8;
           break;
@@ -312,8 +316,8 @@ class CborEncoder {
       }
       this._writeUInt8(majorType | ai);
       this._write(val);
-    } else if(typeof val === 'number') {
-      switch(false) {
+    } else if (typeof val === 'number') {
+      switch (false) {
         case !(val < 24):
           this._writeUInt8(majorType | val);
           break;
@@ -363,9 +367,9 @@ class CborEncoder {
   }
 
   _isDecimal(str) {
-    for(let i = 0; i < str.length; i++) {
+    for (let i = 0; i < str.length; i++) {
       let c = str[i];
-      if(c == '.' || c == 'e' || c == 'E') {
+      if (c == '.' || c == 'e' || c == 'E') {
         return true;
       }
     }
@@ -376,7 +380,7 @@ class CborEncoder {
   // then directly use converted buf write into result buf, to save unecessary conversion.
   _tryWriteFloat(str) {
     buf_8.writeDoubleBE(str);
-    if((buf_8.readDoubleBE() + '') === str) {
+    if ((buf_8.readDoubleBE() + '') === str) {
       this._writeUInt8(CborTypes.TYPE_FLOAT_64);
       this._mInOut.write(buf_8);
       return true;
@@ -385,5 +389,3 @@ class CborEncoder {
     }
   }
 }
-
-module.exports = CborEncoder;

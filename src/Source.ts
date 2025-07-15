@@ -13,15 +13,15 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const dns = require('dns');
-const net = require('net');
-const Util = require('./Util');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import dns from 'dns'
+import net from 'net'
+import { Util } from './Util';
+import { DaxClientError } from './DaxClientError'
+import { DaxErrorCode } from './DaxErrorCode'
 
-class Source {
+export class Source {
   static autoconf(cluster, seeds) {
-    if(!seeds || !seeds.length) {
+    if (!seeds || !seeds.length) {
       throw new DaxClientError('no configuration seed hosts provided', DaxErrorCode.IllegalArgument, false);
     }
     return new AutoconfSource(cluster, seeds);
@@ -29,6 +29,9 @@ class Source {
 }
 
 class AutoconfSource {
+  _cluster: any;
+  _seeds: any;
+  _services: any;
   constructor(cluster, seeds) {
     this._cluster = cluster;
     this._seeds = seeds;
@@ -36,7 +39,7 @@ class AutoconfSource {
 
   refresh(callback) {
     this._pullWithRetry(this._seeds, (err, cfg) => {
-      if(err) {
+      if (err) {
         callback(err);
       } else {
         this._checkConfig(cfg);
@@ -49,7 +52,7 @@ class AutoconfSource {
     let existing = this._services;
     let latest = newCfg;
     // update only if configuration has changed.
-    if(existing && Util.arrayEquals(existing, latest)) {
+    if (existing && Util.arrayEquals(existing, latest)) {
       return;
     }
 
@@ -58,15 +61,15 @@ class AutoconfSource {
   }
 
   _resolveAddr(dests, index, callback) {
-    if(index >= dests.length) {
+    if (index >= dests.length) {
       return callback(new DaxClientError('not able to resolve address: ' + JSON.stringify(dests), DaxErrorCode.NoRoute));
     }
 
     let dest = dests[index];
-    if(net.isIP(dest.host) !== 0) {
+    if (net.isIP(dest.host) !== 0) {
       return process.nextTick(() => {
         this._pull([dest.host], dest.port, (err, newCfg) => {
-          if(err) {
+          if (err) {
             this._resolveAddr(dests, index + 1, callback);
           } else {
             callback(null, newCfg);
@@ -76,12 +79,12 @@ class AutoconfSource {
     } else {
       // console.log(`Resolving ${dest.host}...`);
       dns.resolve(dest.host, (err, addrs) => {
-        if(err) {
+        if (err) {
           console.error(`Failed to resolve ${dest.host}:`, err);
           this._resolveAddr(dests, index + 1, callback);
         } else {
           this._pull(addrs, dest.port, (err, newCfg) => {
-            if(err) {
+            if (err) {
               console.error(`Failed to pull from ${dest.host} (${addrs}):`, err);
               this._resolveAddr(dests, index + 1, callback);
             } else {
@@ -94,9 +97,9 @@ class AutoconfSource {
   }
 
   _pull(addrs, port, callback) {
-    if(addrs.length > 1) {
+    if (addrs.length > 1) {
       // randomize multiple addresses; in-place fischer-yates shuffle.
-      for(let j = addrs.length - 1; j > 0; --j) {
+      for (let j = addrs.length - 1; j > 0; --j) {
         let k = Math.round(Math.random() * j);
         let tmp = addrs[k];
         addrs[k] = addrs[j];
@@ -107,10 +110,11 @@ class AutoconfSource {
     // Sequentially iterate through all nodes. Any of them succeed will return new
     // endpoints config.
     let refreshEndpoints = Promise.reject();
-    for(let ia of addrs) {
+    for (let ia of addrs) {
+      // @ts-ignore
       refreshEndpoints = refreshEndpoints.catch(() => {
         return this._pullFrom(ia, port).then((newCfg) => {
-          if(newCfg && newCfg.length) {
+          if (newCfg && newCfg.length) {
             return callback(null, newCfg);
           } else {
             throw new Error('not able to find configuration');
@@ -127,10 +131,10 @@ class AutoconfSource {
   _pullWithRetry(dests, callback) {
     // one retry
     this._resolveAddr(dests, 0, (err, cfg) => {
-      if(err) {
+      if (err) {
         // give one more try for each endpoint
         this._resolveAddr(dests, 0, (err, cfg) => {
-          if(err) {
+          if (err) {
             callback(err);
           } else {
             callback(null, cfg);
@@ -154,10 +158,8 @@ class AutoconfSource {
         this._cluster.unregisterAndClose(client);
         throw err;
       });
-    } catch(err) {
+    } catch (err) {
       return Promise.reject(err);
     }
   }
 }
-
-module.exports = Source;

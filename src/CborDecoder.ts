@@ -14,16 +14,16 @@
  */
 'use strict';
 
-const BigNumber = require('bignumber.js');
-const BigDecimal = require('./BigDecimal');
-const CborTypes = require('./CborTypes');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
-const StreamBuffer = require('./ByteStreamBuffer');
+import BigNumber from 'bignumber.js';
+import { BigDecimal } from './BigDecimal';
+import * as CborTypes from './CborTypes';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
+import { ByteStreamBuffer as StreamBuffer } from './ByteStreamBuffer';
 
 const SHIFT32 = Math.pow(2, 32);
 
-class NeedMoreData extends Error {
+export class NeedMoreData extends Error {
   constructor() {
     super('Not enough data');
   }
@@ -36,9 +36,16 @@ function copyBuffer(buffer, start, end) {
   return Buffer.from(slice);
 }
 
-class CborDecoder {
+export class CborDecoder {
+  buffer: any;
+  start: any;
+  _limit: any;
+  tagHandlers: any;
+  _byteStreamBuffer: StreamBuffer;
+  subDecoder: any;
+  static NeedMoreData: typeof NeedMoreData;
   constructor(buffer, start, end, tagHandlers) {
-    if(!buffer) {
+    if (!buffer) {
       throw new Error('buffer must be provided.');
     }
 
@@ -84,7 +91,7 @@ class CborDecoder {
 
   decodeString() {
     let t = this.peek();
-    if(!CborTypes.isMajorType(t, CborTypes.TYPE_UTF)) {
+    if (!CborTypes.isMajorType(t, CborTypes.TYPE_UTF)) {
       throw new Error('Not string (got ' + t + ')');
     }
 
@@ -94,7 +101,7 @@ class CborDecoder {
 
   decodeBytes() {
     let t = this.peek();
-    if(!CborTypes.isMajorType(t, CborTypes.TYPE_BYTES)) {
+    if (!CborTypes.isMajorType(t, CborTypes.TYPE_BYTES)) {
       throw new Error('Not bytes (got ' + t + ')');
     }
 
@@ -104,12 +111,12 @@ class CborDecoder {
 
   _decodeByteStringsInternal(destStreamBuffer, cborType) {
     let length = this._decodeValue(cborType);
-    if(length != -1) {
+    if (length != -1) {
       this._ensureAvailable(length);
       destStreamBuffer.write(this.buffer.slice(this.start, this.start + length));
       this._consume(length);
     } else {
-      while(!this.tryDecodeBreak()) {
+      while (!this.tryDecodeBreak()) {
         this._decodeByteStringsInternal(destStreamBuffer, this.peek());
       }
     }
@@ -117,7 +124,7 @@ class CborDecoder {
 
   decodeNumber() {
     let t = this.peek();
-    switch(t) {
+    switch (t) {
       case CborTypes.TYPE_FLOAT_16:
       case CborTypes.TYPE_FLOAT_32:
       case CborTypes.TYPE_FLOAT_64:
@@ -125,14 +132,14 @@ class CborDecoder {
     }
 
     let mt = CborTypes.majorType(t);
-    switch(mt) {
+    switch (mt) {
       case CborTypes.TYPE_POSINT:
       case CborTypes.TYPE_NEGINT:
         return this.decodeInt();
 
       case CborTypes.TYPE_TAG:
         let tag = this._decodeTag(t);
-        switch(tag) {
+        switch (tag) {
           case CborTypes.TAG_POSBIGINT:
           case CborTypes.TAG_NEGBIGINT:
             return this._decodeBigInt(tag);
@@ -149,10 +156,10 @@ class CborDecoder {
     let t = this.peek();
 
     let mt = CborTypes.majorType(t);
-    if(mt != CborTypes.TYPE_POSINT && mt != CborTypes.TYPE_NEGINT) {
-      if(mt === CborTypes.TYPE_TAG) {
+    if (mt != CborTypes.TYPE_POSINT && mt != CborTypes.TYPE_NEGINT) {
+      if (mt === CborTypes.TYPE_TAG) {
         let tag = this._decodeTag(t);
-        switch(tag) {
+        switch (tag) {
           case CborTypes.TAG_POSBIGINT:
           case CborTypes.TAG_NEGBIGINT:
             return this._decodeBigInt(tag);
@@ -169,7 +176,7 @@ class CborDecoder {
     let t = this.peek();
 
     let result; let excess;
-    switch(t) {
+    switch (t) {
       case CborTypes.TYPE_FLOAT_16:
         this._ensureAvailable(3);
         result = CborDecoder._parseHalf(this.buffer, this.start + 1);
@@ -192,17 +199,17 @@ class CborDecoder {
         throw new DaxClientError('Type is not float: ' + t, DaxErrorCode.Decoder);
     }
 
-    this._consume(1+excess);
+    this._consume(1 + excess);
     return result;
   }
 
   _decodeBigInt(tag) {
-    if(tag != CborTypes.TAG_POSBIGINT && tag != CborTypes.TAG_NEGBIGINT) {
+    if (tag != CborTypes.TAG_POSBIGINT && tag != CborTypes.TAG_NEGBIGINT) {
       throw new DaxClientError('Invalid tag to decode BigInt: ' + tag, DaxErrorCode.Decoder);
     }
 
     let t = this.peek();
-    if(!CborTypes.isMajorType(t, CborTypes.TYPE_BYTES)) {
+    if (!CborTypes.isMajorType(t, CborTypes.TYPE_BYTES)) {
       throw new DaxClientError('Type for BigInt is not binary: ' + t, DaxErrorCode.Decoder);
     }
 
@@ -213,12 +220,12 @@ class CborDecoder {
   }
 
   _decodeDecimal(tag) {
-    if(tag != CborTypes.TAG_DECIMAL) {
+    if (tag != CborTypes.TAG_DECIMAL) {
       throw new DaxClientError('Decimal value must have TAG_DECIMAL tag (got ' + tag + ')', DaxErrorCode.Decoder);
     }
 
     let size = this.decodeArrayLength();
-    if(size != 2) {
+    if (size != 2) {
       throw new DaxClientError('Decimal value has wrong array size (' + size + ')', DaxErrorCode.Decoder);
     }
 
@@ -230,7 +237,7 @@ class CborDecoder {
 
   decodeArrayLength() {
     let t = this.peek();
-    if(CborTypes.majorType(t) !== CborTypes.TYPE_ARRAY) {
+    if (CborTypes.majorType(t) !== CborTypes.TYPE_ARRAY) {
       throw new Error('Not array: ' + CborTypes.majorType(t));
     }
 
@@ -239,7 +246,7 @@ class CborDecoder {
 
   decodeMapLength() {
     let t = this.peek();
-    if(CborTypes.majorType(t) !== CborTypes.TYPE_MAP) {
+    if (CborTypes.majorType(t) !== CborTypes.TYPE_MAP) {
       throw new Error('Not map: ' + CborTypes.majorType(t));
     }
 
@@ -261,7 +268,7 @@ class CborDecoder {
   tryDecodeBreak() {
     let val = this.peek();
 
-    if(val === CborTypes.TYPE_BREAK) {
+    if (val === CborTypes.TYPE_BREAK) {
       this._consume(1);
       return true;
     } else {
@@ -272,7 +279,7 @@ class CborDecoder {
   tryDecodeNull() {
     let val = this.peek();
 
-    if(val === CborTypes.TYPE_NULL) {
+    if (val === CborTypes.TYPE_NULL) {
       this._consume(1);
       return true;
     } else {
@@ -281,14 +288,14 @@ class CborDecoder {
   }
 
   decodeObject() {
-    if(this.tryDecodeNull()) {
+    if (this.tryDecodeNull()) {
       return null;
     }
 
     let t = this.peek();
 
     // Check simple types first
-    switch(t) {
+    switch (t) {
       case CborTypes.TYPE_NULL:
       case CborTypes.TYPE_UNDEFINED:
         this._consume(1);
@@ -313,7 +320,7 @@ class CborDecoder {
 
     // Proceed to complex types
     let mt = CborTypes.majorType(t);
-    switch(mt) {
+    switch (mt) {
       case CborTypes.TYPE_POSINT:
       case CborTypes.TYPE_NEGINT:
         return this.decodeInt();
@@ -344,12 +351,12 @@ class CborDecoder {
    */
   decodeCbor() {
     let t = this.peek();
-    if(!CborTypes.isMajorType(t, CborTypes.TYPE_BYTES)) {
+    if (!CborTypes.isMajorType(t, CborTypes.TYPE_BYTES)) {
       throw new Error('Not CBOR bytes (got ' + t + ')');
     }
 
     let buffer; let start; let limit;
-    if(t != CborTypes.TYPE_BYTES + CborTypes.SIZE_STREAM) {
+    if (t != CborTypes.TYPE_BYTES + CborTypes.SIZE_STREAM) {
       // fixed size
       // Re-use the same buffer, but advance it in this instance
       let length = this._decodeValue(t);
@@ -367,7 +374,7 @@ class CborDecoder {
     }
 
     // prep the subDecoder
-    if(!this.subDecoder) {
+    if (!this.subDecoder) {
       // create one if it doesn't exist
       // Ensure it is the same actual class of this instance
       let proto = Object.getPrototypeOf(this);
@@ -389,8 +396,8 @@ class CborDecoder {
   processMap(fn) {
     let length = this.decodeMapLength();
     let i = 0;
-    while(i != length) {
-      if(this.tryDecodeBreak()) {
+    while (i != length) {
+      if (this.tryDecodeBreak()) {
         break;
       }
 
@@ -405,7 +412,7 @@ class CborDecoder {
       let r = fn();
       let k = r[0]; let v = r[1];
 
-      if(m.hasOwnProperty(k)) {
+      if (m.hasOwnProperty(k)) {
         throw new DaxClientError('Duplicate key: ' + k, DaxErrorCode.Decoder);
       }
 
@@ -417,8 +424,8 @@ class CborDecoder {
   processArray(fn) {
     let length = this.decodeArrayLength();
     let i = 0;
-    while(i != length) {
-      if(this.tryDecodeBreak()) {
+    while (i != length) {
+      if (this.tryDecodeBreak()) {
         break;
       }
 
@@ -428,7 +435,7 @@ class CborDecoder {
   }
 
   buildArray(fn) {
-    let a = [];
+    let a: any[] = [];
     this.processArray(() => a.push(fn()));
     return a;
   }
@@ -438,11 +445,11 @@ class CborDecoder {
     let size = CborTypes.minorType(v);
 
     let result; let excess;
-    if(size < CborTypes.SIZE_8) {
+    if (size < CborTypes.SIZE_8) {
       result = size;
       excess = 0;
     } else {
-      switch(size) {
+      switch (size) {
         case CborTypes.SIZE_8:
           this._ensureAvailable(2);
           result = this.buffer[this.start + 1];
@@ -467,7 +474,7 @@ class CborDecoder {
           let f = new BigNumber(this.buffer.readUInt32BE(this.start + 1));
           let g = this.buffer.readUInt32BE(this.start + 5);
           result = f.times(SHIFT32).plus(g);
-          if(result >= Number.MIN_SAFE_INTEGER && result <= Number.MAX_SAFE_INTEGER) {
+          if (result >= Number.MIN_SAFE_INTEGER && result <= Number.MAX_SAFE_INTEGER) {
             // If it's in the safe range, convert back to a Number
             result = result.toNumber();
           } else {
@@ -488,12 +495,12 @@ class CborDecoder {
       }
     }
 
-    this._consume(1+excess);
+    this._consume(1 + excess);
     return result;
   }
 
   _decodeTag(t) {
-    if(!CborTypes.isMajorType(t, CborTypes.TYPE_TAG)) {
+    if (!CborTypes.isMajorType(t, CborTypes.TYPE_TAG)) {
       throw new Error('Not a tag');
     }
 
@@ -502,7 +509,7 @@ class CborDecoder {
 
   _decodeTaggedType(t) {
     let tag = this._decodeTag(t);
-    switch(tag) {
+    switch (tag) {
       case CborTypes.TAG_POSBIGINT:
       case CborTypes.TAG_NEGBIGINT:
         return this._decodeBigInt(tag);
@@ -511,9 +518,9 @@ class CborDecoder {
         return this._decodeDecimal(tag);
 
       default:
-        if(this.tagHandlers) {
+        if (this.tagHandlers) {
           let handler = this.tagHandlers[tag];
-          if(handler) {
+          if (handler) {
             return handler(tag);
           }
         }
@@ -523,7 +530,7 @@ class CborDecoder {
   }
 
   _ensureAvailable(n) {
-    if(this._limit - this.start < n) {
+    if (this._limit - this.start < n) {
       throw new NeedMoreData();
     }
   }
@@ -532,10 +539,10 @@ class CborDecoder {
     offset = offset || 0;
     let sign = buf[offset] & 0x80 ? -1 : 1;
     let exp = (buf[offset] & 0x7C) >> 2;
-    let mant = ((buf[offset] & 0x03) << 8) | buf[offset+1];
-    if(!exp) {
+    let mant = ((buf[offset] & 0x03) << 8) | buf[offset + 1];
+    if (!exp) {
       return sign * 5.9604644775390625e-8 * mant;
-    } else if(exp === 0x1f) {
+    } else if (exp === 0x1f) {
       return sign * (mant ? 0 / 0 : 2e308);
     } else {
       return sign * Math.pow(2, exp - 25) * (1024 + mant);
@@ -544,5 +551,3 @@ class CborDecoder {
 }
 
 CborDecoder.NeedMoreData = NeedMoreData;
-
-module.exports = CborDecoder;

@@ -14,9 +14,9 @@
  */
 'use strict';
 
-const CborTypes = require('./CborTypes');
+import * as CborTypes from './CborTypes';
 const SHIFT32 = Math.pow(2, 32);
-const {NeedMoreData} = require('./CborDecoder');
+import { NeedMoreData } from './CborDecoder';
 
 /** Skip over CBOR while validating structure.
  *
@@ -26,11 +26,11 @@ const {NeedMoreData} = require('./CborDecoder');
  * @returns the number of complete items skipped over, or `null` if the end of the skipped
  *          region occurs in the middle of a CBOR value
  */
-exports.skipCbor = function skipCbor(data, start, end) {
+export function skipCbor(data, start, end) {
   try {
     return SKIPPER.reset(data, start, end).skip();
-  } catch(e) {
-    if(e instanceof NeedMoreData) {
+  } catch (e) {
+    if (e instanceof NeedMoreData) {
       return null;
     } else {
       throw e;
@@ -38,7 +38,10 @@ exports.skipCbor = function skipCbor(data, start, end) {
   }
 };
 
-class CborSkipper {
+export class CborSkipper {
+  buffer: any;
+  offset: any;
+  end: any;
   reset(data, start, end) {
     this.buffer = data;
     this.offset = start || 0;
@@ -55,7 +58,7 @@ class CborSkipper {
    */
   skip() {
     let count = 0;
-    while(this.offset < this.end) {
+    while (this.offset < this.end) {
       let t = this.nextType();
       this.skipItem(t);
       ++count;
@@ -71,7 +74,7 @@ class CborSkipper {
 
   skipItem(t) {
     let mt = CborTypes.majorType(t);
-    switch(mt) {
+    switch (mt) {
       case CborTypes.TYPE_POSINT:
       case CborTypes.TYPE_NEGINT:
         this.skipInt(t);
@@ -106,7 +109,7 @@ class CborSkipper {
 
   skipInt(t) {
     let size = CborTypes.minorType(t);
-    switch(size) {
+    switch (size) {
       case CborTypes.SIZE_8:
         this.offset += 1;
         break;
@@ -124,7 +127,7 @@ class CborSkipper {
         break;
 
       default:
-        if(size < CborTypes.SIZE_8) {
+        if (size < CborTypes.SIZE_8) {
           // no need to advance
           return;
         } else {
@@ -135,10 +138,10 @@ class CborSkipper {
 
   skipByteString(t) {
     let size = this.readLength(t);
-    if(size != -1) {
+    if (size != -1) {
       this.offset += size;
     } else {
-      while(t != CborTypes.TYPE_BREAK) {
+      while (t != CborTypes.TYPE_BREAK) {
         t = this.nextType();
         this.skipItem(t);
       }
@@ -147,12 +150,12 @@ class CborSkipper {
 
   skipArray(t) {
     let size = this.readLength(t);
-    if(size != -1) {
-      for(let i = 0; i < size; i++) {
+    if (size != -1) {
+      for (let i = 0; i < size; i++) {
         this.skipItem(this.nextType());
       }
     } else {
-      while(t != CborTypes.TYPE_BREAK) {
+      while (t != CborTypes.TYPE_BREAK) {
         t = this.nextType();
         this.skipItem(t);
       }
@@ -161,15 +164,15 @@ class CborSkipper {
 
   skipMap(t) {
     let size = this.readLength(t);
-    if(size != -1) {
-      for(let i = 0; i < size; i++) {
+    if (size != -1) {
+      for (let i = 0; i < size; i++) {
         this.skipItem(this.nextType()); // key
         this.skipItem(this.nextType()); // value
       }
     } else {
-      while(true) {
+      while (true) {
         t = this.nextType();
-        if(t == CborTypes.TYPE_BREAK) {
+        if (t == CborTypes.TYPE_BREAK) {
           break;
         }
         this.skipItem(t); // key
@@ -183,7 +186,7 @@ class CborSkipper {
   }
 
   skipSimple(t) {
-    switch(t) {
+    switch (t) {
       case CborTypes.TYPE_BREAK:
       case CborTypes.TYPE_NULL:
       case CborTypes.TYPE_UNDEFINED:
@@ -216,7 +219,7 @@ class CborSkipper {
   readLength(t) {
     let size = CborTypes.minorType(t);
     let result;
-    switch(size) {
+    switch (size) {
       case CborTypes.SIZE_8:
         this._ensureAvailable(1);
         result = this.buffer[this.offset++];
@@ -236,7 +239,9 @@ class CborSkipper {
 
       case CborTypes.SIZE_64:
         this._ensureAvailable(8);
+        // @ts-ignore
         let f = buf.readUInt32BE(this.offset);
+        // @ts-ignore
         let g = buf.readUInt32BE(this.offset);
         result = (f * SHIFT32) + g;
         this.offset += 8;
@@ -247,7 +252,7 @@ class CborSkipper {
         break;
 
       default:
-        if(size < CborTypes.SIZE_8) {
+        if (size < CborTypes.SIZE_8) {
           result = size;
         } else {
           throw new Error('Unexpected size for integer: ' + size);
@@ -258,7 +263,7 @@ class CborSkipper {
   }
 
   _ensureAvailable(n) {
-    if(this.offset + n > this.end) {
+    if (this.offset + n > this.end) {
       throw new NeedMoreData();
     }
   }

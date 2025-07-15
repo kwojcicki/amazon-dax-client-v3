@@ -15,25 +15,30 @@
 'use strict';
 
 /*
- * Used for any erros detected in the client side
+ * Used for any errors detected in the client side
 */
-class DaxClientError extends Error {
-  constructor(message, code, retryable, requestId, statusCode) {
+export class DaxClientError extends Error {
+  time: number;
+  code: any;
+  retryable: any;
+  requestId: any;
+  statusCode: any;
+  _tubeInvalid: boolean;
+  waitForRecoveryBeforeRetrying: boolean;
+  constructor(message: any, code?: any, retryable?: any, requestId?: any, statusCode?: any) {
     super(message);
     this.time = Date.now();
     this.code = code;
-    this.retryable = retryable === undefined ? true: retryable;
-    this.requestId = requestId === undefined ? null: requestId;
-    this.statusCode = statusCode === undefined ? -1: statusCode;
+    this.retryable = retryable === undefined ? true : retryable;
+    this.requestId = requestId === undefined ? null : requestId;
+    this.statusCode = statusCode === undefined ? -1 : statusCode;
     this._tubeInvalid = false;
     this.waitForRecoveryBeforeRetrying = false;
 
     this.message = DaxClientError._formatMessage(code, message);
   }
 
-  static _formatMessage(code, message) {
+  static _formatMessage(code: any, message: any) {
     return !code || message.startsWith(code) ? message : code + ': ' + message;
   }
 }
-
-module.exports = DaxClientError;

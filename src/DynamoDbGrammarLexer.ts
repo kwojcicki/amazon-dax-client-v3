@@ -14,7 +14,7 @@
  */
 // Generated from DynamoDbGrammar.g4 by ANTLR 4.5.3
 // jshint ignore: start
-var antlr4 = require('antlr4/index');
+import * as antlr4 from "antlr4/index";
 
 
 var serializedATN = ["\u0003\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
@@ -214,10 +214,10 @@ var serializedATN = ["\u0003\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
 
 var atn = new antlr4.atn.ATNDeserializer().deserialize(serializedATN);
 
-var decisionsToDFA = atn.decisionToState.map( function(ds, index) { return new antlr4.dfa.DFA(ds, index); });
+var decisionsToDFA = atn.decisionToState.map(function (ds, index) { return new antlr4.dfa.DFA(ds, index); });
 
-function DynamoDbGrammarLexer(input) {
-	antlr4.Lexer.call(this, input);
+export function DynamoDbGrammarLexer(input) {
+    antlr4.Lexer.call(this, input);
     this._interp = new antlr4.atn.LexerATNSimulator(this, atn, decisionsToDFA, new antlr4.PredictionContextCache());
     return this;
 }
@@ -258,36 +258,31 @@ DynamoDbGrammarLexer.STRING_LITERAL = 29;
 DynamoDbGrammarLexer.UNKNOWN = 30;
 
 
-DynamoDbGrammarLexer.modeNames = [ "DEFAULT_MODE" ];
+DynamoDbGrammarLexer.modeNames = ["DEFAULT_MODE"];
 
-DynamoDbGrammarLexer.literalNames = [ null, "','", "'('", "')'", "'.'", 
-                                      "'['", "']'", null, "'='", "'<>'", 
-                                      "'<'", "'<='", "'>'", "'>='", "'+'", 
-                                      "'-'" ];
+DynamoDbGrammarLexer.literalNames = [null, "','", "'('", "')'", "'.'",
+    "'['", "']'", null, "'='", "'<>'",
+    "'<'", "'<='", "'>'", "'>='", "'+'",
+    "'-'"];
 
-DynamoDbGrammarLexer.symbolicNames = [ null, null, null, null, null, null, 
-                                       null, "WS", "EQ", "NE", "LT", "LE", 
-                                       "GT", "GE", "PLUS", "MINUS", "IN", 
-                                       "BETWEEN", "NOT", "AND", "OR", "SET", 
-                                       "ADD", "DELETE", "REMOVE", "INDEX", 
-                                       "ID", "ATTRIBUTE_NAME_SUB", "LITERAL_SUB", 
-                                       "STRING_LITERAL", "UNKNOWN" ];
+DynamoDbGrammarLexer.symbolicNames = [null, null, null, null, null, null,
+    null, "WS", "EQ", "NE", "LT", "LE",
+    "GT", "GE", "PLUS", "MINUS", "IN",
+    "BETWEEN", "NOT", "AND", "OR", "SET",
+    "ADD", "DELETE", "REMOVE", "INDEX",
+    "ID", "ATTRIBUTE_NAME_SUB", "LITERAL_SUB",
+    "STRING_LITERAL", "UNKNOWN"];
 
-DynamoDbGrammarLexer.ruleNames = [ "T__0", "T__1", "T__2", "T__3", "T__4", 
-                                   "T__5", "WS", "EQ", "NE", "LT", "LE", 
-                                   "GT", "GE", "PLUS", "MINUS", "IN", "BETWEEN", 
-                                   "NOT", "AND", "OR", "SET", "ADD", "DELETE", 
-                                   "REMOVE", "INDEX", "ID", "ATTRIBUTE_NAME_SUB", 
-                                   "LITERAL_SUB", "ID_START_CHAR", "ID_CHAR", 
-                                   "POS_DIGIT", "DIGIT", "A", "B", "C", 
-                                   "D", "E", "F", "G", "H", "I", "J", "K", 
-                                   "L", "M", "N", "O", "P", "Q", "R", "S", 
-                                   "T", "U", "V", "W", "X", "Y", "Z", "STRING_LITERAL", 
-                                   "UNKNOWN" ];
+DynamoDbGrammarLexer.ruleNames = ["T__0", "T__1", "T__2", "T__3", "T__4",
+    "T__5", "WS", "EQ", "NE", "LT", "LE",
+    "GT", "GE", "PLUS", "MINUS", "IN", "BETWEEN",
+    "NOT", "AND", "OR", "SET", "ADD", "DELETE",
+    "REMOVE", "INDEX", "ID", "ATTRIBUTE_NAME_SUB",
+    "LITERAL_SUB", "ID_START_CHAR", "ID_CHAR",
+    "POS_DIGIT", "DIGIT", "A", "B", "C",
+    "D", "E", "F", "G", "H", "I", "J", "K",
+    "L", "M", "N", "O", "P", "Q", "R", "S",
+    "T", "U", "V", "W", "X", "Y", "Z", "STRING_LITERAL",
+    "UNKNOWN"];
 
 DynamoDbGrammarLexer.grammarFileName = "DynamoDbGrammar.g4";
-
-
-
-exports.DynamoDbGrammarLexer = DynamoDbGrammarLexer;
-

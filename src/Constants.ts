@@ -14,8 +14,8 @@
  */
 /* eslint no-invalid-this: ["off"]*/
 'use strict';
-const self = this;
-self.DaxResponseParam = {
+
+export const DaxResponseParam = {
   Item: 0,
   ConsumedCapacity: 1,
   Attributes: 2,
@@ -30,7 +30,7 @@ self.DaxResponseParam = {
   TableDescription: 11,
 };
 
-self.DaxTableRequestParam = {
+export const DaxTableRequestParam = {
   AttributeDefinitions: 0,
   KeySchema: 1,
   ProvisionedThroughput: 2,
@@ -42,7 +42,7 @@ self.DaxTableRequestParam = {
   Limit: 8,
 };
 
-self.DaxDataRequestParam = {
+export const DaxDataRequestParam = {
   ProjectionExpression: 0,
   ExpressionAttributeNames: 1,
   ConsistentRead: 2,
@@ -65,7 +65,7 @@ self.DaxDataRequestParam = {
   ClientRequestToken: 19,
 };
 
-self.DaxMethodIds = {
+export const DaxMethodIds = {
   authorizeConnection: 1489122155,
   batchGetItem: -697851100,
   batchWriteItem: 116217951,
@@ -91,7 +91,7 @@ self.DaxMethodIds = {
   updateTable: 383747477,
 };
 
-self.Operation = {
+export const Operation = {
   GET: 1,
   PUT: 2,
   EXCHANGE: 3,
@@ -115,30 +115,30 @@ self.Operation = {
   UPDATE_TABLE: 21,
 };
 
-self.ReturnValueOnConditionCheckFailure = {
+export const ReturnValueOnConditionCheckFailure = {
   NONE: 1,
   ALL_OLD: 2,
 };
 
-self.ReturnConsumedCapacityValues = {
+export const ReturnConsumedCapacityValues = {
   NONE: 0,
   TOTAL: 1,
   INDEXES: 2,
 };
 
-self.ReturnItemCollectionMetricsValue = {
+export const ReturnItemCollectionMetricsValue = {
   NONE: 0,
   SIZE: 1,
 };
 
-self.SelectValues = {
+export const SelectValues = {
   ALL_ATTRIBUTES: 1,
   ALL_PROJECTED_ATTRIBUTES: 2,
   COUNT: 3,
   SPECIFIC_ATTRIBUTES: 4,
 };
 
-self.ReturnValues = {
+export const ReturnValues = {
   NONE: 1,
   ALL_OLD: 2,
   UPDATED_OLD: 3,
@@ -146,13 +146,13 @@ self.ReturnValues = {
   UPDATED_NEW: 5,
 };
 
-self.ReturnItemCollectionMetricsValues = {
+export const ReturnItemCollectionMetricsValues = {
   NONE: 0,
   SIZE: 1,
 };
 
 // Index into this array is the enum value we use on the wire
-self.ConsumedCapacityValues = [
+export const ConsumedCapacityValues = [
   undefined,
   'CapacityUnits',
   'ReadCapacityUnits',

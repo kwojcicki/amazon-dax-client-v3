@@ -13,9 +13,10 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const crypto = require('crypto');
+import crypto from 'crypto';
 
-class SessionVersion {
+export class SessionVersion {
+  session: any;
   constructor() {
     this.session = crypto.randomBytes(16);
   }
@@ -24,5 +25,3 @@ class SessionVersion {
     return new SessionVersion();
   }
 }
-
-module.exports = SessionVersion;

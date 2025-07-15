@@ -14,21 +14,21 @@
  */
 'use strict';
 
-class _DdbSet {
+
+export class _DdbSet {
+  type: any;
+  values: any;
   constructor(type, values) {
     this.type = type;
     this.values = values;
   }
 
   toAV() {
-    return {[this.type]: this.values};
+    return { [this.type]: this.values };
   }
 }
 
-module.exports = {
-  _DdbSet: _DdbSet,
-  TAG_DDB_STRING_SET: 3321,
-  TAG_DDB_NUMBER_SET: 3322,
-  TAG_DDB_BINARY_SET: 3323,
-  TAG_DDB_DOCUMENT_PATH_ORDINAL: 3324,
-};
+export const TAG_DDB_STRING_SET = 3321;
+export const TAG_DDB_NUMBER_SET = 3322;
+export const TAG_DDB_BINARY_SET = 3323;
+export const TAG_DDB_DOCUMENT_PATH_ORDINAL = 3324;

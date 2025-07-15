@@ -13,9 +13,10 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const SimpleCache = require('./SimpleCache');
+import { SimpleCache } from './SimpleCache';
 
-class RefreshingCache extends SimpleCache {
+export class RefreshingCache extends SimpleCache {
+  _mTimeToLive: any;
   constructor(size, fetcher, timeToLiveMills) {
     super(size, (key) => {
       return fetcher.fetch(key).then((val) => {
@@ -27,7 +28,7 @@ class RefreshingCache extends SimpleCache {
 
   get(key) {
     return super.get(key).then((innerValue) => {
-      if(innerValue === null || (innerValue[1] + this._mTimeToLive < Date.now())) {
+      if (innerValue === null || (innerValue[1] + this._mTimeToLive < Date.now())) {
         // console.log('expire:', Date.now())
         super.remove(key);
         return super.get(key).then((innerValue) => {
@@ -46,5 +47,3 @@ class RefreshingCache extends SimpleCache {
     return (!oldInnerValue ? null : oldInnerValue[0]);
   }
 }
-
-module.exports = RefreshingCache;

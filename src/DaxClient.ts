@@ -14,15 +14,20 @@
  */
 'use strict';
 
-const RefreshingCache = require('./RefreshingCache');
-const SimpleCache = require('./SimpleCache');
-const Operations = require('../generated-src/Operations');
+import { RefreshingCache } from './RefreshingCache';
+import { SimpleCache } from './SimpleCache';
+import Operations from '../generated-src/Operations';
 const CacheType = require('./Cache').CacheType;
 
 const CACHE_SIZE = 250;
 const KEY_CACHE_TTL_MILLIS = 60000;
 
-class DaxClient {
+export class DaxClient {
+  _exceptionListener: any;
+  operations: Operations;
+  _tubePool: any;
+  _keyCache: RefreshingCache;
+  _attrListCache: SimpleCache;
   constructor(pool, region, exceptionListener, requestTimeout) {
     this._exceptionListener = exceptionListener;
 
@@ -48,7 +53,7 @@ class DaxClient {
   }
 
   shutdown() {
-    if(this._tubePool) {
+    if (this._tubePool) {
       this._tubePool.close();
     }
   }
@@ -59,7 +64,7 @@ class DaxClient {
 
   _defineAttributeList(attributeListId) {
     // attrListId 1 is defined to be the empty list of names
-    if(attributeListId == 1) {
+    if (attributeListId == 1) {
       return Promise.resolve([]);
     }
 
@@ -68,7 +73,7 @@ class DaxClient {
 
   _defineAttributeListId(attributeNames) {
     // An empty attrList has a defined value of 1
-    if(attributeNames.length === 0) {
+    if (attributeNames.length === 0) {
       return Promise.resolve(1);
     }
 
@@ -119,5 +124,3 @@ class DaxClient {
     return this.operations.transactWriteItems_N1160037738_1(request);
   }
 }
-
-module.exports = DaxClient;

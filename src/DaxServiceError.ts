@@ -13,13 +13,16 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const DaxErrorCode = require('./DaxErrorCode');
-const DaxClientError = require('./DaxClientError');
+import { DaxErrorCode } from './DaxErrorCode';
+import { DaxClientError } from './DaxClientError';
 
 /*
  * Used for errors coming explicitly from the server
 */
-class DaxServiceError extends DaxClientError {
+export class DaxServiceError extends DaxClientError {
+  _message: any;
+  codeSeq: any;
+  cancellationReasons: any;
   constructor(message, code, retryable, requestId, statusCode, codeSeq, cancellationReasons) {
     let errorInfo = DaxServiceError._pickError(codeSeq, code, message);
     message = errorInfo[0];
@@ -37,11 +40,11 @@ class DaxServiceError extends DaxClientError {
   }
 
   static _pickError(codeSeq, code, message) {
-    if(codeSeq && codeSeq.length >= 2) {
-      switch(codeSeq[1]) {
+    if (codeSeq && codeSeq.length >= 2) {
+      switch (codeSeq[1]) {
         case 23:
-          if(codeSeq.length > 2) {
-            switch(codeSeq[2]) {
+          if (codeSeq.length > 2) {
+            switch (codeSeq[2]) {
               case 24:
                 code = DaxErrorCode.ResourceNotFound;
                 break;
@@ -52,11 +55,11 @@ class DaxServiceError extends DaxClientError {
           }
           break;
         case 37:
-          if(codeSeq.length > 3) {
-            switch(codeSeq[3]) {
+          if (codeSeq.length > 3) {
+            switch (codeSeq[3]) {
               case 39:
-                if(codeSeq.length > 4) {
-                  switch(codeSeq[4]) {
+                if (codeSeq.length > 4) {
+                  switch (codeSeq[4]) {
                     case 40:
                       code = DaxErrorCode.ProvisionedThroughputExceeded;
                       break;
@@ -105,24 +108,24 @@ class DaxServiceError extends DaxClientError {
   }
 
   _determineRetryability() {
-    if(!this.codeSeq || this.codeSeq.length < 2) {
+    if (!this.codeSeq || this.codeSeq.length < 2) {
       return;
     }
 
-    if((this.codeSeq[0] !== 4)
-    || this.code === DaxErrorCode.Throttling
-    || this.statusCode === 503 // Service Unavailable
-    || this.statusCode === 500) { // Internal Server Error
+    if ((this.codeSeq[0] !== 4)
+      || this.code === DaxErrorCode.Throttling
+      || this.statusCode === 503 // Service Unavailable
+      || this.statusCode === 500) { // Internal Server Error
       this.retryable = true;
       return;
     }
 
-    switch(this.codeSeq[1]) {
+    switch (this.codeSeq[1]) {
       case 23:
-        switch(this.codeSeq[2]) {
+        switch (this.codeSeq[2]) {
           case 31:
-            if(this.codeSeq.length > 3) {
-              switch(this.codeSeq[3]) {
+            if (this.codeSeq.length > 3) {
+              switch (this.codeSeq[3]) {
                 case 33:
                   this.retryable = true; // AuthenticationRequiredException
                   break;
@@ -132,11 +135,11 @@ class DaxServiceError extends DaxClientError {
         }
         break;
       case 37:
-        if(this.codeSeq.length > 3) {
-          switch(this.codeSeq[3]) {
+        if (this.codeSeq.length > 3) {
+          switch (this.codeSeq[3]) {
             case 39:
-              if(this.codeSeq.length > 4) {
-                switch(this.codeSeq[4]) {
+              if (this.codeSeq.length > 4) {
+                switch (this.codeSeq[4]) {
                   case 40: // ProvisionedThroughputExceededException
                   case 47: // InternalServerError
                   case 49: // LimitExceededException
@@ -157,11 +160,9 @@ class DaxServiceError extends DaxClientError {
   }
 
   _determineTubeValidity() {
-    if(this.codeSeq.length >= 4
+    if (this.codeSeq.length >= 4
       && this.codeSeq[1] === 23 && this.codeSeq[2] === 31) {
       this._tubeInvalid = true;
     }
   }
 }
-
-module.exports = DaxServiceError;

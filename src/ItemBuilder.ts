@@ -13,10 +13,11 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { DaxClientError } from './DaxClientError'
+import { DaxErrorCode } from './DaxErrorCode'
 
-class ItemBuilder {
+export class ItemBuilder {
+  _item: { M?: any, L?: any };
   constructor() {
     this._item = {};
   }
@@ -29,23 +30,23 @@ class ItemBuilder {
   with(path, av) {
     let p = this._item;
     let prev;
-    for(let loc of path) {
-      switch(typeof loc) {
+    for (let loc of path) {
+      switch (typeof loc) {
         case 'string':
-          if(!p.M) {
+          if (!p.M) {
             p.M = {};
           }
-          if(!p.M[loc]) {
+          if (!p.M[loc]) {
             p.M[loc] = {};
           }
           prev = p;
           p = p.M[loc];
           break;
         case 'number':
-          if(!Array.isArray(p.L)) {
+          if (!Array.isArray(p.L)) {
             p.L = [];
           }
-          if(!p.L[loc]) {
+          if (!p.L[loc]) {
             p.L[loc] = {};
           }
           prev = p;
@@ -55,7 +56,7 @@ class ItemBuilder {
           throw new DaxClientError('shouldn\'t be here', DaxErrorCode.MalformedResult);
       }
     }
-    let lastchild = path[path.length-1];
+    let lastchild = path[path.length - 1];
     let lasttype = (typeof lastchild === 'string' ? 'M' : 'L');
     prev[lasttype][lastchild] = av;
     return this;
@@ -77,16 +78,16 @@ class ItemBuilder {
    */
   static _cleanup(item) {
     // ignore primitive types
-    if(typeof item !== 'object') {
+    if (typeof item !== 'object') {
       return;
     }
 
-    for(let x in item) {
-      if(x === 'L') {
+    for (let x in item) {
+      if (x === 'L') {
         // filter ignores missing elements, so just copy everything else
         item.L = item.L.filter(() => true);
-        for(let y in item.L) {
-          if(Object.prototype.hasOwnProperty.call(item.L, y)) {
+        for (let y in item.L) {
+          if (Object.prototype.hasOwnProperty.call(item.L, y)) {
             ItemBuilder._cleanup(y);
           }
         }
@@ -96,5 +97,3 @@ class ItemBuilder {
     }
   }
 }
-
-module.exports = ItemBuilder;

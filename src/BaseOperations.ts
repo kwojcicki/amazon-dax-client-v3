@@ -13,27 +13,33 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
-const StreamBuffer = require('./ByteStreamBuffer');
-const CborEncoder = require('./CborEncoder');
-const Encoder = require('./Encoders');
-const AttributeValueEncoder = require('./AttributeValueEncoder');
-const Constants = require('./Constants');
-const Util = require('./Util');
-const DaxServiceError = require('./DaxServiceError');
-const Tube = require('./Tube');
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
+import { ByteStreamBuffer as StreamBuffer } from './ByteStreamBuffer';
+import { CborEncoder } from './CborEncoder';
+import { Encoders as Encoder } from './Encoders';
+import { AttributeValueEncoder } from './AttributeValueEncoder';
+import * as Constants from './Constants';
+import { Util } from './Util';
+import { DaxServiceError } from './DaxServiceError';
+import * as Tube from './Tube';
 const DaxMethodIds = require('./Constants').DaxMethodIds;
 const Operation = require('./Constants').Operation;
 const ReturnValueOnConditionCheckFailure = require('./Constants').ReturnValueOnConditionCheckFailure;
-const RequestValidator = require('./RequestValidator');
-const UUID = require('uuid');
+import { RequestValidator } from './RequestValidator';
+import UUID from 'uuid';
 
 const MAX_WRITE_BATCH_SIZE = 25;
 const MAX_READ_BATCH_SIZE = 100;
 const BATCH_WRITE_MAX_ITEM_SIZE = 409600;
 
-module.exports = class BaseOperations {
+export class BaseOperations {
+  tubePool: any;
+  keyCache: any;
+  attrListCache: any;
+  attrListIdCache: any;
+  caches: { attrListCache: any; attrListIdCache: any; keyCache: any; };
+  _requestTimeout: any;
   constructor(keyCache, attrListCache, attrListIdCache, tubePool, requestTimeout) {
     this.tubePool = tubePool;
 
@@ -65,23 +71,23 @@ module.exports = class BaseOperations {
         try {
           // Pass data to the assembler
           result = assembler.feed(data);
-        } catch(err) {
+        } catch (err) {
           // Catch & reject any errors, including those returned from the server
-          if(err._tubeInvalid) {
+          if (err._tubeInvalid) {
             tube.invalidateAuth();
           }
 
-          if(!(err instanceof DaxServiceError)) {
+          if (!(err instanceof DaxServiceError)) {
             // On non-DAX errors, reset the pool
             this.tubePool.reset(tube);
           } else {
             // On DAX errors, the tube is still usable
             this.tubePool.recycle(tube);
 
-            if(err.cancellationReasons) { // For TransactionCanceledException, we also need to deanonymize items.
-              let deanonymizePromiseList = [];
-              for(let cancellationReason of err.cancellationReasons) {
-                if(cancellationReason.Item) {
+            if (err.cancellationReasons) { // For TransactionCanceledException, we also need to deanonymize items.
+              let deanonymizePromiseList: any[] = [];
+              for (let cancellationReason of err.cancellationReasons) {
+                if (cancellationReason.Item) {
                   deanonymizePromiseList.push(
                     BaseOperations._resolveItemAttributeValues(this.attrListCache, cancellationReason.Item)
                   );
@@ -95,7 +101,7 @@ module.exports = class BaseOperations {
           return reject(err);
         }
 
-        if(result) {
+        if (result) {
           // If the response is complete, resolve immediately
           return resolve(result);
         }
@@ -118,14 +124,14 @@ module.exports = class BaseOperations {
       });
     }).then((result) => {
       // Remove end listener
-      if(endListener) {
+      if (endListener) {
         tube.socket.removeListener('end', endListener);
       }
       this.tubePool.recycle(tube);
       return this._resolveAttributeValues(result);
     }).catch((err) => {
       // Remove end listener
-      if(endListener) {
+      if (endListener) {
         tube.socket.removeListener('end', endListener);
       }
       throw err;
@@ -142,25 +148,25 @@ module.exports = class BaseOperations {
   }
 
   _resolveAttributeValues(response) {
-    let deanonymizePromiseList = [];
+    let deanonymizePromiseList: any[] = [];
 
     // getItem
-    if(response.Item) {
+    if (response.Item) {
       deanonymizePromiseList.push(
         BaseOperations._resolveItemAttributeValues(this.attrListCache, response.Item)
       );
     }
 
     // deleteItem, putItem
-    if(response.Attributes) {
+    if (response.Attributes) {
       deanonymizePromiseList.push(
         BaseOperations._resolveItemAttributeValues(this.attrListCache, response.Attributes)
       );
     }
 
     // query, scan
-    if(response.Items) {
-      for(let item of response.Items) {
+    if (response.Items) {
+      for (let item of response.Items) {
         deanonymizePromiseList.push(
           BaseOperations._resolveItemAttributeValues(this.attrListCache, item)
         );
@@ -168,19 +174,19 @@ module.exports = class BaseOperations {
     }
 
     // batchGetItem and transactGetItems
-    if(response.Responses) {
-      if(Array.isArray(response.Responses)) {
+    if (response.Responses) {
+      if (Array.isArray(response.Responses)) {
         // transactGetItems (list of items)
-        for(let item of response.Responses) {
+        for (let item of response.Responses) {
           deanonymizePromiseList.push(
             BaseOperations._resolveItemAttributeValues(this.attrListCache, item.Item));
         }
       } else {
         // batchGetItem (map of table names to items)
-        for(let tableName in response.Responses) {
-          if(response.Responses.hasOwnProperty(tableName)) {
+        for (let tableName in response.Responses) {
+          if (response.Responses.hasOwnProperty(tableName)) {
             let tableResults = response.Responses[tableName];
-            for(let item of tableResults) {
+            for (let item of tableResults) {
               deanonymizePromiseList.push(
                 BaseOperations._resolveItemAttributeValues(this.attrListCache, item)
               );
@@ -191,15 +197,15 @@ module.exports = class BaseOperations {
     }
 
     // batchWriteItem
-    if(response.UnprocessedItems) {
-      for(let tableName in response.UnprocessedItems) {
-        if(response.UnprocessedItems.hasOwnProperty(tableName)) {
+    if (response.UnprocessedItems) {
+      for (let tableName in response.UnprocessedItems) {
+        if (response.UnprocessedItems.hasOwnProperty(tableName)) {
           let unprocessedRequests = response.UnprocessedItems[tableName];
-          for(let unprocessedRequest of unprocessedRequests) {
-            for(let i = 0; i < unprocessedRequest.length; i++) {
+          for (let unprocessedRequest of unprocessedRequests) {
+            for (let i = 0; i < unprocessedRequest.length; i++) {
               let writeType = unprocessedRequest[i][0];
               let writeRequest = unprocessedRequest[i][0];
-              if(writeType === 'PutRequest' && writeRequest.Item) {
+              if (writeType === 'PutRequest' && writeRequest.Item) {
                 deanonymizePromiseList.push(
                   BaseOperations._resolveItemAttributeValues(this.attrListCache, writeRequest.Item)
                 );
@@ -214,7 +220,7 @@ module.exports = class BaseOperations {
   }
 
   static _resolveItemAttributeValues(attrListCache, item) {
-    if(item && item._attrListId !== undefined) {
+    if (item && item._attrListId !== undefined) {
       return attrListCache.get(item._attrListId).then((attrNames) => {
         Util.deanonymizeAttributeValues(item, attrNames);
       });
@@ -224,11 +230,11 @@ module.exports = class BaseOperations {
   }
 
   _validateBatchGetItem(request) {
-    if(!request.RequestItems) {
+    if (!request.RequestItems) {
       throw new DaxClientError('1 validation error detected: Value ' +
         JSON.stringify(request.RequestItems) +
         ' at "requestItems" failed to satisfy constraint: Member must have length greater than or equal to 1',
-      DaxErrorCode.Validation, false);
+        DaxErrorCode.Validation, false);
     }
     let requestByTable = request.RequestItems;
     let batchSize = 0;
@@ -236,20 +242,20 @@ module.exports = class BaseOperations {
 
     Object.keys(requestByTable).forEach((tableName) => {
       let kaas = requestByTable[tableName];
-      if(!kaas) {
+      if (!kaas) {
         throw new DaxClientError('Request can not be null for table ' + tableName, DaxErrorCode.Validation, false);
       }
-      if(!Object.keys(kaas).length) {
+      if (!Object.keys(kaas).length) {
         throw new DaxClientError('Keys can not be null for table ' + tableName, DaxErrorCode.Validation, false);
       }
       batchSize += Object.keys(kaas).length;
-      if(batchSize > MAX_READ_BATCH_SIZE) {
+      if (batchSize > MAX_READ_BATCH_SIZE) {
         throw new DaxClientError('Batch size should be less than ' + MAX_READ_BATCH_SIZE, DaxErrorCode.Validation, false);
       }
       isEmpty = false;
     });
 
-    if(isEmpty) {
+    if (isEmpty) {
       throw new DaxClientError(
         '1 validation error detected: Value null at "requestItems" failed to satisfy constraint: Member must not be null',
         DaxErrorCode.Validation, false);
@@ -258,7 +264,7 @@ module.exports = class BaseOperations {
 
   prepare_batchGetItem_N697851100_1(request) {
     this._validateBatchGetItem(request);
-    let stubData = {};
+    let stubData = {} as any;
     let requestByTable = request.RequestItems;
     let keysPerTable = {};
     let tableProjOrdinals = {};
@@ -267,7 +273,7 @@ module.exports = class BaseOperations {
 
     buffer.write(encoder.encodeMapHeader(Object.keys(requestByTable).length));
 
-    let fetchKeySchema = [];
+    let fetchKeySchema: any[] = [];
     Object.keys(requestByTable).forEach((tableName) => {
       fetchKeySchema.push(this.keyCache.get(tableName).then((keySchema) => {
         keysPerTable[tableName] = keySchema;
@@ -283,14 +289,14 @@ module.exports = class BaseOperations {
         buffer.write(encoder.encodeString(tableName));
         buffer.write(encoder.encodeArrayHeader(3));
 
-        if(!kaas.ConsistentRead) {
+        if (!kaas.ConsistentRead) {
           buffer.write(encoder.encodeBoolean(false));
         } else {
           buffer.write(encoder.encodeBoolean(true));
         }
 
         tableProjOrdinals[tableName] = [];
-        if(kaas.ProjectionExpression) {
+        if (kaas.ProjectionExpression) {
           buffer.write(encoder.encodeBinary(Encoder._encodeProjection(kaas.ProjectionExpression, kaas.ExpressionAttributeNames)));
           Encoder._prepareProjection(kaas.ProjectionExpression, kaas.ExpressionAttributeNames, tableProjOrdinals[tableName]);
         } else {
@@ -301,9 +307,9 @@ module.exports = class BaseOperations {
         let keys = (kaas.Keys ? kaas.Keys : []);
 
         buffer.write(encoder.encodeArrayHeader(keys.length));
-        for(let key of keys) {
+        for (let key of keys) {
           let keyBytes = Encoder.encodeKey(key, keysPerTable[tableName], encoder);
-          if(keySet.has(keyBytes)) {
+          if (keySet.has(keyBytes)) {
             throw new DaxClientError('Provided list of item keys contains duplicates', DaxErrorCode.Validation, false);
           }
           keySet.add(keyBytes);
@@ -313,9 +319,9 @@ module.exports = class BaseOperations {
 
       stubData.getItemKeys = buffer.read();
       let hasKwargs = request.ReturnConsumedCapacity;
-      if(hasKwargs) {
+      if (hasKwargs) {
         buffer.write(encoder.encodeMapStreamHeader());
-        if(request.ReturnConsumedCapacity) {
+        if (request.ReturnConsumedCapacity) {
           buffer.write(encoder.encodeInt(Constants.DaxDataRequestParam.ReturnConsumedCapacity));
           buffer.write(encoder.encodeInt(Constants.ReturnConsumedCapacityValues[request.ReturnConsumedCapacity]));
         }
@@ -345,36 +351,36 @@ module.exports = class BaseOperations {
   }
 
   prepare_batchWriteItem_116217951_1(request) {
-    let stubData = {};
+    let stubData = {} as any;
     let keysPerTable = {};
-    let attrListIdPerTable = {};
+    let attrListIdPerTable = {} as any;
     let requestByTable = request.RequestItems;
     let buffer = new StreamBuffer();
     let encoder = new CborEncoder();
     let totalRequests = 0;
-    if(!requestByTable) {
+    if (!requestByTable) {
       throw new DaxClientError('1 validation error detected: Value ' +
         JSON.stringify(request.RequestItems) +
         ' at "requestItems" failed to satisfy constraint: Member must have length greater than or equal to 1',
-      DaxErrorCode.Validation, false);
+        DaxErrorCode.Validation, false);
     }
 
-    let fetchKeySchema = [];
+    let fetchKeySchema: any[] = [];
     Object.keys(requestByTable).forEach((tableName) => {
       fetchKeySchema.push(this.keyCache.get(tableName).then((keySchema) => {
         keysPerTable[tableName] = keySchema;
       }));
     });
 
-    let fetchAttributeSchema = [];
+    let fetchAttributeSchema: any[] = [];
 
     buffer.write(encoder.encodeMapHeader(Object.keys(requestByTable).length));
 
     return Promise.all(fetchKeySchema).then(() => {
       Object.keys(requestByTable).forEach((tableName) => {
         attrListIdPerTable[tableName] = [];
-        for(let i = 0; i < requestByTable[tableName].length; ++i) {
-          if(requestByTable[tableName][i].PutRequest) {
+        for (let i = 0; i < requestByTable[tableName].length; ++i) {
+          if (requestByTable[tableName][i].PutRequest) {
             let attrNames = AttributeValueEncoder.getCanonicalAttributeList(requestByTable[tableName][i].PutRequest.Item, keysPerTable[tableName]);
             fetchAttributeSchema.push(this.attrListIdCache.get(attrNames).then((attrListId) => {
               attrListIdPerTable[tableName][i] = attrListId;
@@ -388,12 +394,12 @@ module.exports = class BaseOperations {
       let keySet = new Set();
       Object.keys(requestByTable).forEach((tableName) => {
         keySet.clear();
-        if(!tableName) {
+        if (!tableName) {
           throw new DaxClientError('Value null at "tableName" failed to satisfy constraint: Member must not be null', DaxErrorCode.Validation, false);
         }
 
         let writeRequests = requestByTable[tableName];
-        if((totalRequests += writeRequests.length) > MAX_WRITE_BATCH_SIZE) {
+        if ((totalRequests += writeRequests.length) > MAX_WRITE_BATCH_SIZE) {
           throw new DaxClientError(`Batch size should be less than ${MAX_WRITE_BATCH_SIZE}`, DaxErrorCode.Validation, false);
         }
 
@@ -401,35 +407,35 @@ module.exports = class BaseOperations {
 
         let requestItemCount = 0;
         let isEmpty = true;
-        for(let writeRequest of writeRequests) {
-          if(writeRequest.PutRequest || writeRequest.DeleteRequest) {
+        for (let writeRequest of writeRequests) {
+          if (writeRequest.PutRequest || writeRequest.DeleteRequest) {
             requestItemCount++;
           }
         }
         buffer.write(encoder.encodeArrayHeader(requestItemCount * 2));
 
-        for(let i = 0; i < writeRequests.length; ++i) {
+        for (let i = 0; i < writeRequests.length; ++i) {
           let writeRequest = writeRequests[i];
-          if(!writeRequest) {
+          if (!writeRequest) {
             continue;
           }
 
           isEmpty = false;
           this._validateWriteRequest(writeRequest);
-          if(writeRequest.PutRequest) {
+          if (writeRequest.PutRequest) {
             let attributes = writeRequest.PutRequest.Item;
             this._validateBatchWriteItem(attributes);
             let keyBytes = Encoder.encodeKey(attributes, keysPerTable[tableName], encoder);
-            if(keySet.has(keyBytes)) {
+            if (keySet.has(keyBytes)) {
               throw new DaxClientError('Provided list of item keys contains duplicates', DaxErrorCode.Validation, false);
             }
             keySet.add(keyBytes);
             buffer.write(keyBytes);
             buffer.write(Encoder.encodeValuesWithKeys(attributes, keysPerTable[tableName], attrListIdPerTable[tableName][i], encoder));
-          } else if(writeRequest.DeleteRequest) {
+          } else if (writeRequest.DeleteRequest) {
             let key = writeRequest.DeleteRequest.Key;
             let keyBytes = Encoder.encodeKey(key, keysPerTable[tableName], encoder);
-            if(keySet.has(keyBytes)) {
+            if (keySet.has(keyBytes)) {
               throw new DaxClientError('Provided list of item keys contains duplicates', DaxErrorCode.Validation, false);
             }
             keySet.add(keyBytes);
@@ -437,16 +443,17 @@ module.exports = class BaseOperations {
             buffer.write(encoder.encodeNull());
           }
         }
-        if(isEmpty) {
+        if (isEmpty) {
           throw new DaxClientError(`1 validation error detected: Value '{ ${tableName} =`,
             JSON.stringify(writeRequests),
             `}' at 'requestItems' failed to satisfy constraint: Map value must satisfy constraint:`,
             `[Member must have length less than or equal to 25, Member must have length greater than or equal to 1`,
+            // @ts-ignore
             DaxErrorCode.Validation, false);
         }
       });
 
-      if(totalRequests === 0) {
+      if (totalRequests === 0) {
         throw new DaxClientError(`1 validation error detected: Value`,
           JSON.stringify(requestByTable),
           `at "requestItems" failed to satisfy constaint: Member must have length greater than or equal to 1`,
@@ -455,12 +462,12 @@ module.exports = class BaseOperations {
 
       stubData.keyValuesByTable = buffer.read();
       buffer.write(encoder.encodeMapStreamHeader());
-      if(request.ReturnConsumedCapacity && request.ReturnConsumedCapacity !== 'NONE') {
+      if (request.ReturnConsumedCapacity && request.ReturnConsumedCapacity !== 'NONE') {
         buffer.write(encoder.encodeInt(Constants.DaxDataRequestParam.ReturnConsumedCapacity));
         buffer.write(encoder.encodeInt(Constants.ReturnConsumedCapacityValues[request.ReturnConsumedCapacity]));
       }
 
-      if(request.ReturnItemCollectionMetrics && request.ReturnItemCollectionMetrics !== 'NONE') {
+      if (request.ReturnItemCollectionMetrics && request.ReturnItemCollectionMetrics !== 'NONE') {
         buffer.write(encoder.encodeInt(Constants.DaxDataRequestParam.ReturnItemCollectionMetrics));
         buffer.write(encoder.encodeInt(Constants.ReturnItemCollectionMetricsValue[request.ReturnItemCollectionMetrics]));
       }
@@ -485,9 +492,9 @@ module.exports = class BaseOperations {
   }
 
   prepare_transactWriteItems_N1160037738_1(request) {
-    if(request.TransactItems == null) {
+    if (request.TransactItems == null) {
       throw RequestValidator.newValidationException(`1 validation error detected: Value ${JSON.stringify(request.TransactItems)} at 'transactItems' failed to satisfy constraint: Member must not be null`);
-    } else if(request.TransactItems.length < 1) {
+    } else if (request.TransactItems.length < 1) {
       throw RequestValidator.newValidationException(`1 validation error detected: Value '${request.TransactItems}' at 'transactItems' failed to satisfy constraint: Member must have length greater than or equal to 1`);
     }
 
@@ -516,7 +523,7 @@ module.exports = class BaseOperations {
     let promiseChain = Promise.resolve();
     request.TransactItems.forEach((transactWriteItem, i) => {
       promiseChain = promiseChain.then(() => {
-        if(!transactWriteItem) {
+        if (!transactWriteItem) {
           throw RequestValidator.newValidationException(`1 validation error detected: Value '${JSON.stringify(request.TransactItems)}' at 'transactItems' failed to satisfy constraint: Member must not be null`);
         }
 
@@ -532,23 +539,23 @@ module.exports = class BaseOperations {
         let opName;
         let operations = 0;
 
-        if(transactWriteItem.ConditionCheck) {
+        if (transactWriteItem.ConditionCheck) {
           operations++;
           let check = transactWriteItem.ConditionCheck;
           tableName = check.TableName;
           operation = Operation.CHECK;
           key = check.Key;
           conditionExpr = check.ConditionExpression;
-          if(!conditionExpr) {
+          if (!conditionExpr) {
             throw RequestValidator.newValidationException(
-              `Value ${JSON.stringify(check.ConditionExpression)} at 'transactItems.${i+1}.member.conditionCheck.conditionExpression' failed to satisfy constraint: Member must not be null`);
+              `Value ${JSON.stringify(check.ConditionExpression)} at 'transactItems.${i + 1}.member.conditionCheck.conditionExpression' failed to satisfy constraint: Member must not be null`);
           }
           eAttrName = check.ExpressionAttributeNames;
           eAttrVal = check.ExpressionAttributeValues;
           rvOnConditionCheckFailure = check.ReturnValuesOnConditionCheckFailure;
           opName = 'conditionCheck';
         }
-        if(transactWriteItem.Put) {
+        if (transactWriteItem.Put) {
           operations++;
           let put = transactWriteItem.Put;
           tableName = put.TableName;
@@ -560,7 +567,7 @@ module.exports = class BaseOperations {
           rvOnConditionCheckFailure = put.ReturnValuesOnConditionCheckFailure;
           opName = 'put';
         }
-        if(transactWriteItem.Delete) {
+        if (transactWriteItem.Delete) {
           operations++;
           // delete is the reserved word for JS.
           let deleteOp = transactWriteItem.Delete;
@@ -573,7 +580,7 @@ module.exports = class BaseOperations {
           rvOnConditionCheckFailure = deleteOp.ReturnValuesOnConditionCheckFailure;
           opName = 'delete';
         }
-        if(transactWriteItem.Update) {
+        if (transactWriteItem.Update) {
           operations++;
           let update = transactWriteItem.Update;
           tableName = update.TableName;
@@ -581,9 +588,9 @@ module.exports = class BaseOperations {
           key = update.Key;
           conditionExpr = update.ConditionExpression;
           updateExpr = update.UpdateExpression;
-          if(!updateExpr) {
+          if (!updateExpr) {
             throw RequestValidator.newValidationException(
-              `1 validation error detected: Value null at 'transactItems.${i+1}.member.update.updateExpression' failed to satisfy constraint: Member must not be null`);
+              `1 validation error detected: Value null at 'transactItems.${i + 1}.member.update.updateExpression' failed to satisfy constraint: Member must not be null`);
           }
           eAttrName = update.ExpressionAttributeNames;
           eAttrVal = update.ExpressionAttributeValues;
@@ -591,15 +598,15 @@ module.exports = class BaseOperations {
           opName = 'update';
         }
 
-        if(operations > 1) {
+        if (operations > 1) {
           throw RequestValidator.newValidationException('TransactItems can only contain one of ConditionCheck, Put, Update or Delete');
         }
-        if(operations === 0) {
+        if (operations === 0) {
           throw RequestValidator.newValidationException('Invalid Request: TransactWriteRequest should contain Delete or Put or Update request');
         }
 
-        RequestValidator.validateTableName(tableName, `transactItems.${i+1}.member.${opName}.tableName`);
-        RequestValidator.validateTransactItem(opName === 'put' ? item : key, `transactItems.${i+1}.member.${opName}.${opName === 'put' ? 'item' : 'key'}`);
+        RequestValidator.validateTableName(tableName, `transactItems.${i + 1}.member.${opName}.tableName`);
+        RequestValidator.validateTransactItem(opName === 'put' ? item : key, `transactItems.${i + 1}.member.${opName}.${opName === 'put' ? 'item' : 'key'}`);
         RequestValidator.validateExpression(conditionExpr,
           updateExpr, // UpdateExpression
           null, // ProjectionExpression
@@ -617,24 +624,25 @@ module.exports = class BaseOperations {
 
         return this.keyCache.get(tableName).then((keySchema) => {
           keysPerTable[tableName] = keySchema;
+          // @ts-ignore
           keysPerRequest.push(Util.extractKey(key ? key : item, keySchema));
-          if(key) {
+          if (key) {
             RequestValidator.validateKey(key, keySchema);
           }
           let keyBytes = Encoder.encodeKey(key ? key : item, keySchema, encoder);
           let keySet = keySetPerTable[tableName];
-          if(!keySet) {
+          if (!keySet) {
             keySet = {};
             keySetPerTable[tableName] = keySet;
           }
-          if(keySet[keyBytes]) {
+          if (keySet[keyBytes]) {
             throw new DaxClientError('Provided list of item keys contains duplicates', DaxErrorCode.Validation, false);
           }
           // This will convert buffer to string first. Set will compare Buffer reference instead of actual value.
           keySet[keyBytes] = true;
           keysBuffer.write(keyBytes);
 
-          if(item) {
+          if (item) {
             let attrNames = AttributeValueEncoder.getCanonicalAttributeList(item, keySchema);
             return this.attrListIdCache.get(attrNames).then((attrListId) => {
               valuesBuffer.write(Encoder.encodeValuesWithKeys(item, keySchema, attrListId, encoder));
@@ -645,7 +653,7 @@ module.exports = class BaseOperations {
         }).then(() => {
           operationsBuffer.write(encoder.encodeInt(operation));
           tableNamesBuffer.write(encoder.encodeBinary(tableName));
-          if(rvOnConditionCheckFailure) {
+          if (rvOnConditionCheckFailure) {
             rvOnConditionCheckFailuresBuffer.write(encoder.encodeInt(ReturnValueOnConditionCheckFailure[rvOnConditionCheckFailure]));
           } else {
             rvOnConditionCheckFailuresBuffer.write(encoder.encodeInt(ReturnValueOnConditionCheckFailure.NONE));
@@ -657,12 +665,12 @@ module.exports = class BaseOperations {
             ExpressionAttributeNames: eAttrName,
             ExpressionAttributeValues: eAttrVal,
           });
-          if(encodedExprs.Condition) {
+          if (encodedExprs.Condition) {
             conditionExprsBuffer.write(encoder.encodeBinary(encodedExprs.Condition));
           } else {
             conditionExprsBuffer.write(encoder.encodeNull());
           }
-          if(encodedExprs.Update) {
+          if (encodedExprs.Update) {
             updateExprsBuffer.write(encoder.encodeBinary(encodedExprs.Update));
           } else {
             updateExprsBuffer.write(encoder.encodeNull());
@@ -674,7 +682,7 @@ module.exports = class BaseOperations {
     return promiseChain.then(() => {
       request._keysPerTable = keysPerTable;
       request._keysPerRequest = keysPerRequest;
-      if(!request.ClientRequestToken) {
+      if (!request.ClientRequestToken) {
         request.ClientRequestToken = UUID.v4();
       }
       request._stubData = {
@@ -712,23 +720,24 @@ module.exports = class BaseOperations {
 
 
   _validateWriteRequest(writeRequest) {
-    if(writeRequest.PutRequest && writeRequest.DeleteRequest) {
+    if (writeRequest.PutRequest && writeRequest.DeleteRequest) {
       throw new DaxClientError('Both delete and put request cannot be set', DaxErrorCode.Validation, false);
     }
-    if(!writeRequest.PutRequest && !writeRequest.DeleteRequest) {
+    if (!writeRequest.PutRequest && !writeRequest.DeleteRequest) {
       throw new DaxClientError('Both delete and put request cannot be empty', DaxErrorCode.Validation, false);
     }
   }
 
   _validateBatchWriteItem(attributes) {
-    if(!attributes || Object.keys(attributes) === 0) {
+    // @ts-ignore
+    if (!attributes || Object.keys(attributes) === 0) {
       throw new DaxClientError(
         `1 validation error detected. Value ${JSON.stringify(attributes)} at "item" failed to satisfy constraint: Item must not be null`,
         DaxErrorCode.Validation, false);
     }
 
     Object.keys(attributes).forEach((name) => {
-      if(this._simpleAttrValLength(attributes[name]) > BATCH_WRITE_MAX_ITEM_SIZE) {
+      if (this._simpleAttrValLength(attributes[name]) > BATCH_WRITE_MAX_ITEM_SIZE) {
         throw new DaxClientError('Item size has exceeded the maximum allowed size', DaxErrorCode.Validation, false);
       }
     });
@@ -753,60 +762,60 @@ module.exports = class BaseOperations {
    *        code: 'MissingRequiredParameter',
    */
   _validateTransactGetItems(request) {
-    let validationErrors = [];
+    let validationErrors: any[] = [];
 
-    if(request.TransactItems == null) {
+    if (request.TransactItems == null) {
       throw new DaxClientError(
         'Missing required key \'TransactItems\' in params',
         DaxErrorCode.Validation, false, undefined, 400);
     }
 
-    if(request.TransactItems.length < 1) {
+    if (request.TransactItems.length < 1) {
       validationErrors.push(
         'Value \'' + JSON.stringify(request.TransactItems)
-          + '\' at \'transactItems\' failed to satisfy constraint: Member must have length greater than or equal to 1');
-    } else if(request.TransactItems.length > 25) {
+        + '\' at \'transactItems\' failed to satisfy constraint: Member must have length greater than or equal to 1');
+    } else if (request.TransactItems.length > 25) {
       validationErrors.push(
         'Value \'' + JSON.stringify(request.TransactItems)
-          + '\' at \'transactItems\' failed to satisfy constraint: Member must have length less than or equal to 25');
+        + '\' at \'transactItems\' failed to satisfy constraint: Member must have length less than or equal to 25');
     }
 
-    for(const [i, item] of request.TransactItems.entries()) {
-      if(item === null || !('Get' in item)) {
+    for (const [i, item] of request.TransactItems.entries()) {
+      if (item === null || !('Get' in item)) {
         throw new DaxClientError(
           'Cannot read property \'Get\' of ' + JSON.stringify(item), DaxErrorCode.Validation, false, undefined, 400);
       }
       let get = item.Get;
 
-      if(get === null || !('Key' in get)) {
+      if (get === null || !('Key' in get)) {
         throw new DaxClientError(
           'Cannot read property \'Key\' of ' + JSON.stringify(item), DaxErrorCode.Validation, false, undefined, 400);
       }
 
-      if(!('TableName' in get) || get.TableName == null) {
+      if (!('TableName' in get) || get.TableName == null) {
         throw new DaxClientError(
           `Missing required key 'TableName' in params.TransactItems[${i}].Get`, DaxErrorCode.Validation, false, undefined, 400);
       }
       let tableName = get.TableName;
 
-      if(tableName.length < 3) {
+      if (tableName.length < 3) {
         validationErrors.push(`Value '${tableName}' at 'transactItems.${i + 1}.member.get.tableName' failed to satisfy constraint: `
-                              + 'Member must have length greater than or equal to 3');
+          + 'Member must have length greater than or equal to 3');
       }
 
-      if(!/[a-zA-Z0-9_.-]+/.test(tableName)) {
+      if (!/[a-zA-Z0-9_.-]+/.test(tableName)) {
         validationErrors.push(`Value '${tableName}' at 'transactItems.${i + 1}.member.get.tableName' failed to satisfy constraint: `
-                              + 'Member must satisfy regular expression pattern: [a-zA-Z0-9_.-]+');
+          + 'Member must satisfy regular expression pattern: [a-zA-Z0-9_.-]+');
       }
 
       let key = get.Key;
-      if(key === null) {
+      if (key === null) {
         throw new DaxClientError(
           `Missing required key 'Key' in params.TransactItems[${i}].Get`, DaxErrorCode.Validation, false, undefined, 400);
       }
     }
 
-    if(validationErrors.length > 0) {
+    if (validationErrors.length > 0) {
       throw new DaxClientError(
         validationErrors.length + ' validation errors detected: ' + validationErrors.join('; '),
         DaxErrorCode.Validation, false, undefined, 400);
@@ -819,30 +828,30 @@ module.exports = class BaseOperations {
    * _validateTransactGetItems(), so it's safe to dereference them now.
    */
   _validate_transactgetitems_keys(items, keySchemasForTables) {
-    let validationErrors = [];
-    for(const [i, item] of items.entries()) {
+    let validationErrors: any[] = [];
+    for (const [i, item] of items.entries()) {
       let schema = keySchemasForTables[item.TableName];
-      for(const attrSchema of schema) {
+      for (const attrSchema of schema) {
         let attrName = attrSchema.AttributeName;
         let attrSchemaType = attrSchema.AttributeType;
         let keyAttr = item.Key[attrName];
 
-        if(!keyAttr) {
+        if (!keyAttr) {
           // Missing key attribute
           validationErrors.push(`key attribute '${attrName}' is missing from params.TransactItems[${i}].Get.Key`);
-        } else if(!keyAttr.hasOwnProperty(attrSchemaType)) {
+        } else if (!keyAttr.hasOwnProperty(attrSchemaType)) {
           // Key attribute with wrong type
           validationErrors.push(`key attribute '${attrName}' with value '${JSON.stringify(item.Key[attrName])}' `
-                                + 'does not match schema type \'${attrSchemaType}\'');
+            + 'does not match schema type \'${attrSchemaType}\'');
         }
       }
       let keyAttrNames = Object.keys(item.Key);
-      if(schema.length != keyAttrNames.length) {
+      if (schema.length != keyAttrNames.length) {
         validationErrors.push(`key length does not match schema for table '${item.TableName}' in params.TransactItems[${i}].Get.Key`);
       }
     }
 
-    if(validationErrors.length > 0) {
+    if (validationErrors.length > 0) {
       throw new DaxClientError(
         validationErrors.length + ' validation errors detected: ' + validationErrors.join('; '),
         DaxErrorCode.Validation, false, undefined, 400);
@@ -850,7 +859,7 @@ module.exports = class BaseOperations {
   }
 
   prepare_transactGetItems_1866287579_1(request) {
-    let stubData = {};
+    let stubData = {} as any;
     let kwargsBuffer = new StreamBuffer();
     let tableNameBuffer = new StreamBuffer();
     let keysBuffer = new StreamBuffer();
@@ -860,9 +869,9 @@ module.exports = class BaseOperations {
 
     // Prepare the keyword arguments
     let hasKwargs = request.ReturnConsumedCapacity;
-    if(hasKwargs) {
+    if (hasKwargs) {
       kwargsBuffer.write(encoder.encodeMapStreamHeader());
-      if(request.ReturnConsumedCapacity) {
+      if (request.ReturnConsumedCapacity) {
         kwargsBuffer.write(encoder.encodeInt(Constants.DaxDataRequestParam.ReturnConsumedCapacity));
         kwargsBuffer.write(encoder.encodeInt(Constants.ReturnConsumedCapacityValues[request.ReturnConsumedCapacity]));
       }
@@ -877,7 +886,7 @@ module.exports = class BaseOperations {
     keysBuffer.write(encoder.encodeArrayHeader(items.length));
 
     // Prepare the table names
-    for(const item of items) {
+    for (const item of items) {
       let tableName = item.TableName;
       tableNameBuffer.write(encoder.encodeBinary(tableName));
     }
@@ -897,6 +906,7 @@ module.exports = class BaseOperations {
         // schema value from the key cache. Put both promises in an array
         // to call Promise.all() on, then assign the schema to the dict.
         return Promise.all([keySchemasForTables, this.keyCache.get(tableName)]).then((arr) => {
+          // @ts-ignore
           arr[0][tableName] = arr[1];
           return arr[0];
         });
@@ -904,6 +914,7 @@ module.exports = class BaseOperations {
       Promise.resolve({})
     );
 
+    // @ts-ignore
     return keySchemasForTablesPromise
       .then((keySchemasForTables) => {
         // Now we can validate the keys against their table schema
@@ -919,8 +930,8 @@ module.exports = class BaseOperations {
         // and write the projection expressions
         let projectionExpressionsBuffer = new StreamBuffer();
         projectionExpressionsBuffer.write(encoder.encodeArrayHeader(items.length));
-        for(const item of items) {
-          if('ProjectionExpression' in item) {
+        for (const item of items) {
+          if ('ProjectionExpression' in item) {
             projectionExpressionsBuffer.write(encoder.encodeBinary(Encoder._encodeProjection(item.ProjectionExpression, item.ExpressionAttributeNames)));
             item._projectionOrdinals = [];
             Encoder._prepareProjection(item.ProjectionExpression, item.ExpressionAttributeNames, item._projectionOrdinals);
@@ -944,17 +955,17 @@ module.exports = class BaseOperations {
   }
 
   _simpleAttrValLength(v) {
-    if(!v) {
+    if (!v) {
       return 0;
-    } else if(v.S) {
+    } else if (v.S) {
       return v.S.length;
-    } else if(v.B) {
+    } else if (v.B) {
       return v.B.length;
-    } else if(v.N) {
+    } else if (v.N) {
       return v.N.length;
-    } else if(v.BS) {
+    } else if (v.BS) {
       let size = 0;
-      for(let b of v.BS) {
+      for (let b of v.BS) {
         size += b.length;
       }
       return size;

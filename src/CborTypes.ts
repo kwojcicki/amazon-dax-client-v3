@@ -14,111 +14,111 @@
  */
 /* eslint no-invalid-this: ["off"]*/
 'use strict';
-const self = this;
+// const self = this;
 // Type encoding sizes measured in bits.
-self.SIZE_8 = 0b00011000;
-self.SIZE_16 = 0b00011001;
-self.SIZE_32 = 0b00011010;
-self.SIZE_64 = 0b00011011;
-self.SIZE_ILLEGAL_1 = 0b00011100;
-self.SIZE_ILLEGAL_2 = 0b00011101;
-self.SIZE_ILLEGAL_3 = 0b00011110;
-self.SIZE_STREAM = 0b00011111;
+export const SIZE_8 = 0b00011000;
+export const SIZE_16 = 0b00011001;
+export const SIZE_32 = 0b00011010;
+export const SIZE_64 = 0b00011011;
+export const SIZE_ILLEGAL_1 = 0b00011100;
+export const SIZE_ILLEGAL_2 = 0b00011101;
+export const SIZE_ILLEGAL_3 = 0b00011110;
+export const SIZE_STREAM = 0b00011111;
 
 // Upper 3 bits of type header defines the major type.
-self.MAJOR_TYPE_MASK = 0b11100000;
+export const MAJOR_TYPE_MASK = 0b11100000;
 
 // Lower 5 bits of type header defines the minor type.
-self.MINOR_TYPE_MASK = 0b00011111;
+export const MINOR_TYPE_MASK = 0b00011111;
 
 // Positive integer types.
-self.TYPE_POSINT = 0b00000000; // 0..23
-self.TYPE_POSINT_8 = self.TYPE_POSINT + self.SIZE_8;
-self.TYPE_POSINT_16 = self.TYPE_POSINT + self.SIZE_16;
-self.TYPE_POSINT_32 = self.TYPE_POSINT + self.SIZE_32;
-self.TYPE_POSINT_64 = self.TYPE_POSINT + self.SIZE_64;
+export const TYPE_POSINT = 0b00000000; // 0..23
+export const TYPE_POSINT_8 = TYPE_POSINT + SIZE_8;
+export const TYPE_POSINT_16 = TYPE_POSINT + SIZE_16;
+export const TYPE_POSINT_32 = TYPE_POSINT + SIZE_32;
+export const TYPE_POSINT_64 = TYPE_POSINT + SIZE_64;
 
 // Negative integer types.
-self.TYPE_NEGINT = 0b00100000; // -1..-24
-self.TYPE_NEGINT_8 = self.TYPE_NEGINT + self.SIZE_8;
-self.TYPE_NEGINT_16 = self.TYPE_NEGINT + self.SIZE_16;
-self.TYPE_NEGINT_32 = self.TYPE_NEGINT + self.SIZE_32;
-self.TYPE_NEGINT_64 = self.TYPE_NEGINT + self.SIZE_64;
+export const TYPE_NEGINT = 0b00100000; // -1..-24
+export const TYPE_NEGINT_8 = TYPE_NEGINT + SIZE_8;
+export const TYPE_NEGINT_16 = TYPE_NEGINT + SIZE_16;
+export const TYPE_NEGINT_32 = TYPE_NEGINT + SIZE_32;
+export const TYPE_NEGINT_64 = TYPE_NEGINT + SIZE_64;
 
 // Byte string types.
-self.TYPE_BYTES = 0b01000000; // 0..23 bytes in length
-self.TYPE_BYTES_8 = self.TYPE_BYTES + self.SIZE_8;
-self.TYPE_BYTES_16 = self.TYPE_BYTES + self.SIZE_16;
-self.TYPE_BYTES_32 = self.TYPE_BYTES + self.SIZE_32;
-self.TYPE_BYTES_64 = self.TYPE_BYTES + self.SIZE_64;
-self.TYPE_BYTES_STREAM = self.TYPE_BYTES + self.SIZE_STREAM;
+export const TYPE_BYTES = 0b01000000; // 0..23 bytes in length
+export const TYPE_BYTES_8 = TYPE_BYTES + SIZE_8;
+export const TYPE_BYTES_16 = TYPE_BYTES + SIZE_16;
+export const TYPE_BYTES_32 = TYPE_BYTES + SIZE_32;
+export const TYPE_BYTES_64 = TYPE_BYTES + SIZE_64;
+export const TYPE_BYTES_STREAM = TYPE_BYTES + SIZE_STREAM;
 
 // UTF-8 string types.
-self.TYPE_UTF = 0b01100000; // 0..23 bytes in length
-self.TYPE_UTF_8 = self.TYPE_UTF + self.SIZE_8;
-self.TYPE_UTF_16 = self.TYPE_UTF + self.SIZE_16;
-self.TYPE_UTF_32 = self.TYPE_UTF + self.SIZE_32;
-self.TYPE_UTF_64 = self.TYPE_UTF + self.SIZE_64;
-self.TYPE_UTF_STREAM = self.TYPE_UTF + self.SIZE_STREAM;
+export const TYPE_UTF = 0b01100000; // 0..23 bytes in length
+export const TYPE_UTF_8 = TYPE_UTF + SIZE_8;
+export const TYPE_UTF_16 = TYPE_UTF + SIZE_16;
+export const TYPE_UTF_32 = TYPE_UTF + SIZE_32;
+export const TYPE_UTF_64 = TYPE_UTF + SIZE_64;
+export const TYPE_UTF_STREAM = TYPE_UTF + SIZE_STREAM;
 
 // Array types.
-self.TYPE_ARRAY = 0b10000000; // 0..23 elements
-self.TYPE_ARRAY_8 = self.TYPE_ARRAY + self.SIZE_8;
-self.TYPE_ARRAY_16 = self.TYPE_ARRAY + self.SIZE_16;
-self.TYPE_ARRAY_32 = self.TYPE_ARRAY + self.SIZE_32;
-self.TYPE_ARRAY_64 = self.TYPE_ARRAY + self.SIZE_64;
-self.TYPE_ARRAY_STREAM = self.TYPE_ARRAY + self.SIZE_STREAM;
+export const TYPE_ARRAY = 0b10000000; // 0..23 elements
+export const TYPE_ARRAY_8 = TYPE_ARRAY + SIZE_8;
+export const TYPE_ARRAY_16 = TYPE_ARRAY + SIZE_16;
+export const TYPE_ARRAY_32 = TYPE_ARRAY + SIZE_32;
+export const TYPE_ARRAY_64 = TYPE_ARRAY + SIZE_64;
+export const TYPE_ARRAY_STREAM = TYPE_ARRAY + SIZE_STREAM;
 
 // Map types.
-self.TYPE_MAP = 0b10100000; // 0..23 element pairs
-self.TYPE_MAP_8 = self.TYPE_MAP + self.SIZE_8;
-self.TYPE_MAP_16 = self.TYPE_MAP + self.SIZE_16;
-self.TYPE_MAP_32 = self.TYPE_MAP + self.SIZE_32;
-self.TYPE_MAP_64 = self.TYPE_MAP + self.SIZE_64;
-self.TYPE_MAP_STREAM = self.TYPE_MAP + self.SIZE_STREAM;
+export const TYPE_MAP = 0b10100000; // 0..23 element pairs
+export const TYPE_MAP_8 = TYPE_MAP + SIZE_8;
+export const TYPE_MAP_16 = TYPE_MAP + SIZE_16;
+export const TYPE_MAP_32 = TYPE_MAP + SIZE_32;
+export const TYPE_MAP_64 = TYPE_MAP + SIZE_64;
+export const TYPE_MAP_STREAM = TYPE_MAP + SIZE_STREAM;
 
 // Tagged types.
-self.TYPE_TAG = 0b11000000; // for tag type 0..23
-self.TYPE_TAG_8 = self.TYPE_TAG + self.SIZE_8;
-self.TYPE_TAG_16 = self.TYPE_TAG + self.SIZE_16;
-self.TYPE_TAG_32 = self.TYPE_TAG + self.SIZE_32;
-self.TYPE_TAG_64 = self.TYPE_TAG + self.SIZE_64;
+export const TYPE_TAG = 0b11000000; // for tag type 0..23
+export const TYPE_TAG_8 = TYPE_TAG + SIZE_8;
+export const TYPE_TAG_16 = TYPE_TAG + SIZE_16;
+export const TYPE_TAG_32 = TYPE_TAG + SIZE_32;
+export const TYPE_TAG_64 = TYPE_TAG + SIZE_64;
 
 // Simple and special types.
-self.TYPE_SIMPLE = 0b11100000; // not a real type
-self.TYPE_FALSE = self.TYPE_SIMPLE + 0b00010100;
-self.TYPE_TRUE = self.TYPE_SIMPLE + 0b00010101;
-self.TYPE_NULL = self.TYPE_SIMPLE + 0b00010110;
-self.TYPE_UNDEFINED = self.TYPE_SIMPLE + 0b00010111;
-self.TYPE_SIMPLE_8 = self.TYPE_SIMPLE + self.SIZE_8; // next byte specifies type 32..255
-self.TYPE_FLOAT_16 = self.TYPE_SIMPLE + self.SIZE_16;
-self.TYPE_FLOAT_32 = self.TYPE_SIMPLE + self.SIZE_32;
-self.TYPE_FLOAT_64 = self.TYPE_SIMPLE + self.SIZE_64;
-self.TYPE_BREAK = self.TYPE_SIMPLE + self.SIZE_STREAM;
+export const TYPE_SIMPLE = 0b11100000; // not a real type
+export const TYPE_FALSE = TYPE_SIMPLE + 0b00010100;
+export const TYPE_TRUE = TYPE_SIMPLE + 0b00010101;
+export const TYPE_NULL = TYPE_SIMPLE + 0b00010110;
+export const TYPE_UNDEFINED = TYPE_SIMPLE + 0b00010111;
+export const TYPE_SIMPLE_8 = TYPE_SIMPLE + SIZE_8; // next byte specifies type 32..255
+export const TYPE_FLOAT_16 = TYPE_SIMPLE + SIZE_16;
+export const TYPE_FLOAT_32 = TYPE_SIMPLE + SIZE_32;
+export const TYPE_FLOAT_64 = TYPE_SIMPLE + SIZE_64;
+export const TYPE_BREAK = TYPE_SIMPLE + SIZE_STREAM;
 
 // A few standard tags.
-self.TAG_DATETIME = 0; // string
-self.TAG_TIMESTAMP = 1; // seconds from epoch
-self.TAG_POSBIGINT = 2;
-self.TAG_NEGBIGINT = 3;
-self.TAG_DECIMAL = 4;
-self.TAG_BIGFLOAT = 5;
+export const TAG_DATETIME = 0; // string
+export const TAG_TIMESTAMP = 1; // seconds from epoch
+export const TAG_POSBIGINT = 2;
+export const TAG_NEGBIGINT = 3;
+export const TAG_DECIMAL = 4;
+export const TAG_BIGFLOAT = 5;
 
 // return type
-self.RET_INT = 0;
-self.RET_UTF = 1;
-self.RET_BUF = 2;
-self.RET_BIGINT = 3;
-self.RET_BIGDEC = 4;
-self.RET_FLOAT = 5;
-self.RET_TAG = 6;
-self.RET_BOOL = 7;
-self.RET_NULL = 8;
-self.RET_UNDEFINED = 9;
-self.RET_MAP_HEADER = 10;
-self.RET_ARR_HEADER = 11;
-self.RET_STREAM_BREAK = 12;
+export const RET_INT = 0;
+export const RET_UTF = 1;
+export const RET_BUF = 2;
+export const RET_BIGINT = 3;
+export const RET_BIGDEC = 4;
+export const RET_FLOAT = 5;
+export const RET_TAG = 6;
+export const RET_BOOL = 7;
+export const RET_NULL = 8;
+export const RET_UNDEFINED = 9;
+export const RET_MAP_HEADER = 10;
+export const RET_ARR_HEADER = 11;
+export const RET_STREAM_BREAK = 12;
 
-self.majorType = (v) => v & self.MAJOR_TYPE_MASK;
-self.minorType = (v) => v & self.MINOR_TYPE_MASK;
-self.isMajorType = (v, t) => (v & self.MAJOR_TYPE_MASK) === t;
+export const majorType = (v) => v & MAJOR_TYPE_MASK;
+export const minorType = (v) => v & MINOR_TYPE_MASK;
+export const isMajorType = (v, t) => (v & MAJOR_TYPE_MASK) === t;

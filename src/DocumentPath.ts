@@ -13,15 +13,17 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
 
 function mapGetOrDefault(map, key, defaultValue) { // helper function
   return map[key] ? map[key] : defaultValue;
 }
 
-class DocumentPath extends Array {
-// string represent a Map, number represent a ArrayIndex
+
+// @ts-ignore
+export class DocumentPath extends Array {
+  // string represent a Map, number represent a ArrayIndex
   constructor(elements) {
     // super(...elements)
     super();
@@ -31,45 +33,48 @@ class DocumentPath extends Array {
   }
 
   static from(path, attrNames) {
-    if(!attrNames) {
+    if (!attrNames) {
       attrNames = {};
     }
     const split = path.split('.');
     const elements = [];
 
-    for(let element of split) {
+    for (let element of split) {
       let index = element.indexOf('[');
-      if(index === -1) {
+      if (index === -1) {
+        // @ts-ignore
         elements.push(mapGetOrDefault(attrNames, element, element));
         continue;
       }
-      if(index === 0) {
+      if (index === 0) {
         throw new DaxClientError('Invalid path: ' + path, DaxErrorCode.Validation, false);
       }
 
       let initial = element.substr(0, index);
+      // @ts-ignore
       elements.push(mapGetOrDefault(attrNames, initial, initial));
 
       do {
         element = element.substr(index + 1);
         index = element.indexOf(']');
 
-        if(index === -1) {
+        if (index === -1) {
           throw new DaxClientError('Invalid path: ' + path, DaxErrorCode.Validation, false);
         }
 
         let arrayIndex = parseInt(element.substr(0, index));
+        // @ts-ignore
         elements.push(arrayIndex);
 
         element = element.substr(index + 1);
         index = element.indexOf('[');
 
-        if(index > 0) {
+        if (index > 0) {
           throw new DaxClientError('Invalid path: ' + path, DaxErrorCode.Validation, false);
         }
-      } while(index !== -1);
+      } while (index !== -1);
 
-      if(element) {
+      if (element) {
         throw new DaxClientError('Invalid path: ' + path, DaxErrorCode.Validation, false);
       }
     }
@@ -77,5 +82,3 @@ class DocumentPath extends Array {
     return new DocumentPath(elements);
   }
 }
-
-module.exports = DocumentPath;

@@ -13,11 +13,11 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const ProjectionExpressionParser = require('./ProjectionExpressionParser');
-const ConditionExpressionParser = require('./ConditionExpressionParser');
-const UpdateExpressionParser = require('./UpdateExpressionParser');
+import { ProjectionExpressionParser } from './ProjectionExpressionParser';
+import { ConditionExpressionParser } from './ConditionExpressionParser';
+import { UpdateExpressionParser } from './UpdateExpressionParser';
 
-class DynamoDbExpressionParser {
+export class DynamoDbExpressionParser {
   /**
    * Helper to parse the expression into a 'projection' AST
    */
@@ -39,5 +39,3 @@ class DynamoDbExpressionParser {
     return new UpdateExpressionParser().parse(expression, errorListener);
   }
 }
-
-module.exports = DynamoDbExpressionParser;

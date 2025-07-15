@@ -14,16 +14,17 @@
  */
 'use strict';
 const ALPHABET = '0123456789abcdef';
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { Buffer } from 'buffer';
+import { DaxClientError } from './DaxClientError'
+import { DaxErrorCode } from './DaxErrorCode'
 
-const ENCRYPTED_SCHEME = 'daxs';
-const UNENCRYPTED_SCHEME = 'dax';
-const SCHEMES_TO_PORTS = {[UNENCRYPTED_SCHEME]: 8111, [ENCRYPTED_SCHEME]: 9111};
+export const ENCRYPTED_SCHEME = 'daxs';
+export const UNENCRYPTED_SCHEME = 'dax';
+const SCHEMES_TO_PORTS = { [UNENCRYPTED_SCHEME]: 8111, [ENCRYPTED_SCHEME]: 9111 };
 
-class Util {
+export class Util {
   static convertBase(str, baseIn, baseOut) {
-    if(str[0] === '-') {
+    if (str[0] === '-') {
       str = str.slice(1);
     }
     let j;
@@ -32,15 +33,15 @@ class Util {
     let i = 0;
     let len = str.length;
 
-    for(; i < len;) {
-      for(arrL = arr.length; arrL--; arr[arrL] *= baseIn) {
+    for (; i < len;) {
+      for (arrL = arr.length; arrL--; arr[arrL] *= baseIn) {
 
       }
       arr[j = 0] += ALPHABET.indexOf(str[i++]);
 
-      for(; j < arr.length; j++) {
-        if(arr[j] > baseOut - 1) {
-          if(arr[j + 1] == null) {
+      for (; j < arr.length; j++) {
+        if (arr[j] > baseOut - 1) {
+          if (arr[j + 1] == null) {
             arr[j + 1] = 0;
           }
           arr[j + 1] += arr[j] / baseOut | 0;
@@ -50,11 +51,11 @@ class Util {
     }
 
     let outstr = '';
-    for(i = arr.length - 1; i >= 0; --i) {
+    for (i = arr.length - 1; i >= 0; --i) {
       outstr += ALPHABET[arr[i]];
     }
-    if(baseOut === 16) { // to hex then has to have certain length
-      switch(true) {
+    if (baseOut === 16) { // to hex then has to have certain length
+      switch (true) {
         case outstr.length <= 2:
           outstr = '0'.repeat(2 - outstr.length) + outstr;
           break;
@@ -75,39 +76,39 @@ class Util {
   }
 
   static parseHostPorts(hostports) {
-    if(hostports == null || hostports == '') {
+    if (hostports == null || hostports == '') {
       throw new DaxClientError('Provide a Cluster Discovery Endpoint to connect.');
     }
 
     // Handle the case of a single string
-    if(typeof hostports === 'string') {
+    if (typeof hostports === 'string') {
       return [Util.parseHostPort(hostports)];
     }
 
-    let addrs = [];
-    for(let hostport of hostports) {
+    let addrs: { host: any, scheme: any, port: number }[] = [];
+    for (let hostport of hostports) {
       addrs.push(Util.parseHostPort(hostport));
     }
 
     const schemesInAddrs = addrs.map((addr) => addr.scheme);
     const daxScheme = schemesInAddrs[0];
     const areAllSchemesTheSame = schemesInAddrs.every((scheme) => scheme == daxScheme);
-    if(!areAllSchemesTheSame) {
+    if (!areAllSchemesTheSame) {
       throw new DaxClientError('Inconsistency between the schemes of provided endpoints.', DaxErrorCode.IllegalArgument, false);
     }
 
-    if(daxScheme == ENCRYPTED_SCHEME && addrs != null && addrs.length >= 2) {
+    if (daxScheme == ENCRYPTED_SCHEME && addrs != null && addrs.length >= 2) {
       throw new DaxClientError('Only one encrypted endpoint URL is allowed.');
     }
 
     return addrs;
   }
 
-  static parseHostPort(hostport) {
+  static parseHostPort(hostport: any) {
     let url;
 
-    if(hostport.indexOf('://') == -1) { // url has no scheme
-      if(hostport.indexOf(':') == -1) { // url has no port
+    if (hostport.indexOf('://') == -1) { // url has no scheme
+      if (hostport.indexOf(':') == -1) { // url has no port
         throw new DaxClientError('Invalid hostport: ' + hostport, DaxErrorCode.IllegalArgument, false);
       }
       // This scheme assumption exists to support legacy <host>:<port> endpoints.
@@ -116,7 +117,7 @@ class Util {
 
     try {
       url = new URL(hostport);
-    } catch(error) {
+    } catch (error) {
       throw new DaxClientError('Invalid hostport: ' + hostport, DaxErrorCode.IllegalArgument, false);
     }
 
@@ -124,26 +125,26 @@ class Util {
     let port = url.port;
     const scheme = url.protocol.replace(':', ''); // changes `daxs:` to `daxs`
 
-    if(!Object.keys(SCHEMES_TO_PORTS).includes(scheme)) {
+    if (!Object.keys(SCHEMES_TO_PORTS).includes(scheme)) {
       throw new DaxClientError('URL scheme must be one of: ' + Object.keys(SCHEMES_TO_PORTS), DaxErrorCode.IllegalArgument, false);
     }
 
-    if(port == '' || port == null) {
+    if (port == '' || port == null) {
       port = SCHEMES_TO_PORTS[scheme];
     }
 
-    return {host: host, port: parseInt(port), scheme: scheme};
+    return { host: host, port: parseInt(port), scheme: scheme };
   }
 
   static objEqual(a, b) {
     // Create arrays of property names
-    if(!a || !b) {
+    if (!a || !b) {
       return a === b;
     }
 
-    if(typeof(a) === typeof(b)) {
+    if (typeof (a) === typeof (b)) {
       // handle primitive types using native equality
-      switch(typeof(a)) {
+      switch (typeof (a)) {
         case 'string':
         case 'number':
         case 'boolean':
@@ -156,20 +157,20 @@ class Util {
 
     // If number of properties is different,
     // objects are not equivalent
-    if(aProps.length != bProps.length) {
+    if (aProps.length != bProps.length) {
       return false;
     }
 
-    for(let i = 0; i < aProps.length; i++) {
+    for (let i = 0; i < aProps.length; i++) {
       let propName = aProps[i];
 
       // If values of same property are not equal,
       // objects are not equivalent
-      if(typeof a[propName] === 'object') {
-        if(!Util.objEqual(a[propName], b[propName])) {
+      if (typeof a[propName] === 'object') {
+        if (!Util.objEqual(a[propName], b[propName])) {
           return false;
         }
-      } else if(a[propName] !== b[propName]) {
+      } else if (a[propName] !== b[propName]) {
         return false;
       }
     }
@@ -181,20 +182,20 @@ class Util {
 
   // compare two Lists
   static arrayEquals(lista, listb) {
-    if(lista.length !== listb.length) {
+    if (lista.length !== listb.length) {
       return false;
     }
     let usedIndex = new Set();
-    for(let i = 0; i < lista.length; ++i) {
+    for (let i = 0; i < lista.length; ++i) {
       let equal = false;
-      for(let j = 0; j < listb.length; ++j) {
-        if(!usedIndex.has(j) && Util.objEqual(lista[i], listb[j])) {
+      for (let j = 0; j < listb.length; ++j) {
+        if (!usedIndex.has(j) && Util.objEqual(lista[i], listb[j])) {
           equal = true;
           usedIndex.add(j);
           break;
         }
       }
-      if(!equal) {
+      if (!equal) {
         return false;
       }
     }
@@ -203,12 +204,12 @@ class Util {
 
   // compare two sorted Lists
   static sortedArrayEquals(lista, listb) {
-    if(lista.length !== listb.length) {
+    if (lista.length !== listb.length) {
       return false;
     }
 
-    for(let i = 0; i < lista.length; ++i) {
-      if(!Util.objEqual(lista[i], listb[i])) {
+    for (let i = 0; i < lista.length; ++i) {
+      if (!Util.objEqual(lista[i], listb[i])) {
         return false;
       }
     }
@@ -218,13 +219,13 @@ class Util {
 
   static objArrayEquals(a, b) {
     // Create arrays of property names
-    if(!a || !b) {
+    if (!a || !b) {
       return a === b;
     }
 
-    if(typeof(a) === typeof(b)) {
+    if (typeof (a) === typeof (b)) {
       // handle primitive types using native equality
-      switch(typeof(a)) {
+      switch (typeof (a)) {
         case 'string':
         case 'number':
         case 'boolean':
@@ -237,24 +238,24 @@ class Util {
 
     // If number of properties is different,
     // objects are not equivalent
-    if(aProps.length != bProps.length) {
+    if (aProps.length != bProps.length) {
       return false;
     }
 
-    if(Array.isArray(a) && Array.isArray(b)) {
+    if (Array.isArray(a) && Array.isArray(b)) {
       return Util.arrayEquals(a, b);
     }
 
-    for(let i = 0; i < aProps.length; i++) {
+    for (let i = 0; i < aProps.length; i++) {
       let propName = aProps[i];
 
       // If values of same property are not equal,
       // objects are not equivalent
-      if(typeof a[propName] === 'object') {
-        if(!Util.objArrayEquals(a[propName], b[propName])) {
+      if (typeof a[propName] === 'object') {
+        if (!Util.objArrayEquals(a[propName], b[propName])) {
           return false;
         }
-      } else if(a[propName] !== b[propName]) {
+      } else if (a[propName] !== b[propName]) {
         return false;
       }
     }
@@ -265,21 +266,21 @@ class Util {
   }
 
   static deepCopy(obj) {
-    if(obj === undefined || obj === null || typeof(obj) !== 'object') {
+    if (obj === undefined || obj === null || typeof (obj) !== 'object') {
       return obj;
     }
 
-    if(Array.isArray(obj)) {
+    if (Array.isArray(obj)) {
       return obj.map((e) => Util.deepCopy(e));
     }
 
-    if(Buffer.isBuffer(obj)) {
+    if (Buffer.isBuffer(obj)) {
       return Buffer.from(obj);
     }
 
     let clone = {};
-    for(let prop in obj) {
-      if(obj.hasOwnProperty(prop)) {
+    for (let prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
         clone[prop] = Util.deepCopy(obj[prop]);
       }
     }
@@ -288,7 +289,7 @@ class Util {
   }
 
   static serviceEndpointFrom(nodeId, hostname, address, port, role, zone, leaderSessionId) {
-    return {nodeId: nodeId, hostname: hostname, address: address, port: port, role: role, zone: zone, leaderSessionId: leaderSessionId};
+    return { nodeId: nodeId, hostname: hostname, address: address, port: port, role: role, zone: zone, leaderSessionId: leaderSessionId };
   }
 
   static deanonymizeAttributeValues(item, attrNames) {
@@ -309,14 +310,10 @@ class Util {
 
   static extractKey(item, tableKeys) {
     let keys = {};
-    for(let keyDef of tableKeys) {
+    for (let keyDef of tableKeys) {
       let keyName = keyDef.AttributeName;
       keys[keyName] = item[keyName];
     }
     return keys;
   }
 }
-
-module.exports = Util;
-module.exports.ENCRYPTED_SCHEME = ENCRYPTED_SCHEME;
-module.exports.UNENCRYPTED_SCHEME = UNENCRYPTED_SCHEME;

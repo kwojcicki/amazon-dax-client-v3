@@ -13,35 +13,36 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const StreamBuffer = require('./ByteStreamBuffer');
-const CborEncoder = require('./CborEncoder');
-const DaxCborTypes = require('./DaxCborTypes');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
-const LexDecimal = require('./LexDecimal');
-const BigDecimal = require('./BigDecimal');
+import { ByteStreamBuffer as StreamBuffer } from './ByteStreamBuffer'
+import { CborEncoder } from './CborEncoder';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
+import { LexDecimal } from './LexDecimal';
+import { BigDecimal } from './BigDecimal';
+import { Buffer } from 'buffer';
+import * as DaxCborTypes from './DaxCborTypes';
 
-module.exports = class AttributeValueEncoder {
+export class AttributeValueEncoder {
   static encodeKey(item, keySchema) {
     let keybuffer = new StreamBuffer();
     let encoder = new CborEncoder();
-    if(!item) {
+    if (!item) {
       throw new DaxClientError('Cannot have null item', DaxErrorCode.Validation, false);
     }
 
     let ad = keySchema[0];
     let av = item[ad.AttributeName];
-    if(!av) {
+    if (!av) {
       throw new DaxClientError('One of the required keys was not given a value', DaxErrorCode.Validation, false);
     }
 
     let obj;
     obj = av[ad.AttributeType];
-    if(obj == null) {
+    if (obj == null) {
       throw new DaxClientError('One of the required keys was not given a value', DaxErrorCode.Validation, false);
     }
-    if(keySchema.length === 2) {
-      switch(ad.AttributeType) {
+    if (keySchema.length === 2) {
+      switch (ad.AttributeType) {
         case 'S':
           keybuffer.write(encoder.encodeString(obj));
           break;
@@ -57,14 +58,14 @@ module.exports = class AttributeValueEncoder {
 
       ad = keySchema[1];
       av = item[ad.AttributeName];
-      if(!av) {
+      if (!av) {
         throw new DaxClientError('One of the required keys was not given a value', DaxErrorCode.Validation, false);
       }
       obj = av[ad.AttributeType];
-      if(obj == null) {
+      if (obj == null) {
         throw new DaxClientError('One of the required keys was not given a value', DaxErrorCode.Validation, false);
       }
-      switch(ad.AttributeType) {
+      switch (ad.AttributeType) {
         case 'S':
           keybuffer.write(Buffer.from(obj, 'utf8'));
           break;
@@ -78,7 +79,7 @@ module.exports = class AttributeValueEncoder {
           throw new DaxClientError('Unsupported KeyType encountered in Range Attribute: ' + ad, DaxErrorCode.Validation, false);
       }
     } else {
-      switch(ad.AttributeType) {
+      switch (ad.AttributeType) {
         case 'S':
           keybuffer.write(Buffer.from(obj, 'utf8'));
           break;
@@ -96,10 +97,10 @@ module.exports = class AttributeValueEncoder {
   }
 
   static checkValidExprParamNames(eAttrNames, eAttrVals) {
-    if(eAttrVals) {
+    if (eAttrVals) {
       AttributeValueEncoder.checkExprParams(Object.keys(eAttrVals), true);
     }
-    if(eAttrNames) {
+    if (eAttrNames) {
       AttributeValueEncoder.checkExprParams(Object.keys(eAttrNames), false);
     }
   }
@@ -109,23 +110,23 @@ module.exports = class AttributeValueEncoder {
     let i;
     let prefix = (isExprAttrVals ? ':' : '#');
 
-    if(keyNames) {
-      for(let s of keyNames) {
+    if (keyNames) {
+      for (let s of keyNames) {
         i = 0;
 
         valid: {
-          if(s.length > 1 && s[i++] === prefix) {
-            for(; i < s.length; i++) {
+          if (s.length > 1 && s[i++] === prefix) {
+            for (; i < s.length; i++) {
               c = s[i];
               // FIXME: Ensure underscore valid character (bozek@ filed feedback on documentation)
-              if((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '_') {
+              if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '_') {
                 break valid;
               }
             }
             continue;
           }
         }
-        if(isExprAttrVals) {
+        if (isExprAttrVals) {
           throw new DaxClientError('ExpressionAttributeValues contains invalid key: "' + s + '"', DaxErrorCode.Validation, false);
         } else {
           throw new DaxClientError('ExpressionAttributeNames contains invalid key: "' + s + '"', DaxErrorCode.Validation, false);
@@ -139,7 +140,7 @@ module.exports = class AttributeValueEncoder {
     let encoder = new CborEncoder();
 
     buffer.write(encoder.encodeInt(attrListId));
-    for(let attr of attrNames) {
+    for (let attr of attrNames) {
       let av = item[attr];
       AttributeValueEncoder._encodeAttributeValueInternal(av, buffer, encoder);
     }
@@ -149,9 +150,9 @@ module.exports = class AttributeValueEncoder {
 
   static getCanonicalAttributeList(item, keySchema) {
     const keyNames = keySchema.map((k) => k.AttributeName);
-    let attrs = [];
-    for(let attr in item) {
-      if(keyNames.indexOf(attr) >= 0) {
+    const attrs: string[] = [];
+    for (let attr in item) {
+      if (keyNames.indexOf(attr) >= 0) {
         continue;
       } else {
         attrs.push(attr);
@@ -172,7 +173,7 @@ module.exports = class AttributeValueEncoder {
   static _encodeAttributeValueInternal(av, buffer, encoder) {
     let type = Object.keys(av)[0];
     let val = av[type];
-    switch(type) {
+    switch (type) {
       case 'S':
         buffer.write(encoder.encodeString(val));
         break;
@@ -183,32 +184,32 @@ module.exports = class AttributeValueEncoder {
         buffer.write(encoder.encodeBinary(val));
         break;
       case 'SS':
-        if(val.length === 0) {
+        if (val.length === 0) {
           throw new DaxClientError('Supplied AttributeValue is empty, must contain exactly one of the supported datatypes', DaxErrorCode.Validation, false);
         }
         buffer.write(encoder.encodeTag(DaxCborTypes.TAG_DDB_STRING_SET));
         buffer.write(encoder.encodeArrayHeader(val.length));
-        for(let str of val) {
+        for (let str of val) {
           buffer.write(encoder.encodeString(str));
         }
         break;
       case 'NS':
-        if(val.length === 0) {
+        if (val.length === 0) {
           throw new DaxClientError('Supplied AttributeValue is empty, must contain exactly one of the supported datatypes', DaxErrorCode.Validation, false);
         }
         buffer.write(encoder.encodeTag(DaxCborTypes.TAG_DDB_NUMBER_SET));
         buffer.write(encoder.encodeArrayHeader(val.length));
-        for(let str of val) {
+        for (let str of val) {
           buffer.write(encoder.encodeNumber(str));
         }
         break;
       case 'BS':
-        if(val.length === 0) {
+        if (val.length === 0) {
           throw new DaxClientError('Supplied AttributeValue is empty, must contain exactly one of the supported datatypes', DaxErrorCode.Validation, false);
         }
         buffer.write(encoder.encodeTag(DaxCborTypes.TAG_DDB_BINARY_SET));
         buffer.write(encoder.encodeArrayHeader(val.length));
-        for(let str of val) {
+        for (let str of val) {
           buffer.write(encoder.encodeBinary(str));
         }
         break;

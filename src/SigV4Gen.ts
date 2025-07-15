@@ -13,10 +13,17 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const crypto = require('crypto');
+import crypto from "crypto";
+import { DaxClientError } from "./DaxClientError";
+import { DaxErrorCode } from "./DaxErrorCode";
 
 /** Class representing a Signature Generation type. */
-class SigV4Gen {
+export class SigV4Gen {
+  static _SIGNED_HEADERS: any[];
+  static _HMAC_SHA256: string;
+  static _HEADER_NAME_DATE: string;
+  static _HEADER_NAME_SECURITY_TOKEN: string;
+  static _HEADER_NAME_HOST: string;
   /**
    * Generate signature
    * @param {AWSCredentials} creds
@@ -26,8 +33,8 @@ class SigV4Gen {
    * @param {Date} time
    * @return {SigAndStringToSign}
    */
-  static generateSigAndStringToSign(creds, endpoint, region, payload, time) {
-    if(time === undefined || !(time instanceof Date)) {
+  static generateSigAndStringToSign(creds, endpoint, region, payload, time?) {
+    if (time === undefined || !(time instanceof Date)) {
       time = new Date();
     }
     const headers = SigV4Gen._getHeaders(endpoint, time, creds);
@@ -67,14 +74,16 @@ class SigV4Gen {
     let sessionToken = awsCredentials.sessionToken !== undefined
       ? awsCredentials.sessionToken : null;
 
-    return {signature: signature,
+    return {
+      signature: signature,
       stringToSign: stringToSign,
-      sessionToken: sessionToken};
+      sessionToken: sessionToken
+    };
   }
 
   static _getCanonicalHeaders(headers) {
     let stringBuilder = '';
-    for(let h of SigV4Gen._SIGNED_HEADERS) {
+    for (let h of SigV4Gen._SIGNED_HEADERS) {
       stringBuilder += (h + ':' + headers.get(h) + '\n');
     }
     return stringBuilder;
@@ -89,7 +98,7 @@ class SigV4Gen {
       const hash = crypto.createHash('sha256');
       hash.update(data);
       return hash.digest('hex');
-    } catch(e) {
+    } catch (e) {
       throw new DaxClientError('Failed to compute SHA-256. ' +
         e.name + ': ' + e.message, DaxErrorCode.Unrecognized);
     }
@@ -110,19 +119,19 @@ class SigV4Gen {
       let kService = SigV4Gen._HmacSHA256(serviceName, kRegion);
       let kSigning = SigV4Gen._HmacSHA256('aws4_request', kService);
       return kSigning;
-    } catch(e) {
+    } catch (e) {
       throw e;
     }
   }
 
   static _getHeaders(hostname, now, awsCredentials) {
     const headers = new Map();
-    if(hostname.startsWith('https://')) {
+    if (hostname.startsWith('https://')) {
       hostname = hostname.substring(8);
     }
     headers.set(SigV4Gen._HEADER_NAME_HOST, hostname);
     headers.set(SigV4Gen._HEADER_NAME_DATE, customizedtoISOString(now, false));
-    if(awsCredentials.sessionToken !== undefined) {
+    if (awsCredentials.sessionToken !== undefined) {
       headers.set(SigV4Gen._HEADER_NAME_SECURITY_TOKEN,
         awsCredentials.sessionToken);
     }
@@ -137,11 +146,11 @@ SigV4Gen._HEADER_NAME_SECURITY_TOKEN = 'x-amz-security-token';
 SigV4Gen._HEADER_NAME_HOST = 'host';
 // NOTE: should be in lexicographic order
 SigV4Gen._SIGNED_HEADERS = [SigV4Gen._HEADER_NAME_HOST,
-  SigV4Gen._HEADER_NAME_DATE];
+SigV4Gen._HEADER_NAME_DATE];
 
 function customizedtoISOString(date, dateOnly) {
   function pad(number) {
-    if(number < 10) {
+    if (number < 10) {
       return '0' + number;
     }
     return number;
@@ -150,10 +159,8 @@ function customizedtoISOString(date, dateOnly) {
   return date.getUTCFullYear() +
     '' + pad(date.getUTCMonth() + 1) +
     '' + pad(date.getUTCDate()) + (dateOnly ? '' :
-    'T' + pad(date.getUTCHours()) +
-    '' + pad(date.getUTCMinutes()) +
-    '' + pad(date.getUTCSeconds()) +
-    'Z');
+      'T' + pad(date.getUTCHours()) +
+      '' + pad(date.getUTCMinutes()) +
+      '' + pad(date.getUTCSeconds()) +
+      'Z');
 }
-
-module.exports = SigV4Gen;

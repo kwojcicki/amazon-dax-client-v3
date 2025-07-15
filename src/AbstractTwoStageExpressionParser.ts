@@ -13,14 +13,19 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const antlr4 = require('antlr4');
-const DynamoDbGrammarLexer = require('./DynamoDbGrammarLexer').DynamoDbGrammarLexer;
-const DynamoDbGrammarParser = require('./DynamoDbGrammarParser').DynamoDbGrammarParser;
 
-class AbstractTwoStageExpressionParser {
+import { PredictionMode } from "antlr4/atn";
+
+import antlr4 from 'antlr4';
+import { DynamoDbGrammarLexer } from './DynamoDbGrammarLexer'
+import { DynamoDbGrammarParser } from './DynamoDbGrammarParser'
+
+export class AbstractTwoStageExpressionParser {
   parse(expression, errorListener) {
+    // @ts-ignore
     let lexer = new DynamoDbGrammarLexer(new antlr4.InputStream(expression));
     let tokens = new antlr4.CommonTokenStream(lexer);
+    // @ts-ignore
     let parser = new DynamoDbGrammarParser(tokens);
     parser.buildParseTrees = true;
     lexer.removeErrorListeners();
@@ -32,7 +37,7 @@ class AbstractTwoStageExpressionParser {
       // If there were problems LL will be used to try again
       parser.interpreter.setPredictionMode(PredictionMode.LL);
       return this.parseStub(parser);
-    } catch(e) {
+    } catch (e) {
       // If there was an error we don't know if it's a real SyntaxError
       // Or SLL strategy wasn't strong enough
       // Stage 2 parse with default prediction mode
@@ -48,5 +53,3 @@ class AbstractTwoStageExpressionParser {
 
   }
 }
-
-module.exports = AbstractTwoStageExpressionParser;

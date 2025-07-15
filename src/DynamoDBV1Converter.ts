@@ -16,10 +16,10 @@
 
 const DaxMethodIds = require('./Constants').DaxMethodIds;
 const DaxDataRequestParam = require('./Constants').DaxDataRequestParam;
-const BigDecimal = require('./BigDecimal');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
-const Util = require('./Util');
+import { BigDecimal } from './BigDecimal';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
+import { Util } from './Util';
 
 const NAME_PREFIX = '#key';
 const VALUE_PREFIX = ':val';
@@ -29,13 +29,13 @@ class DynamoDBV1Converter {
   * Checks If given DDB request is a V1 request which needs conversion
   */
   static isV1Request(request, type) {
-    switch(type) {
+    switch (type) {
       case DaxMethodIds.getItem:
         return !DynamoDBV1Converter._isArrayEmpty(request.AttributesToGet);
       case DaxMethodIds.batchGetItem:
-        if(!DynamoDBV1Converter._isMapEmpty(request.RequestItems)) {
-          for(const tableName of Object.getOwnPropertyNames(request.RequestItems)) {
-            if(!DynamoDBV1Converter._isArrayEmpty(request.RequestItems[tableName].AttributesToGet)) {
+        if (!DynamoDBV1Converter._isMapEmpty(request.RequestItems)) {
+          for (const tableName of Object.getOwnPropertyNames(request.RequestItems)) {
+            if (!DynamoDBV1Converter._isArrayEmpty(request.RequestItems[tableName].AttributesToGet)) {
               return true;
             }
           }
@@ -53,7 +53,7 @@ class DynamoDBV1Converter {
           !DynamoDBV1Converter._isMapEmpty(request.KeyConditions));
       case DaxMethodIds.scan:
         return (!DynamoDBV1Converter._isArrayEmpty(request.AttributesToGet) ||
-        !DynamoDBV1Converter._isMapEmpty(request.ScanFilter));
+          !DynamoDBV1Converter._isMapEmpty(request.ScanFilter));
       case DaxMethodIds.batchWriteItem:
       case DaxMethodIds.transactGetItems:
       case DaxMethodIds.transactWriteItems:
@@ -77,7 +77,7 @@ class DynamoDBV1Converter {
     // Workaround a bug in the initial release of DAX
     request.ReturnConsumedCapacity = request.ReturnConsumedCapacity || 'NONE';
 
-    if(DynamoDBV1Converter.isV1Request(request, type)) {
+    if (DynamoDBV1Converter.isV1Request(request, type)) {
       DynamoDBV1Converter.convertV1RequestToV2(request, type);
     }
 
@@ -88,7 +88,7 @@ class DynamoDBV1Converter {
   * Converts V1 compatible DDB request to V2
   */
   static convertV1RequestToV2(request, type) {
-    switch(type) {
+    switch (type) {
       case DaxMethodIds.getItem:
         request.ExpressionAttributeNames = {};
         request.ProjectionExpression = DynamoDBV1Converter._convertAttrToGetToProjExpr(request.AttributesToGet,
@@ -97,8 +97,8 @@ class DynamoDBV1Converter {
         break;
 
       case DaxMethodIds.batchGetItem:
-        for(const tableName in request.RequestItems) {
-          if(!DynamoDBV1Converter._isArrayEmpty(request.RequestItems[tableName].AttributesToGet)) {
+        for (const tableName in request.RequestItems) {
+          if (!DynamoDBV1Converter._isArrayEmpty(request.RequestItems[tableName].AttributesToGet)) {
             request.RequestItems[tableName].ExpressionAttributeNames = {};
             request.RequestItems[tableName].ProjectionExpression = DynamoDBV1Converter._convertAttrToGetToProjExpr(
               request.RequestItems[tableName].AttributesToGet,
@@ -122,7 +122,7 @@ class DynamoDBV1Converter {
         request.ExpressionAttributeNames = {};
         request.ExpressionAttributeValues = {};
 
-        if(!DynamoDBV1Converter._isMapEmpty(request.Expected)) {
+        if (!DynamoDBV1Converter._isMapEmpty(request.Expected)) {
           request.ConditionExpression = DynamoDBV1Converter._convertConditionsToExpression(request.Expected,
             request.ConditionalOperator, request.ExpressionAttributeNames, request.ExpressionAttributeValues,
             DaxDataRequestParam.ConditionExpression);
@@ -130,7 +130,7 @@ class DynamoDBV1Converter {
           delete request.ConditionalOperator;
         }
 
-        if(!DynamoDBV1Converter._isMapEmpty(request.AttributeUpdates)) {
+        if (!DynamoDBV1Converter._isMapEmpty(request.AttributeUpdates)) {
           request.UpdateExpression = DynamoDBV1Converter._convertUpdateAttributesToUpdateExpr(request.AttributeUpdates,
             request.ExpressionAttributeNames, request.ExpressionAttributeValues);
           delete request.AttributeUpdates;
@@ -138,33 +138,33 @@ class DynamoDBV1Converter {
         break;
 
       case DaxMethodIds.query:
-        if(!request.ExpressionAttributeNames &&
+        if (!request.ExpressionAttributeNames &&
           (!DynamoDBV1Converter._isMapEmpty(request.AttributesToGet) ||
-          !DynamoDBV1Converter._isMapEmpty(request.QueryFilter) ||
-          !DynamoDBV1Converter._isMapEmpty(request.KeyConditions))) {
+            !DynamoDBV1Converter._isMapEmpty(request.QueryFilter) ||
+            !DynamoDBV1Converter._isMapEmpty(request.KeyConditions))) {
           request.ExpressionAttributeNames = {};
         }
 
-        if(request.AttributesToGet) {
+        if (request.AttributesToGet) {
           request.ProjectionExpression = DynamoDBV1Converter._convertAttrToGetToProjExpr(request.AttributesToGet,
             request.ExpressionAttributeNames);
           delete request.AttributesToGet;
         }
 
-        if(!request.ExpressionAttributeValues &&
+        if (!request.ExpressionAttributeValues &&
           (!DynamoDBV1Converter._isMapEmpty(request.KeyConditions) ||
-          !DynamoDBV1Converter._isMapEmpty(request.QueryFilter))) {
+            !DynamoDBV1Converter._isMapEmpty(request.QueryFilter))) {
           request.ExpressionAttributeValues = {};
         }
 
-        if(!DynamoDBV1Converter._isMapEmpty(request.KeyConditions)) {
+        if (!DynamoDBV1Converter._isMapEmpty(request.KeyConditions)) {
           request.KeyConditionExpression = DynamoDBV1Converter._convertConditionsToExpression(request.KeyConditions,
             'AND', request.ExpressionAttributeNames, request.ExpressionAttributeValues,
             DaxDataRequestParam.KeyConditionExpression);
           delete request.KeyConditions;
         }
 
-        if(!DynamoDBV1Converter._isMapEmpty(request.QueryFilter)) {
+        if (!DynamoDBV1Converter._isMapEmpty(request.QueryFilter)) {
           request.FilterExpression = DynamoDBV1Converter._convertConditionsToExpression(request.QueryFilter,
             request.ConditionalOperator, request.ExpressionAttributeNames, request.ExpressionAttributeValues,
             DaxDataRequestParam.FilterExpression);
@@ -174,12 +174,12 @@ class DynamoDBV1Converter {
 
       case DaxMethodIds.scan:
         request.ExpressionAttributeNames = {};
-        if(!DynamoDBV1Converter._isArrayEmpty(request.AttributesToGet)) {
+        if (!DynamoDBV1Converter._isArrayEmpty(request.AttributesToGet)) {
           request.ProjectionExpression = DynamoDBV1Converter._convertAttrToGetToProjExpr(request.AttributesToGet, request.ExpressionAttributeNames);
           delete request.AttributesToGet;
         }
 
-        if(!DynamoDBV1Converter._isMapEmpty(request.ScanFilter)) {
+        if (!DynamoDBV1Converter._isMapEmpty(request.ScanFilter)) {
           request.ExpressionAttributeValues = {};
           request.FilterExpression = DynamoDBV1Converter._convertConditionsToExpression(request.ScanFilter,
             request.ConditionalOperator, request.ExpressionAttributeNames, request.ExpressionAttributeValues,
@@ -198,7 +198,7 @@ class DynamoDBV1Converter {
   * Creates and returns expression string from attribute names map
   */
   static _convertAttrToGetToProjExpr(attrToGet, exprAttrNamesMap) {
-    if(attrToGet === undefined) {
+    if (attrToGet === undefined) {
       throw new DaxClientError('AttributesToGet cannot be null', DaxErrorCode.Validation, false);
     }
 
@@ -215,13 +215,13 @@ class DynamoDBV1Converter {
     let condOperator = conditionalOperator ? conditionalOperator : 'AND';
 
     Object.keys(conditions).forEach((attr) => {
-      if(addCondOpDelimiter) {
-        expr+= ' ' + condOperator + ' ';
+      if (addCondOpDelimiter) {
+        expr += ' ' + condOperator + ' ';
       } else {
         addCondOpDelimiter = true;
       }
       let encodingFn;
-      switch(exprType) {
+      switch (exprType) {
         case DaxDataRequestParam.FilterExpression:
           encodingFn = DynamoDBV1Converter._encodeFilterExpression;
           break;
@@ -231,7 +231,7 @@ class DynamoDBV1Converter {
         case DaxDataRequestParam.KeyConditionExpression:
           encodingFn = DynamoDBV1Converter._encodeKeyConditionExpression;
       }
-      expr+= encodingFn(attr, conditions[attr], exprAttrNamesMap, exprAttrValsMap);
+      expr += encodingFn(attr, conditions[attr], exprAttrNamesMap, exprAttrValsMap);
     });
     return expr;
   }
@@ -240,33 +240,33 @@ class DynamoDBV1Converter {
   * Converts AttributeValueUpdate Map to update expression
   */
   static _convertUpdateAttributesToUpdateExpr(attrValUpdates, exprAttrNamesMap, exprAttrValsMap) {
-    let sets = [];
-    let adds = [];
-    let deletes = [];
-    let removes = [];
-    for(let attributeName in attrValUpdates) {
-      if(!Object.prototype.hasOwnProperty.call(attrValUpdates, attributeName)) {
+    let sets: any[] = [];
+    let adds: any[] = [];
+    let deletes: any[] = [];
+    let removes: any[] = [];
+    for (let attributeName in attrValUpdates) {
+      if (!Object.prototype.hasOwnProperty.call(attrValUpdates, attributeName)) {
         continue;
       }
 
       let attrValUpdate = attrValUpdates[attributeName];
 
       // Move ahead If update entry is null. DynamoDB's behavior.
-      if(!attrValUpdate) {
+      if (!attrValUpdate) {
         continue;
       }
 
-      let action = attrValUpdate.Action ? attrValUpdate.Action: 'PUT';
+      let action = attrValUpdate.Action ? attrValUpdate.Action : 'PUT';
 
-      if(action !== 'ADD' && action !== 'DELETE' && action !== 'PUT') {
+      if (action !== 'ADD' && action !== 'DELETE' && action !== 'PUT') {
         throw new DaxClientError('Member must satisfy enum value set: [ADD, DELETE, PUT]', DaxErrorCode.Validation, false);
       }
 
-      if(!attrValUpdate.Value && action !== 'DELETE') {
+      if (!attrValUpdate.Value && action !== 'DELETE') {
         throw new DaxClientError('Only DELETE action is allowed when no attribute value is specified', DaxErrorCode.Validation, false);
       }
 
-      switch(action) {
+      switch (action) {
         case 'PUT':
           let putExpression = DynamoDBV1Converter._appendToExpAttrMap(attributeName, exprAttrNamesMap, NAME_PREFIX) + ' = '
             + DynamoDBV1Converter._appendToExpAttrMap(attrValUpdate.Value, exprAttrValsMap, VALUE_PREFIX);
@@ -281,7 +281,7 @@ class DynamoDBV1Converter {
 
         case 'DELETE':
           let deleteExpression;
-          if(attrValUpdate.Value) {
+          if (attrValUpdate.Value) {
             deleteExpression = DynamoDBV1Converter._appendToExpAttrMap(attributeName, exprAttrNamesMap, NAME_PREFIX) + ' '
               + DynamoDBV1Converter._appendToExpAttrMap(attrValUpdate.Value, exprAttrValsMap, VALUE_PREFIX);
             deletes.push(deleteExpression);
@@ -297,26 +297,26 @@ class DynamoDBV1Converter {
     }
 
     let updateExpr = '';
-    if(sets.length !== 0) {
-      updateExpr+= DynamoDBV1Converter._generateAndAppendUpdateExpression(sets, 'SET');
+    if (sets.length !== 0) {
+      updateExpr += DynamoDBV1Converter._generateAndAppendUpdateExpression(sets, 'SET');
     }
-    if(adds.length !== 0) {
-      if(updateExpr.length !== 0) {
-        updateExpr+= ' ';
+    if (adds.length !== 0) {
+      if (updateExpr.length !== 0) {
+        updateExpr += ' ';
       }
-      updateExpr+= DynamoDBV1Converter._generateAndAppendUpdateExpression(adds, 'ADD');
+      updateExpr += DynamoDBV1Converter._generateAndAppendUpdateExpression(adds, 'ADD');
     }
-    if(deletes.length !== 0) {
-      if(updateExpr.length !== 0) {
-        updateExpr+= ' ';
+    if (deletes.length !== 0) {
+      if (updateExpr.length !== 0) {
+        updateExpr += ' ';
       }
-      updateExpr+= DynamoDBV1Converter._generateAndAppendUpdateExpression(deletes, 'DELETE');
+      updateExpr += DynamoDBV1Converter._generateAndAppendUpdateExpression(deletes, 'DELETE');
     }
-    if(removes.length !== 0) {
-      if(updateExpr.length !== 0) {
-        updateExpr+= ' ';
+    if (removes.length !== 0) {
+      if (updateExpr.length !== 0) {
+        updateExpr += ' ';
       }
-      updateExpr+= DynamoDBV1Converter._generateAndAppendUpdateExpression(removes, 'REMOVE');
+      updateExpr += DynamoDBV1Converter._generateAndAppendUpdateExpression(removes, 'REMOVE');
     }
 
     return updateExpr;
@@ -327,7 +327,7 @@ class DynamoDBV1Converter {
   */
   static _generateAndAppendUpdateExpression(list, operation) {
     let updateExpr = operation + ' ' + list[0];
-    for(let i = 1; i < list.length; i++) {
+    for (let i = 1; i < list.length; i++) {
       updateExpr += ', ' + list[i];
     }
     return updateExpr;
@@ -338,15 +338,15 @@ class DynamoDBV1Converter {
   */
   static _encodeConditionExpression(attr, expectedAttrVal, exprAttrNamesMap, exprAttrValsMap) {
     // If Expected Attribute value is null, then ignore it. Its the DynamoDB behavior.
-    if(!expectedAttrVal) {
+    if (!expectedAttrVal) {
       return '';
     }
 
     let eName = DynamoDBV1Converter._appendToExpAttrMap(attr, exprAttrNamesMap, NAME_PREFIX);
     let compOp = expectedAttrVal.ComparisonOperator;
 
-    if(!compOp) {
-      if(exprAttrValsMap.AttributeValueList) {
+    if (!compOp) {
+      if (exprAttrValsMap.AttributeValueList) {
         throw new DaxClientError(
           'One or more parameter values were invalid: AttributeValueList can only be used with a ComparisonOperator for Attribute: ' + attr,
           DaxErrorCode.Validation, false);
@@ -355,18 +355,18 @@ class DynamoDBV1Converter {
       return DynamoDBV1Converter._handleExistsCriteria(attr, expectedAttrVal, eName, exprAttrValsMap);
     }
 
-    if(expectedAttrVal.Exists) {
+    if (expectedAttrVal.Exists) {
       throw new DaxClientError('One or more parameter values were invalid: Exists and ComparisonOperator cannot be used together for Attribute: ' + attr,
         DaxErrorCode.Validation, false);
     }
 
     let avl = expectedAttrVal.AttributeValueList;
 
-    if(!avl) {
-      if(expectedAttrVal.Value) {
+    if (!avl) {
+      if (expectedAttrVal.Value) {
         avl = [expectedAttrVal.Value];
       }
-    } else if(expectedAttrVal.Value) {
+    } else if (expectedAttrVal.Value) {
       throw new DaxClientError('Value and AttributeValueList cannot be used together for Attribute: ' + attr + ' ' + avl,
         DaxErrorCode.Validation, false);
     }
@@ -380,13 +380,13 @@ class DynamoDBV1Converter {
   */
   static _encodeFilterExpression(attr, condition, exprAttrNamesMap, exprAttrValsMap) {
     // If the condition is null it should be ignored, as if it wasn't present (same as DDB SDK)
-    if(condition === null) {
+    if (condition === null) {
       return '';
     }
 
     let eName = DynamoDBV1Converter._appendToExpAttrMap(attr, exprAttrNamesMap, NAME_PREFIX);
     let compOp = condition.ComparisonOperator;
-    if(!compOp) {
+    if (!compOp) {
       throw new DaxClientError(
         'One or more parameter values were invalid: AttributeValueList can only be used with a ComparisonOperator for Attribute: ' + attr,
         DaxErrorCode.Validation, false);
@@ -401,12 +401,12 @@ class DynamoDBV1Converter {
   * Converts KeyCondition to conditional expression
   */
   static _encodeKeyConditionExpression(attr, keyCondition, exprAttrNamesMap, exprAttrValsMap) {
-    if(!keyCondition) {
+    if (!keyCondition) {
       throw new DaxClientError('KeyCondition cannot be null for key: ' + attr, DaxErrorCode.Validation, false);
     }
 
     let compOp = keyCondition.ComparisonOperator;
-    if(!compOp || compOp.trim().length === 0) {
+    if (!compOp || compOp.trim().length === 0) {
       throw new DaxClientError('ComparisonOperator cannot be empty for KeyCondition: ' + keyCondition,
         DaxErrorCode.Validation, false);
     }
@@ -415,7 +415,7 @@ class DynamoDBV1Converter {
     let avl = keyCondition.AttributeValueList;
     let eName = DynamoDBV1Converter._appendToExpAttrMap(attr, exprAttrNamesMap, NAME_PREFIX);
 
-    switch(compOp) {
+    switch (compOp) {
       case 'BETWEEN':
         return DynamoDBV1Converter._handleBetweenCondition(compOp, eName, avl, exprAttrValsMap, attr);
       case 'BEGINS_WITH':
@@ -449,17 +449,17 @@ class DynamoDBV1Converter {
   static _handleExistsCriteria(attr, expectedAttrVal, eName, exprAttrValsMap) {
     const exists = expectedAttrVal.Exists === undefined || expectedAttrVal.Exists === null || expectedAttrVal.Exists;
     let expr = '';
-    if(exists) {
+    if (exists) {
       // If Exists is true, a value must be provided
-      if(!expectedAttrVal.Value) {
+      if (!expectedAttrVal.Value) {
         throw new DaxClientError(
           `One or more parameter values were invalid: Value must be provided when Exists is ${expectedAttrVal.Exists} for Attribute: ${attr}`,
           DaxErrorCode.Validation, false);
       }
       let expectedAttrVal0 = DynamoDBV1Converter._appendToExpAttrMap(expectedAttrVal.Value, exprAttrValsMap, VALUE_PREFIX);
-      expr+= eName + ' = ' + expectedAttrVal0;
+      expr += eName + ' = ' + expectedAttrVal0;
     } else {
-      if(expectedAttrVal.Value) {
+      if (expectedAttrVal.Value) {
         // If Exists is false they must not provide a value
         throw new DaxClientError(
           `One or more parameter values were invalid: Value cannot be used when Exists is false for Attribute: ${attr}`,
@@ -475,7 +475,7 @@ class DynamoDBV1Converter {
   */
   static _constructFilterOrExpectedCompOpExpression(compOp, eName, attr, avl, exprAttrValsMap, errorMessage) {
     let op;
-    switch(compOp) {
+    switch (compOp) {
       case 'BETWEEN':
         return DynamoDBV1Converter._handleBetweenCondition(compOp, eName, avl, exprAttrValsMap, attr);
       case 'BEGINS_WITH':
@@ -516,6 +516,7 @@ class DynamoDBV1Converter {
     }
     DynamoDBV1Converter._checkNumArguments(compOp, 1, avl, attr);
     let av0 = avl[0];
+    // @ts-ignore
     DynamoDBV1Converter._checkValidBSNType(compOp, av0);
     let exprAttrVal0 = DynamoDBV1Converter._appendToExpAttrMap(av0, exprAttrValsMap, VALUE_PREFIX);
     return eName + ' ' + op + ' ' + exprAttrVal0;
@@ -526,6 +527,7 @@ class DynamoDBV1Converter {
   */
   static _handleBetweenCondition(compOp, eName, avl, exprAttrValsMap, attr) {
     DynamoDBV1Converter._checkNumArguments(compOp, 2, avl, attr);
+    // @ts-ignore
     DynamoDBV1Converter._checkValidBSNType(compOp, avl[0], avl[1]);
     DynamoDBV1Converter._checkValidBounds(avl[0], avl[1]);
     let exprAttrVal0 = DynamoDBV1Converter._appendToExpAttrMap(avl[0], exprAttrValsMap, VALUE_PREFIX);
@@ -539,9 +541,10 @@ class DynamoDBV1Converter {
   static _handleBeginsWithCondition(compOp, eName, avl, exprAttrValsMap, attr) {
     DynamoDBV1Converter._checkNumArguments(compOp, 1, avl, attr);
     let av0 = avl[0];
-    if(!av0.B && !av0.S) {
+    if (!av0.B && !av0.S) {
       throw new DaxClientError('One or more parameter values were invalid: ComparisonOperator ' + compOp
-         + ' is not valid for ' + Objects.keys(av1)[0] + ' AttributeValue type', DaxErrorCode.Validation, false);
+        // @ts-ignore
+        + ' is not valid for ' + Objects.keys(av1)[0] + ' AttributeValue type', DaxErrorCode.Validation, false);
     }
     let exprAttrVal0 = DynamoDBV1Converter._appendToExpAttrMap(av0, exprAttrValsMap, VALUE_PREFIX);
     return 'begins_with(' + eName + ', ' + exprAttrVal0 + ')';
@@ -553,6 +556,7 @@ class DynamoDBV1Converter {
   static _handleContainsCondition(compOp, eName, avl, exprAttrValsMap, attr) {
     DynamoDBV1Converter._checkNumArguments(compOp, 1, avl, attr);
     let av1 = avl[0];
+    // @ts-ignore
     DynamoDBV1Converter._checkValidBSNBoolNullTypes(compOp, av1);
     let exprAttrVal0 = DynamoDBV1Converter._appendToExpAttrMap(av1, exprAttrValsMap, VALUE_PREFIX);
     return 'contains(' + eName + ', ' + exprAttrVal0 + ')';
@@ -562,11 +566,12 @@ class DynamoDBV1Converter {
   * constructs expression for IN comparison operator
   */
   static _handleInCondition(compOp, eName, atrr, avl, exprAttrValsMap) {
-    if(!avl) {
+    if (!avl) {
       throw new DaxClientError(
+        // @ts-ignore
         'One or more parameter values were invalid: Value or AttributeValueList must be used with ComparisonOperator: IN for Attribute: ' + attr,
         DaxErrorCode.Validation, false);
-    } else if(avl.length === 0) {
+    } else if (avl.length === 0) {
       throw new DaxClientError('One or more parameter values were invalid: Invalid number of argument(s) for the IN ComparisonOperator',
         DaxErrorCode.Validation, false);
     }
@@ -580,12 +585,12 @@ class DynamoDBV1Converter {
   */
   static _checkNumArguments(compOp, expectedArgsCount, avl, attr) {
     let size = avl ? avl.length : 0;
-    if(!avl && expectedArgsCount > 0) {
+    if (!avl && expectedArgsCount > 0) {
       throw new DaxClientError('One or more parameter values were invalid: Value or AttributeValueList must be used with ComparisonOperator: '
-         + compOp + ' for Attribute: ' + attr, DaxErrorCode.Validation, false);
+        + compOp + ' for Attribute: ' + attr, DaxErrorCode.Validation, false);
     }
 
-    if(size != expectedArgsCount) {
+    if (size != expectedArgsCount) {
       throw new DaxClientError('One or more parameter values were invalid: Invalid number of argument(s) for the ' + compOp + ' ComparisonOperator',
         DaxErrorCode.Validation, false);
     }
@@ -596,10 +601,11 @@ class DynamoDBV1Converter {
   */
   static _checkValidBSNBoolNullTypes(compOp) {
     let attrVals = Array.prototype.slice.call(arguments, DynamoDBV1Converter._checkValidBSNBoolNullTypes.length);
-    for(let i = 0; i < attrVals.length; i++) {
-      if(attrVals[i].BOOL || attrVals[i].NULL) {
+    for (let i = 0; i < attrVals.length; i++) {
+      if (attrVals[i].BOOL || attrVals[i].NULL) {
         continue;
       }
+      // @ts-ignore
       DynamoDBV1Converter._checkValidBSNType(compOp, attrVals[i]);
     }
   }
@@ -609,14 +615,14 @@ class DynamoDBV1Converter {
   */
   static _checkValidBSNType(compOp) {
     let attrVals = Array.prototype.slice.call(arguments, DynamoDBV1Converter._checkValidBSNType.length);
-    if(compOp === 'EQ' || compOp === 'NE') {
+    if (compOp === 'EQ' || compOp === 'NE') {
       return;
     }
 
-    for(let i = 0; i < attrVals.length; i++) {
-      if(!attrVals[i].B && !attrVals[i].S && !attrVals[i].N) {
+    for (let i = 0; i < attrVals.length; i++) {
+      if (!attrVals[i].B && !attrVals[i].S && !attrVals[i].N) {
         throw new DaxClientError('One or more parameter values were invalid: ComparisonOperator ' + compOp
-         + ' is not valid for ' + Object.keys(attrVals[i]) + ' AttributeValue type', DaxErrorCode.Validation, false);
+          + ' is not valid for ' + Object.keys(attrVals[i]) + ' AttributeValue type', DaxErrorCode.Validation, false);
       }
     }
   }
@@ -627,18 +633,18 @@ class DynamoDBV1Converter {
   static _checkValidBounds(lowerBoundAv, upperBoundAv) {
     let lbType = Object.keys(lowerBoundAv)[0];
     let ubType = Object.keys(upperBoundAv)[0];
-    if(lbType !== ubType) {
+    if (lbType !== ubType) {
       throw new DaxClientError('One or more parameter values were invalid: '
         + 'AttributeValues inside AttributeValueList must be of same type', DaxErrorCode.Validation, false);
     }
 
-    if(lbType === 'S') {
-      if(lowerBoundAv['S'] > upperBoundAv['S']) {
+    if (lbType === 'S') {
+      if (lowerBoundAv['S'] > upperBoundAv['S']) {
         throw new DaxClientError('The BETWEEN condition was provided a range where the lower bound is greater than the upper bound',
           DaxErrorCode.Validation, false);
       }
-    } else if(lbType === 'N') {
-      if(new BigDecimal(lowerBoundAv['N']).comparedTo(new BigDecimal(upperBoundAv['N'])) > 0) {
+    } else if (lbType === 'N') {
+      if (new BigDecimal(lowerBoundAv['N']).comparedTo(new BigDecimal(upperBoundAv['N'])) > 0) {
         throw new DaxClientError('The BETWEEN condition was provided a range where the lower bound is greater than the upper bound',
           DaxErrorCode.Validation, false);
       }
@@ -651,15 +657,15 @@ class DynamoDBV1Converter {
   static _convertToExpressionAttributeString(attrs, prefix, delimiter, exprAttrMap) {
     let addDelimiter = false;
     let exprAttrStr = '';
-    for(const attr of attrs) {
+    for (const attr of attrs) {
       let exprName = DynamoDBV1Converter._appendToExpAttrMap(attr, exprAttrMap, prefix);
 
-      if(addDelimiter) {
-        exprAttrStr+= delimiter;
+      if (addDelimiter) {
+        exprAttrStr += delimiter;
       } else {
         addDelimiter = true;
       }
-      exprAttrStr+= exprName;
+      exprAttrStr += exprName;
     }
     return exprAttrStr;
   }
@@ -670,7 +676,7 @@ class DynamoDBV1Converter {
   static _appendToExpAttrMap(attr, exprAttrMap, prefix) {
     let suffix = Object.keys(exprAttrMap).length;
 
-    while(exprAttrMap[prefix + suffix] !== undefined) {
+    while (exprAttrMap[prefix + suffix] !== undefined) {
       suffix++;
     }
 

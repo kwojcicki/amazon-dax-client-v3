@@ -14,20 +14,22 @@
  */
 'use strict';
 
-const CborEncoder = require('./CborEncoder');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
-const SessionVersion = require('./SessionVersion');
-const SigV4Gen = require('./SigV4Gen');
-const StreamBuffer = require('./ByteStreamBuffer');
-const ControllablePromise = require('./ControllablePromise');
-const {ENCRYPTED_SCHEME} = require('./Util');
-const net = require('net');
-const tls = require('tls');
+import { CborEncoder } from './CborEncoder';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
+import { SessionVersion } from './SessionVersion';
+import { SigV4Gen } from './SigV4Gen';
+import { ByteStreamBuffer as StreamBuffer } from './ByteStreamBuffer';
+import { ControllablePromise } from './ControllablePromise';
+import { ENCRYPTED_SCHEME } from './Util';
+import net from 'net';
+import tls from 'tls';
 
 const MAGIC_STRING = 'J7yne5G';
 const USER_AGENT_STRING = 'UserAgent';
-const USER_AGENT = 'DaxJSClient-' + require('../package.json').version;
+import packageJson from '../package.json';
+// TODO: should probably replace this with the actual DAX user agent string
+const USER_AGENT = 'DaxJSClient-' + packageJson.version;
 const WINDOW_SCALAR = 0.1;
 const DAX_ADDR = 'https://dax.amazonaws.com';
 const BUFFER_ZERO = Buffer.from([0]);
@@ -35,7 +37,7 @@ const DEFAULT_FLUSH_SIZE = 4096;
 
 const MAX_PENDING_CONNECTION = 10; // same number as JAVA client
 
-class TimeoutError extends DaxClientError {
+export class TimeoutError extends DaxClientError {
   constructor(timeout) {
     super('Connection timeout after ' + timeout + 'ms', DaxErrorCode.Connection);
   }
@@ -44,9 +46,29 @@ class TimeoutError extends DaxClientError {
 exports.USER_AGENT = USER_AGENT;
 
 class ClientTube {
+  cbor: CborEncoder;
+  static ENCODED_INIT_PREFIX: any;
+  socket: any;
+  _authExp: number;
+  _nextTube: ClientTube | null;
+  _authTTLMillis: number;
+  _poolWindow: number;
+  _tubeWindow: number;
+  _region: any;
+  _credProvider: any;
+  _sessionVersion: any;
+  requestBuffer: StreamBuffer;
+  responseBuffer: StreamBuffer;
+  _closed: boolean;
+  static ENCODED_INIT_SUFFIX: any;
+  static ENCODED_AUTH_PREFIX: any;
+  static ENCODED_USER_AGENT: any;
+  _lastPoolAuth: number;
+  _accessKeyId: any;
+
   constructor(socket, version, credProvider, region) {
     this.cbor = new CborEncoder();
-    if(!ClientTube.ENCODED_INIT_PREFIX) {
+    if (!ClientTube.ENCODED_INIT_PREFIX) {
       // lazily initialize ClientTube cbor encoder/context.
       ClientTube.makeCborContext(this.cbor);
     }
@@ -93,7 +115,7 @@ class ClientTube {
   _init(session) {
     this.write(ClientTube.ENCODED_INIT_PREFIX);
 
-    if(!session) {
+    if (!session) {
       this.write(this.cbor.encodeNull());
     } else {
       this.write(this.cbor.encodeBinary(session));
@@ -112,7 +134,7 @@ class ClientTube {
   _cleanupListeners() {
     // don't use removeAllListeners() to remove all listeners since there
     // are some default system listeners that deal with socket end/close event.
-    if(this.socket) {
+    if (this.socket) {
       this.socket.removeAllListeners('timeout');
       this.socket.removeAllListeners('data');
       this.socket.removeAllListeners('error');
@@ -121,21 +143,21 @@ class ClientTube {
 
   write(data) {
     this.requestBuffer.write(data);
-    if(this.requestBuffer.length >= DEFAULT_FLUSH_SIZE) {
+    if (this.requestBuffer.length >= DEFAULT_FLUSH_SIZE) {
       this.socket.write(this.requestBuffer.read());
     }
   }
 
-  flush(data) {
-    if(this.requestBuffer.length > 0) {
+  flush(data?) {
+    if (this.requestBuffer.length > 0) {
       this.socket.write(this.requestBuffer.read());
     }
   }
 
   reauth() {
     let currTime = Date.now();
-    if(this._authExp - currTime <= this._tubeWindow
-        || currTime - this._lastPoolAuth >= this._poolWindow) {
+    if (this._authExp - currTime <= this._tubeWindow
+      || currTime - this._lastPoolAuth >= this._poolWindow) {
       return this._credProvider.resolvePromise().then((creds) => {
         this._checkAndUpdateAccessKeyId(creds.accessKeyId);
         this._lastPoolAuth = currTime;
@@ -156,7 +178,7 @@ class ClientTube {
   }
 
   setTimeout(timeout, callback) {
-    if(this.socket) {
+    if (this.socket) {
       this.socket.setTimeout(timeout, callback);
     }
   }
@@ -178,11 +200,11 @@ class ClientTube {
   }
 
   _checkAndUpdateAccessKeyId(other) {
-    if(!other) {
+    if (!other) {
       throw new DaxClientError('AWSCredentialsProvider provided null AWSAccessKeyId', DaxErrorCode.Authentication, false);
     }
     let equality = (other === this._accessKeyId);
-    if(!equality) {
+    if (!equality) {
       this._accessKeyId = other;
     }
     return equality;
@@ -190,12 +212,14 @@ class ClientTube {
 }
 
 class Connector {
+  _connectOps: { host: any; port: any; checkServerIdentity: any; };
+  _protocol: typeof tls | typeof net;
   constructor(isEncrypted, host, port, skipHostnameVerification, endpointHost) {
     let checkServerIdentity;
-    if(isEncrypted) {
+    if (isEncrypted) {
       checkServerIdentity = skipHostnameVerification ? () => undefined :
         (_, cert) => tls.checkServerIdentity(endpointHost, cert);
-    } else if(skipHostnameVerification) {
+    } else if (skipHostnameVerification) {
       console.warn('Skipping hostname verification for unencrypted clusters will have no effect.');
     }
     this._connectOps = {
@@ -207,11 +231,26 @@ class Connector {
   }
 
   connect(callback) {
+    // @ts-ignore
     return this._protocol.connect(this._connectOps, callback);
   }
 }
 
 class SocketTubePool {
+  _hostname: any;
+  _port: any;
+  _headTube: ClientTube | null;
+  _region: any;
+  _credProvider: any;
+  _sessionVersion: SessionVersion;
+  _pendingConnection: number;
+  _pendingJob: never[];
+  _idleTimeout: any;
+  _connectTimeout: any;
+  _isEncrypted: boolean;
+  _endpointHost: any;
+  _skipHostnameVerification: any;
+  _connector: Connector;
   constructor(hostname, port, credProvider, region, idleTimeout, connectTimeout, tube, seeds, skipHostnameVerification) {
     this._hostname = hostname;
     this._port = port;
@@ -244,16 +283,17 @@ class SocketTubePool {
 
   alloc() {
     let tube = this._headTube;
-    if(tube) {
+    if (tube) {
       // open tube is available, so use it
       this._headTube = tube._nextTube;
       tube._nextTube = null;
-      if(tube.socket) {
+      if (tube.socket) {
         // remove the idle handler
         tube.socket.removeAllListeners('timeout');
 
         // ref socket before return to caller.
         tube.socket.ref();
+        // @ts-ignore
         tube._inPool = false;
       }
 
@@ -261,15 +301,16 @@ class SocketTubePool {
     } else {
       // no open available tubes, so try to create one
       let wait = new ControllablePromise(this._connectTimeout, new TimeoutError(this._connectTimeout));
+      // @ts-ignore
       this._pendingJob.push(wait);
       this._alloc(wait);
       return wait;
     }
   }
 
-  _alloc(wait) {
+  _alloc(wait?) {
     // separate this out since we can better unit test with mocking this func out.
-    if(this._pendingConnection >= MAX_PENDING_CONNECTION) {
+    if (this._pendingConnection >= MAX_PENDING_CONNECTION) {
       return null;
     }
     this._pendingConnection++;
@@ -283,27 +324,29 @@ class SocketTubePool {
   }
 
   socketError(wait, error) {
-    if(wait && !wait.isDone()) {
+    if (wait && !wait.isDone()) {
       wait.reject(new DaxClientError(error.message, DaxErrorCode.Connection));
     }
     this._pendingConnection--;
   }
 
   recycle(tube) {
-    if(!tube || tube._inPool || tube._closed) {
+    if (!tube || tube._inPool || tube._closed) {
       return;
     }
 
-    if(tube._sessionVersion === this._sessionVersion) {
+    if (tube._sessionVersion === this._sessionVersion) {
       // remove all socket listeners to avoid leaks
       tube._cleanupListeners();
 
       // first check whether we can assign tube to someone still waiting for it.
-      while(this._pendingJob.length > 0) {
+      while (this._pendingJob.length > 0) {
         let job = this._pendingJob.shift();
-        if(job.isDone()) {
+        // @ts-ignore
+        if (job.isDone()) {
           continue;
         } else {
+          // @ts-ignore
           job.resolve(tube);
           return;
         }
@@ -329,11 +372,11 @@ class SocketTubePool {
   // preemptively close every tube instead of waiting for each tube to get an
   // exception and closed.
   reset(tube) {
-    if(!tube) {
+    if (!tube) {
       return;
     }
     tube.close();
-    if(tube._sessionVersion !== this._sessionVersion) {
+    if (tube._sessionVersion !== this._sessionVersion) {
       return;
     }
     this._signalAll(false);
@@ -346,9 +389,11 @@ class SocketTubePool {
   // Signal pending connect jobs. 'reject' value will indicate whether to
   // reject directly or allow retry when still within connect timeout.
   _signalAll(reject) {
-    for(let job of this._pendingJob) {
-      if(!job.isDone()) {
-        if(reject) {
+    for (let job of this._pendingJob) {
+      // @ts-ignore
+      if (!job.isDone()) {
+        if (reject) {
+          // @ts-ignore
           job.reject(new DaxClientError('pool is reset or closed', DaxErrorCode.Connection, true));
         } else {
           // We should give it another connect try instead of fail this
@@ -375,7 +420,7 @@ class SocketTubePool {
   _closeAll(tube) {
     let reapCount = 0;
     let next;
-    while(tube) {
+    while (tube) {
       reapCount++;
       tube.close();
       next = tube._nextTube;
@@ -390,14 +435,17 @@ class SocketTubePool {
   }
 
   _removeIdleTube(tube) {
-    if(!tube || !tube._inPool) {
+    if (!tube || !tube._inPool) {
       return;
     }
 
-    if(this._headTube === tube) {
-      if(this._headTube._nextTube) {
+    if (this._headTube === tube) {
+      // @ts-ignore
+      if (this._headTube._nextTube) {
         // if the head tube is idle and there's another tube available, remove the head tube
+        // @ts-ignore
         this._headTube.close();
+        // @ts-ignore
         this._headTube = this._headTube._nextTube;
       } else {
         // if there is no other tube, then leave it intact
@@ -406,12 +454,14 @@ class SocketTubePool {
     } else {
       // find the idle tube in the list
       let prevTube = this._headTube;
+      // @ts-ignore
       let curTube = this._headTube._nextTube;
-      while(curTube) {
-        if(curTube === tube) {
+      while (curTube) {
+        if (curTube === tube) {
           // remove this tube from the list, let GC take care of it
           // prevTube cannot be null
           curTube.close();
+          // @ts-ignore
           prevTube._nextTube = curTube._nextTube;
           curTube._nextTube = null;
           return;

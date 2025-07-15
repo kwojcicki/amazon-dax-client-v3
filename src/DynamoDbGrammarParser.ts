@@ -14,8 +14,8 @@
  */
 // Generated from DynamoDbGrammar.g4 by ANTLR 4.5.3
 // jshint ignore: start
-var antlr4 = require('antlr4/index');
-var DynamoDbGrammarListener = require('./DynamoDbGrammarListener').DynamoDbGrammarListener;
+import * as antlr4 from "antlr4/index";
+import { DynamoDbGrammarListener } from "./DynamoDbGrammarListener"
 var grammarFileName = "DynamoDbGrammar.g4";
 
 var serializedATN = ["\u0003\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
@@ -170,42 +170,42 @@ var serializedATN = ["\u0003\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd",
 
 var atn = new antlr4.atn.ATNDeserializer().deserialize(serializedATN);
 
-var decisionsToDFA = atn.decisionToState.map( function(ds, index) { return new antlr4.dfa.DFA(ds, index); });
+var decisionsToDFA = atn.decisionToState.map(function (ds, index) { return new antlr4.dfa.DFA(ds, index); });
 
 var sharedContextCache = new antlr4.PredictionContextCache();
 
-var literalNames = [ null, "','", "'('", "')'", "'.'", "'['", "']'", null, 
-                     "'='", "'<>'", "'<'", "'<='", "'>'", "'>='", "'+'", 
-                     "'-'" ];
+var literalNames = [null, "','", "'('", "')'", "'.'", "'['", "']'", null,
+    "'='", "'<>'", "'<'", "'<='", "'>'", "'>='", "'+'",
+    "'-'"];
 
-var symbolicNames = [ null, null, null, null, null, null, null, "WS", "EQ", 
-                      "NE", "LT", "LE", "GT", "GE", "PLUS", "MINUS", "IN", 
-                      "BETWEEN", "NOT", "AND", "OR", "SET", "ADD", "DELETE", 
-                      "REMOVE", "INDEX", "ID", "ATTRIBUTE_NAME_SUB", "LITERAL_SUB", 
-                      "STRING_LITERAL", "UNKNOWN" ];
+var symbolicNames = [null, null, null, null, null, null, null, "WS", "EQ",
+    "NE", "LT", "LE", "GT", "GE", "PLUS", "MINUS", "IN",
+    "BETWEEN", "NOT", "AND", "OR", "SET", "ADD", "DELETE",
+    "REMOVE", "INDEX", "ID", "ATTRIBUTE_NAME_SUB", "LITERAL_SUB",
+    "STRING_LITERAL", "UNKNOWN"];
 
-var ruleNames =  [ "projection_", "projection", "condition_", "condition", 
-                   "comparator_symbol", "update_", "update", "set_section", 
-                   "set_action", "add_section", "add_action", "delete_section", 
-                   "delete_action", "remove_section", "remove_action", "set_value", 
-                   "arithmetic", "operand", "func", "path", "id", "dereference", 
-                   "literal", "expression_attr_names_sub", "expression_attr_values_sub", 
-                   "unknown" ];
+var ruleNames = ["projection_", "projection", "condition_", "condition",
+    "comparator_symbol", "update_", "update", "set_section",
+    "set_action", "add_section", "add_action", "delete_section",
+    "delete_action", "remove_section", "remove_action", "set_value",
+    "arithmetic", "operand", "func", "path", "id", "dereference",
+    "literal", "expression_attr_names_sub", "expression_attr_values_sub",
+    "unknown"];
 
-function DynamoDbGrammarParser (input) {
-	antlr4.Parser.call(this, input);
+export function DynamoDbGrammarParser(input) {
+    antlr4.Parser.call(this, input);
     this._interp = new antlr4.atn.ParserATNSimulator(this, atn, decisionsToDFA, sharedContextCache);
     this.ruleNames = ruleNames;
     this.literalNames = literalNames;
     this.symbolicNames = symbolicNames;
 
-	//    private static void validateRedundantParentheses(boolean redundantParens) {
-	    this.validateRedundantParentheses = function(redundantParens) {
-	        if (redundantParens) {
-	//            throw new RedundantParenthesesException();
-	              throw new Error('RedundantParenthesesException')
-	        }
-	    }
+    //    private static void validateRedundantParentheses(boolean redundantParens) {
+    this.validateRedundantParentheses = function (redundantParens) {
+        if (redundantParens) {
+            //            throw new RedundantParenthesesException();
+            throw new Error('RedundantParenthesesException')
+        }
+    }
 
     return this;
 }
@@ -214,9 +214,9 @@ DynamoDbGrammarParser.prototype = Object.create(antlr4.Parser.prototype);
 DynamoDbGrammarParser.prototype.constructor = DynamoDbGrammarParser;
 
 Object.defineProperty(DynamoDbGrammarParser.prototype, "atn", {
-	get : function() {
-		return atn;
-	}
+    get: function () {
+        return atn;
+    }
 });
 
 DynamoDbGrammarParser.EOF = antlr4.Token.EOF;
@@ -279,13 +279,13 @@ DynamoDbGrammarParser.RULE_expression_attr_values_sub = 24;
 DynamoDbGrammarParser.RULE_unknown = 25;
 
 function Projection_Context(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_projection_;
     return this;
@@ -294,24 +294,26 @@ function Projection_Context(parser, parent, invokingState) {
 Projection_Context.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Projection_Context.prototype.constructor = Projection_Context;
 
-Projection_Context.prototype.projection = function() {
-    return this.getTypedRuleContext(ProjectionContext,0);
+Projection_Context.prototype.projection = function () {
+    return this.getTypedRuleContext(ProjectionContext, 0);
 };
 
-Projection_Context.prototype.EOF = function() {
+Projection_Context.prototype.EOF = function () {
     return this.getToken(DynamoDbGrammarParser.EOF, 0);
 };
 
-Projection_Context.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Projection_Context.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterProjection_(this);
-	}
+    }
 };
 
-Projection_Context.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Projection_Context.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitProjection_(this);
-	}
+    }
 };
 
 
@@ -319,8 +321,9 @@ Projection_Context.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Projection_Context = Projection_Context;
 
-DynamoDbGrammarParser.prototype.projection_ = function() {
+DynamoDbGrammarParser.prototype.projection_ = function () {
 
+    // @ts-ignore
     var localctx = new Projection_Context(this, this._ctx, this.state);
     this.enterRule(localctx, 0, DynamoDbGrammarParser.RULE_projection_);
     try {
@@ -330,13 +333,13 @@ DynamoDbGrammarParser.prototype.projection_ = function() {
         this.state = 53;
         this.match(DynamoDbGrammarParser.EOF);
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -344,13 +347,13 @@ DynamoDbGrammarParser.prototype.projection_ = function() {
 };
 
 function ProjectionContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_projection;
     return this;
@@ -359,27 +362,29 @@ function ProjectionContext(parser, parent, invokingState) {
 ProjectionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 ProjectionContext.prototype.constructor = ProjectionContext;
 
-ProjectionContext.prototype.path = function(i) {
-    if(i===undefined) {
+ProjectionContext.prototype.path = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(PathContext);
     } else {
-        return this.getTypedRuleContext(PathContext,i);
+        return this.getTypedRuleContext(PathContext, i);
     }
 };
 
-ProjectionContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ProjectionContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterProjection(this);
-	}
+    }
 };
 
-ProjectionContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ProjectionContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitProjection(this);
-	}
+    }
 };
 
 
@@ -387,8 +392,9 @@ ProjectionContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.ProjectionContext = ProjectionContext;
 
-DynamoDbGrammarParser.prototype.projection = function() {
+DynamoDbGrammarParser.prototype.projection = function () {
 
+    // @ts-ignore
     var localctx = new ProjectionContext(this, this._ctx, this.state);
     this.enterRule(localctx, 2, DynamoDbGrammarParser.RULE_projection);
     var _la = 0; // Token type
@@ -399,7 +405,7 @@ DynamoDbGrammarParser.prototype.projection = function() {
         this.state = 60;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
-        while(_la===DynamoDbGrammarParser.T__0) {
+        while (_la === DynamoDbGrammarParser.T__0) {
             this.state = 56;
             this.match(DynamoDbGrammarParser.T__0);
             this.state = 57;
@@ -409,13 +415,13 @@ DynamoDbGrammarParser.prototype.projection = function() {
             _la = this._input.LA(1);
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -423,13 +429,13 @@ DynamoDbGrammarParser.prototype.projection = function() {
 };
 
 function Condition_Context(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_condition_;
     return this;
@@ -438,24 +444,26 @@ function Condition_Context(parser, parent, invokingState) {
 Condition_Context.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Condition_Context.prototype.constructor = Condition_Context;
 
-Condition_Context.prototype.condition = function() {
-    return this.getTypedRuleContext(ConditionContext,0);
+Condition_Context.prototype.condition = function () {
+    return this.getTypedRuleContext(ConditionContext, 0);
 };
 
-Condition_Context.prototype.EOF = function() {
+Condition_Context.prototype.EOF = function () {
     return this.getToken(DynamoDbGrammarParser.EOF, 0);
 };
 
-Condition_Context.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Condition_Context.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterCondition_(this);
-	}
+    }
 };
 
-Condition_Context.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Condition_Context.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitCondition_(this);
-	}
+    }
 };
 
 
@@ -463,8 +471,9 @@ Condition_Context.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Condition_Context = Condition_Context;
 
-DynamoDbGrammarParser.prototype.condition_ = function() {
+DynamoDbGrammarParser.prototype.condition_ = function () {
 
+    // @ts-ignore
     var localctx = new Condition_Context(this, this._ctx, this.state);
     this.enterRule(localctx, 4, DynamoDbGrammarParser.RULE_condition_);
     try {
@@ -474,13 +483,13 @@ DynamoDbGrammarParser.prototype.condition_ = function() {
         this.state = 64;
         this.match(DynamoDbGrammarParser.EOF);
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -488,13 +497,13 @@ DynamoDbGrammarParser.prototype.condition_ = function() {
 };
 
 function ConditionContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_condition;
     this.hasOuterParens = false
@@ -505,14 +514,14 @@ ConditionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 ConditionContext.prototype.constructor = ConditionContext;
 
 
- 
-ConditionContext.prototype.copyFrom = function(ctx) {
+
+ConditionContext.prototype.copyFrom = function (ctx) {
     antlr4.ParserRuleContext.prototype.copyFrom.call(this, ctx);
     this.hasOuterParens = ctx.hasOuterParens;
 };
 
 function OrContext(parser, ctx) {
-	ConditionContext.call(this, parser);
+    ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -522,35 +531,37 @@ OrContext.prototype.constructor = OrContext;
 
 DynamoDbGrammarParser.OrContext = OrContext;
 
-OrContext.prototype.condition = function(i) {
-    if(i===undefined) {
+OrContext.prototype.condition = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(ConditionContext);
     } else {
-        return this.getTypedRuleContext(ConditionContext,i);
+        return this.getTypedRuleContext(ConditionContext, i);
     }
 };
 
-OrContext.prototype.OR = function() {
+OrContext.prototype.OR = function () {
     return this.getToken(DynamoDbGrammarParser.OR, 0);
 };
-OrContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+OrContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterOr(this);
-	}
+    }
 };
 
-OrContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+OrContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitOr(this);
-	}
+    }
 };
 
 
 function NegationContext(parser, ctx) {
-	ConditionContext.call(this, parser);
+    ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -560,28 +571,30 @@ NegationContext.prototype.constructor = NegationContext;
 
 DynamoDbGrammarParser.NegationContext = NegationContext;
 
-NegationContext.prototype.NOT = function() {
+NegationContext.prototype.NOT = function () {
     return this.getToken(DynamoDbGrammarParser.NOT, 0);
 };
 
-NegationContext.prototype.condition = function() {
-    return this.getTypedRuleContext(ConditionContext,0);
+NegationContext.prototype.condition = function () {
+    return this.getTypedRuleContext(ConditionContext, 0);
 };
-NegationContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+NegationContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterNegation(this);
-	}
+    }
 };
 
-NegationContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+NegationContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitNegation(this);
-	}
+    }
 };
 
 
 function InContext(parser, ctx) {
-	ConditionContext.call(this, parser);
+    ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -591,35 +604,37 @@ InContext.prototype.constructor = InContext;
 
 DynamoDbGrammarParser.InContext = InContext;
 
-InContext.prototype.operand = function(i) {
-    if(i===undefined) {
+InContext.prototype.operand = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(OperandContext);
     } else {
-        return this.getTypedRuleContext(OperandContext,i);
+        return this.getTypedRuleContext(OperandContext, i);
     }
 };
 
-InContext.prototype.IN = function() {
+InContext.prototype.IN = function () {
     return this.getToken(DynamoDbGrammarParser.IN, 0);
 };
-InContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+InContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterIn(this);
-	}
+    }
 };
 
-InContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+InContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitIn(this);
-	}
+    }
 };
 
 
 function AndContext(parser, ctx) {
-	ConditionContext.call(this, parser);
+    ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -629,35 +644,37 @@ AndContext.prototype.constructor = AndContext;
 
 DynamoDbGrammarParser.AndContext = AndContext;
 
-AndContext.prototype.condition = function(i) {
-    if(i===undefined) {
+AndContext.prototype.condition = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(ConditionContext);
     } else {
-        return this.getTypedRuleContext(ConditionContext,i);
+        return this.getTypedRuleContext(ConditionContext, i);
     }
 };
 
-AndContext.prototype.AND = function() {
+AndContext.prototype.AND = function () {
     return this.getToken(DynamoDbGrammarParser.AND, 0);
 };
-AndContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+AndContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterAnd(this);
-	}
+    }
 };
 
-AndContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+AndContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitAnd(this);
-	}
+    }
 };
 
 
 function BetweenContext(parser, ctx) {
-	ConditionContext.call(this, parser);
+    ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -667,39 +684,41 @@ BetweenContext.prototype.constructor = BetweenContext;
 
 DynamoDbGrammarParser.BetweenContext = BetweenContext;
 
-BetweenContext.prototype.operand = function(i) {
-    if(i===undefined) {
+BetweenContext.prototype.operand = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(OperandContext);
     } else {
-        return this.getTypedRuleContext(OperandContext,i);
+        return this.getTypedRuleContext(OperandContext, i);
     }
 };
 
-BetweenContext.prototype.BETWEEN = function() {
+BetweenContext.prototype.BETWEEN = function () {
     return this.getToken(DynamoDbGrammarParser.BETWEEN, 0);
 };
 
-BetweenContext.prototype.AND = function() {
+BetweenContext.prototype.AND = function () {
     return this.getToken(DynamoDbGrammarParser.AND, 0);
 };
-BetweenContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+BetweenContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterBetween(this);
-	}
+    }
 };
 
-BetweenContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+BetweenContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitBetween(this);
-	}
+    }
 };
 
 
 function FunctionConditionContext(parser, ctx) {
-	ConditionContext.call(this, parser);
+    ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -709,24 +728,26 @@ FunctionConditionContext.prototype.constructor = FunctionConditionContext;
 
 DynamoDbGrammarParser.FunctionConditionContext = FunctionConditionContext;
 
-FunctionConditionContext.prototype.func = function() {
-    return this.getTypedRuleContext(FuncContext,0);
+FunctionConditionContext.prototype.func = function () {
+    return this.getTypedRuleContext(FuncContext, 0);
 };
-FunctionConditionContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+FunctionConditionContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterFunctionCondition(this);
-	}
+    }
 };
 
-FunctionConditionContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+FunctionConditionContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitFunctionCondition(this);
-	}
+    }
 };
 
 
 function ComparatorContext(parser, ctx) {
-	ConditionContext.call(this, parser);
+    ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -736,35 +757,37 @@ ComparatorContext.prototype.constructor = ComparatorContext;
 
 DynamoDbGrammarParser.ComparatorContext = ComparatorContext;
 
-ComparatorContext.prototype.operand = function(i) {
-    if(i===undefined) {
+ComparatorContext.prototype.operand = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(OperandContext);
     } else {
-        return this.getTypedRuleContext(OperandContext,i);
+        return this.getTypedRuleContext(OperandContext, i);
     }
 };
 
-ComparatorContext.prototype.comparator_symbol = function() {
-    return this.getTypedRuleContext(Comparator_symbolContext,0);
+ComparatorContext.prototype.comparator_symbol = function () {
+    return this.getTypedRuleContext(Comparator_symbolContext, 0);
 };
-ComparatorContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ComparatorContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterComparator(this);
-	}
+    }
 };
 
-ComparatorContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ComparatorContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitComparator(this);
-	}
+    }
 };
 
 
 function ConditionGroupingContext(parser, ctx) {
-	ConditionContext.call(this, parser);
+    ConditionContext.call(this, parser);
     this.c = null; // ConditionContext;
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -775,29 +798,32 @@ ConditionGroupingContext.prototype.constructor = ConditionGroupingContext;
 
 DynamoDbGrammarParser.ConditionGroupingContext = ConditionGroupingContext;
 
-ConditionGroupingContext.prototype.condition = function() {
-    return this.getTypedRuleContext(ConditionContext,0);
+ConditionGroupingContext.prototype.condition = function () {
+    return this.getTypedRuleContext(ConditionContext, 0);
 };
-ConditionGroupingContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ConditionGroupingContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterConditionGrouping(this);
-	}
+    }
 };
 
-ConditionGroupingContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ConditionGroupingContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitConditionGrouping(this);
-	}
+    }
 };
 
 
 
-DynamoDbGrammarParser.prototype.condition = function(_p) {
-	if(_p===undefined) {
-	    _p = 0;
-	}
+DynamoDbGrammarParser.prototype.condition = function (_p) {
+    if (_p === undefined) {
+        _p = 0;
+    }
     var _parentctx = this._ctx;
     var _parentState = this.state;
+    // @ts-ignore
     var localctx = new ConditionContext(this, this._ctx, _parentState);
     var _prevctx = localctx;
     var _startState = 6;
@@ -807,155 +833,163 @@ DynamoDbGrammarParser.prototype.condition = function(_p) {
         this.enterOuterAlt(localctx, 1);
         this.state = 98;
         this._errHandler.sync(this);
-        var la_ = this._interp.adaptivePredict(this._input,2,this._ctx);
-        switch(la_) {
-        case 1:
-            localctx = new ComparatorContext(this, localctx);
-            this._ctx = localctx;
-            _prevctx = localctx;
+        var la_ = this._interp.adaptivePredict(this._input, 2, this._ctx);
+        switch (la_) {
+            case 1:
+                // @ts-ignore
+                localctx = new ComparatorContext(this, localctx);
+                this._ctx = localctx;
+                _prevctx = localctx;
 
-            this.state = 67;
-            this.operand();
-            this.state = 68;
-            this.comparator_symbol();
-            this.state = 69;
-            this.operand();
-            break;
-
-        case 2:
-            localctx = new InContext(this, localctx);
-            this._ctx = localctx;
-            _prevctx = localctx;
-            this.state = 71;
-            this.operand();
-            this.state = 72;
-            this.match(DynamoDbGrammarParser.IN);
-            this.state = 73;
-            this.match(DynamoDbGrammarParser.T__1);
-            this.state = 74;
-            this.operand();
-            this.state = 79;
-            this._errHandler.sync(this);
-            _la = this._input.LA(1);
-            while(_la===DynamoDbGrammarParser.T__0) {
-                this.state = 75;
-                this.match(DynamoDbGrammarParser.T__0);
-                this.state = 76;
+                this.state = 67;
                 this.operand();
-                this.state = 81;
+                this.state = 68;
+                this.comparator_symbol();
+                this.state = 69;
+                this.operand();
+                break;
+
+            case 2:
+                // @ts-ignore
+                localctx = new InContext(this, localctx);
+                this._ctx = localctx;
+                _prevctx = localctx;
+                this.state = 71;
+                this.operand();
+                this.state = 72;
+                this.match(DynamoDbGrammarParser.IN);
+                this.state = 73;
+                this.match(DynamoDbGrammarParser.T__1);
+                this.state = 74;
+                this.operand();
+                this.state = 79;
                 this._errHandler.sync(this);
                 _la = this._input.LA(1);
-            }
-            this.state = 82;
-            this.match(DynamoDbGrammarParser.T__2);
-            break;
+                while (_la === DynamoDbGrammarParser.T__0) {
+                    this.state = 75;
+                    this.match(DynamoDbGrammarParser.T__0);
+                    this.state = 76;
+                    this.operand();
+                    this.state = 81;
+                    this._errHandler.sync(this);
+                    _la = this._input.LA(1);
+                }
+                this.state = 82;
+                this.match(DynamoDbGrammarParser.T__2);
+                break;
 
-        case 3:
-            localctx = new BetweenContext(this, localctx);
-            this._ctx = localctx;
-            _prevctx = localctx;
-            this.state = 84;
-            this.operand();
-            this.state = 85;
-            this.match(DynamoDbGrammarParser.BETWEEN);
-            this.state = 86;
-            this.operand();
-            this.state = 87;
-            this.match(DynamoDbGrammarParser.AND);
-            this.state = 88;
-            this.operand();
-            break;
+            case 3:
+                // @ts-ignore
+                localctx = new BetweenContext(this, localctx);
+                this._ctx = localctx;
+                _prevctx = localctx;
+                this.state = 84;
+                this.operand();
+                this.state = 85;
+                this.match(DynamoDbGrammarParser.BETWEEN);
+                this.state = 86;
+                this.operand();
+                this.state = 87;
+                this.match(DynamoDbGrammarParser.AND);
+                this.state = 88;
+                this.operand();
+                break;
 
-        case 4:
-            localctx = new FunctionConditionContext(this, localctx);
-            this._ctx = localctx;
-            _prevctx = localctx;
-            this.state = 90;
-            this.func();
-            break;
+            case 4:
+                // @ts-ignore
+                localctx = new FunctionConditionContext(this, localctx);
+                this._ctx = localctx;
+                _prevctx = localctx;
+                this.state = 90;
+                this.func();
+                break;
 
-        case 5:
-            localctx = new ConditionGroupingContext(this, localctx);
-            this._ctx = localctx;
-            _prevctx = localctx;
-            this.state = 91;
-            this.match(DynamoDbGrammarParser.T__1);
-            this.state = 92;
-            localctx.c = this.condition(0);
-            this.state = 93;
-            this.match(DynamoDbGrammarParser.T__2);
+            case 5:
+                // @ts-ignore
+                localctx = new ConditionGroupingContext(this, localctx);
+                this._ctx = localctx;
+                _prevctx = localctx;
+                this.state = 91;
+                this.match(DynamoDbGrammarParser.T__1);
+                this.state = 92;
+                localctx.c = this.condition(0);
+                this.state = 93;
+                this.match(DynamoDbGrammarParser.T__2);
 
-                        this.validateRedundantParentheses(localctx.c.hasOuterParens);
-                        localctx.hasOuterParens = true
-                    
-            break;
+                this.validateRedundantParentheses(localctx.c.hasOuterParens);
+                localctx.hasOuterParens = true
 
-        case 6:
-            localctx = new NegationContext(this, localctx);
-            this._ctx = localctx;
-            _prevctx = localctx;
-            this.state = 96;
-            this.match(DynamoDbGrammarParser.NOT);
-            this.state = 97;
-            this.condition(3);
-            break;
+                break;
+
+            case 6:
+                // @ts-ignore
+                localctx = new NegationContext(this, localctx);
+                this._ctx = localctx;
+                _prevctx = localctx;
+                this.state = 96;
+                this.match(DynamoDbGrammarParser.NOT);
+                this.state = 97;
+                this.condition(3);
+                break;
 
         }
         this._ctx.stop = this._input.LT(-1);
         this.state = 108;
         this._errHandler.sync(this);
-        var _alt = this._interp.adaptivePredict(this._input,4,this._ctx)
-        while(_alt!=2 && _alt!=antlr4.atn.ATN.INVALID_ALT_NUMBER) {
-            if(_alt===1) {
-                if(this._parseListeners!==null) {
+        var _alt = this._interp.adaptivePredict(this._input, 4, this._ctx)
+        while (_alt != 2 && _alt != antlr4.atn.ATN.INVALID_ALT_NUMBER) {
+            if (_alt === 1) {
+                if (this._parseListeners !== null) {
                     this.triggerExitRuleEvent();
                 }
                 _prevctx = localctx;
                 this.state = 106;
                 this._errHandler.sync(this);
-                var la_ = this._interp.adaptivePredict(this._input,3,this._ctx);
-                switch(la_) {
-                case 1:
-                    localctx = new AndContext(this, new ConditionContext(this, _parentctx, _parentState));
-                    this.pushNewRecursionContext(localctx, _startState, DynamoDbGrammarParser.RULE_condition);
-                    this.state = 100;
-                    if (!( this.precpred(this._ctx, 2))) {
-                        throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 2)");
-                    }
-                    this.state = 101;
-                    this.match(DynamoDbGrammarParser.AND);
-                    this.state = 102;
-                    this.condition(3);
-                    break;
+                var la_ = this._interp.adaptivePredict(this._input, 3, this._ctx);
+                switch (la_) {
+                    case 1:
+                        // @ts-ignore
+                        localctx = new AndContext(this, new ConditionContext(this, _parentctx, _parentState));
+                        this.pushNewRecursionContext(localctx, _startState, DynamoDbGrammarParser.RULE_condition);
+                        this.state = 100;
+                        if (!(this.precpred(this._ctx, 2))) {
+                            throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 2)");
+                        }
+                        this.state = 101;
+                        this.match(DynamoDbGrammarParser.AND);
+                        this.state = 102;
+                        this.condition(3);
+                        break;
 
-                case 2:
-                    localctx = new OrContext(this, new ConditionContext(this, _parentctx, _parentState));
-                    this.pushNewRecursionContext(localctx, _startState, DynamoDbGrammarParser.RULE_condition);
-                    this.state = 103;
-                    if (!( this.precpred(this._ctx, 1))) {
-                        throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 1)");
-                    }
-                    this.state = 104;
-                    this.match(DynamoDbGrammarParser.OR);
-                    this.state = 105;
-                    this.condition(2);
-                    break;
+                    case 2:
+                        // @ts-ignore
+                        localctx = new OrContext(this, new ConditionContext(this, _parentctx, _parentState));
+                        this.pushNewRecursionContext(localctx, _startState, DynamoDbGrammarParser.RULE_condition);
+                        this.state = 103;
+                        if (!(this.precpred(this._ctx, 1))) {
+                            throw new antlr4.error.FailedPredicateException(this, "this.precpred(this._ctx, 1)");
+                        }
+                        this.state = 104;
+                        this.match(DynamoDbGrammarParser.OR);
+                        this.state = 105;
+                        this.condition(2);
+                        break;
 
-                } 
+                }
             }
             this.state = 110;
             this._errHandler.sync(this);
-            _alt = this._interp.adaptivePredict(this._input,4,this._ctx);
+            _alt = this._interp.adaptivePredict(this._input, 4, this._ctx);
         }
 
-    } catch( error) {
-        if(error instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = error;
-	        this._errHandler.reportError(this, error);
-	        this._errHandler.recover(this, error);
-	    } else {
-	    	throw error;
-	    }
+    } catch (error) {
+        if (error instanceof antlr4.error.RecognitionException) {
+            localctx.exception = error;
+            this._errHandler.reportError(this, error);
+            this._errHandler.recover(this, error);
+        } else {
+            throw error;
+        }
     } finally {
         this.unrollRecursionContexts(_parentctx)
     }
@@ -963,13 +997,13 @@ DynamoDbGrammarParser.prototype.condition = function(_p) {
 };
 
 function Comparator_symbolContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_comparator_symbol;
     return this;
@@ -979,16 +1013,18 @@ Comparator_symbolContext.prototype = Object.create(antlr4.ParserRuleContext.prot
 Comparator_symbolContext.prototype.constructor = Comparator_symbolContext;
 
 
-Comparator_symbolContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Comparator_symbolContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterComparator_symbol(this);
-	}
+    }
 };
 
-Comparator_symbolContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Comparator_symbolContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitComparator_symbol(this);
-	}
+    }
 };
 
 
@@ -996,8 +1032,9 @@ Comparator_symbolContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Comparator_symbolContext = Comparator_symbolContext;
 
-DynamoDbGrammarParser.prototype.comparator_symbol = function() {
+DynamoDbGrammarParser.prototype.comparator_symbol = function () {
 
+    // @ts-ignore
     var localctx = new Comparator_symbolContext(this, this._ctx, this.state);
     this.enterRule(localctx, 8, DynamoDbGrammarParser.RULE_comparator_symbol);
     var _la = 0; // Token type
@@ -1005,20 +1042,20 @@ DynamoDbGrammarParser.prototype.comparator_symbol = function() {
         this.enterOuterAlt(localctx, 1);
         this.state = 111;
         _la = this._input.LA(1);
-        if(!((((_la) & ~0x1f) == 0 && ((1 << _la) & ((1 << DynamoDbGrammarParser.EQ) | (1 << DynamoDbGrammarParser.NE) | (1 << DynamoDbGrammarParser.LT) | (1 << DynamoDbGrammarParser.LE) | (1 << DynamoDbGrammarParser.GT) | (1 << DynamoDbGrammarParser.GE))) !== 0))) {
-        this._errHandler.recoverInline(this);
+        if (!((((_la) & ~0x1f) == 0 && ((1 << _la) & ((1 << DynamoDbGrammarParser.EQ) | (1 << DynamoDbGrammarParser.NE) | (1 << DynamoDbGrammarParser.LT) | (1 << DynamoDbGrammarParser.LE) | (1 << DynamoDbGrammarParser.GT) | (1 << DynamoDbGrammarParser.GE))) !== 0))) {
+            this._errHandler.recoverInline(this);
         }
         else {
             this.consume();
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1026,13 +1063,13 @@ DynamoDbGrammarParser.prototype.comparator_symbol = function() {
 };
 
 function Update_Context(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_update_;
     return this;
@@ -1041,24 +1078,26 @@ function Update_Context(parser, parent, invokingState) {
 Update_Context.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Update_Context.prototype.constructor = Update_Context;
 
-Update_Context.prototype.update = function() {
-    return this.getTypedRuleContext(UpdateContext,0);
+Update_Context.prototype.update = function () {
+    return this.getTypedRuleContext(UpdateContext, 0);
 };
 
-Update_Context.prototype.EOF = function() {
+Update_Context.prototype.EOF = function () {
     return this.getToken(DynamoDbGrammarParser.EOF, 0);
 };
 
-Update_Context.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Update_Context.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterUpdate_(this);
-	}
+    }
 };
 
-Update_Context.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Update_Context.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitUpdate_(this);
-	}
+    }
 };
 
 
@@ -1066,8 +1105,9 @@ Update_Context.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Update_Context = Update_Context;
 
-DynamoDbGrammarParser.prototype.update_ = function() {
+DynamoDbGrammarParser.prototype.update_ = function () {
 
+    // @ts-ignore
     var localctx = new Update_Context(this, this._ctx, this.state);
     this.enterRule(localctx, 10, DynamoDbGrammarParser.RULE_update_);
     try {
@@ -1077,13 +1117,13 @@ DynamoDbGrammarParser.prototype.update_ = function() {
         this.state = 114;
         this.match(DynamoDbGrammarParser.EOF);
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1091,13 +1131,13 @@ DynamoDbGrammarParser.prototype.update_ = function() {
 };
 
 function UpdateContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_update;
     return this;
@@ -1106,60 +1146,62 @@ function UpdateContext(parser, parent, invokingState) {
 UpdateContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 UpdateContext.prototype.constructor = UpdateContext;
 
-UpdateContext.prototype.set_section = function(i) {
-    if(i===undefined) {
+UpdateContext.prototype.set_section = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(Set_sectionContext);
     } else {
-        return this.getTypedRuleContext(Set_sectionContext,i);
+        return this.getTypedRuleContext(Set_sectionContext, i);
     }
 };
 
-UpdateContext.prototype.add_section = function(i) {
-    if(i===undefined) {
+UpdateContext.prototype.add_section = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(Add_sectionContext);
     } else {
-        return this.getTypedRuleContext(Add_sectionContext,i);
+        return this.getTypedRuleContext(Add_sectionContext, i);
     }
 };
 
-UpdateContext.prototype.delete_section = function(i) {
-    if(i===undefined) {
+UpdateContext.prototype.delete_section = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(Delete_sectionContext);
     } else {
-        return this.getTypedRuleContext(Delete_sectionContext,i);
+        return this.getTypedRuleContext(Delete_sectionContext, i);
     }
 };
 
-UpdateContext.prototype.remove_section = function(i) {
-    if(i===undefined) {
+UpdateContext.prototype.remove_section = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(Remove_sectionContext);
     } else {
-        return this.getTypedRuleContext(Remove_sectionContext,i);
+        return this.getTypedRuleContext(Remove_sectionContext, i);
     }
 };
 
-UpdateContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+UpdateContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterUpdate(this);
-	}
+    }
 };
 
-UpdateContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+UpdateContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitUpdate(this);
-	}
+    }
 };
 
 
@@ -1167,50 +1209,51 @@ UpdateContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.UpdateContext = UpdateContext;
 
-DynamoDbGrammarParser.prototype.update = function() {
+DynamoDbGrammarParser.prototype.update = function () {
 
+    // @ts-ignore
     var localctx = new UpdateContext(this, this._ctx, this.state);
     this.enterRule(localctx, 12, DynamoDbGrammarParser.RULE_update);
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 120; 
+        this.state = 120;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         do {
             this.state = 120;
-            switch(this._input.LA(1)) {
-            case DynamoDbGrammarParser.SET:
-                this.state = 116;
-                this.set_section();
-                break;
-            case DynamoDbGrammarParser.ADD:
-                this.state = 117;
-                this.add_section();
-                break;
-            case DynamoDbGrammarParser.DELETE:
-                this.state = 118;
-                this.delete_section();
-                break;
-            case DynamoDbGrammarParser.REMOVE:
-                this.state = 119;
-                this.remove_section();
-                break;
-            default:
-                throw new antlr4.error.NoViableAltException(this);
+            switch (this._input.LA(1)) {
+                case DynamoDbGrammarParser.SET:
+                    this.state = 116;
+                    this.set_section();
+                    break;
+                case DynamoDbGrammarParser.ADD:
+                    this.state = 117;
+                    this.add_section();
+                    break;
+                case DynamoDbGrammarParser.DELETE:
+                    this.state = 118;
+                    this.delete_section();
+                    break;
+                case DynamoDbGrammarParser.REMOVE:
+                    this.state = 119;
+                    this.remove_section();
+                    break;
+                default:
+                    throw new antlr4.error.NoViableAltException(this);
             }
-            this.state = 122; 
+            this.state = 122;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
-        } while((((_la) & ~0x1f) == 0 && ((1 << _la) & ((1 << DynamoDbGrammarParser.SET) | (1 << DynamoDbGrammarParser.ADD) | (1 << DynamoDbGrammarParser.DELETE) | (1 << DynamoDbGrammarParser.REMOVE))) !== 0));
+        } while ((((_la) & ~0x1f) == 0 && ((1 << _la) & ((1 << DynamoDbGrammarParser.SET) | (1 << DynamoDbGrammarParser.ADD) | (1 << DynamoDbGrammarParser.DELETE) | (1 << DynamoDbGrammarParser.REMOVE))) !== 0));
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1218,13 +1261,13 @@ DynamoDbGrammarParser.prototype.update = function() {
 };
 
 function Set_sectionContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_set_section;
     return this;
@@ -1233,31 +1276,33 @@ function Set_sectionContext(parser, parent, invokingState) {
 Set_sectionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Set_sectionContext.prototype.constructor = Set_sectionContext;
 
-Set_sectionContext.prototype.SET = function() {
+Set_sectionContext.prototype.SET = function () {
     return this.getToken(DynamoDbGrammarParser.SET, 0);
 };
 
-Set_sectionContext.prototype.set_action = function(i) {
-    if(i===undefined) {
+Set_sectionContext.prototype.set_action = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(Set_actionContext);
     } else {
-        return this.getTypedRuleContext(Set_actionContext,i);
+        return this.getTypedRuleContext(Set_actionContext, i);
     }
 };
 
-Set_sectionContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Set_sectionContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterSet_section(this);
-	}
+    }
 };
 
-Set_sectionContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Set_sectionContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitSet_section(this);
-	}
+    }
 };
 
 
@@ -1265,8 +1310,9 @@ Set_sectionContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Set_sectionContext = Set_sectionContext;
 
-DynamoDbGrammarParser.prototype.set_section = function() {
+DynamoDbGrammarParser.prototype.set_section = function () {
 
+    // @ts-ignore
     var localctx = new Set_sectionContext(this, this._ctx, this.state);
     this.enterRule(localctx, 14, DynamoDbGrammarParser.RULE_set_section);
     var _la = 0; // Token type
@@ -1279,7 +1325,7 @@ DynamoDbGrammarParser.prototype.set_section = function() {
         this.state = 130;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
-        while(_la===DynamoDbGrammarParser.T__0) {
+        while (_la === DynamoDbGrammarParser.T__0) {
             this.state = 126;
             this.match(DynamoDbGrammarParser.T__0);
             this.state = 127;
@@ -1289,13 +1335,13 @@ DynamoDbGrammarParser.prototype.set_section = function() {
             _la = this._input.LA(1);
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1303,13 +1349,13 @@ DynamoDbGrammarParser.prototype.set_section = function() {
 };
 
 function Set_actionContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_set_action;
     return this;
@@ -1318,24 +1364,26 @@ function Set_actionContext(parser, parent, invokingState) {
 Set_actionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Set_actionContext.prototype.constructor = Set_actionContext;
 
-Set_actionContext.prototype.path = function() {
-    return this.getTypedRuleContext(PathContext,0);
+Set_actionContext.prototype.path = function () {
+    return this.getTypedRuleContext(PathContext, 0);
 };
 
-Set_actionContext.prototype.set_value = function() {
-    return this.getTypedRuleContext(Set_valueContext,0);
+Set_actionContext.prototype.set_value = function () {
+    return this.getTypedRuleContext(Set_valueContext, 0);
 };
 
-Set_actionContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Set_actionContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterSet_action(this);
-	}
+    }
 };
 
-Set_actionContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Set_actionContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitSet_action(this);
-	}
+    }
 };
 
 
@@ -1343,8 +1391,9 @@ Set_actionContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Set_actionContext = Set_actionContext;
 
-DynamoDbGrammarParser.prototype.set_action = function() {
+DynamoDbGrammarParser.prototype.set_action = function () {
 
+    // @ts-ignore
     var localctx = new Set_actionContext(this, this._ctx, this.state);
     this.enterRule(localctx, 16, DynamoDbGrammarParser.RULE_set_action);
     try {
@@ -1356,13 +1405,13 @@ DynamoDbGrammarParser.prototype.set_action = function() {
         this.state = 135;
         this.set_value();
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1370,13 +1419,13 @@ DynamoDbGrammarParser.prototype.set_action = function() {
 };
 
 function Add_sectionContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_add_section;
     return this;
@@ -1385,31 +1434,33 @@ function Add_sectionContext(parser, parent, invokingState) {
 Add_sectionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Add_sectionContext.prototype.constructor = Add_sectionContext;
 
-Add_sectionContext.prototype.ADD = function() {
+Add_sectionContext.prototype.ADD = function () {
     return this.getToken(DynamoDbGrammarParser.ADD, 0);
 };
 
-Add_sectionContext.prototype.add_action = function(i) {
-    if(i===undefined) {
+Add_sectionContext.prototype.add_action = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(Add_actionContext);
     } else {
-        return this.getTypedRuleContext(Add_actionContext,i);
+        return this.getTypedRuleContext(Add_actionContext, i);
     }
 };
 
-Add_sectionContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Add_sectionContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterAdd_section(this);
-	}
+    }
 };
 
-Add_sectionContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Add_sectionContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitAdd_section(this);
-	}
+    }
 };
 
 
@@ -1417,8 +1468,9 @@ Add_sectionContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Add_sectionContext = Add_sectionContext;
 
-DynamoDbGrammarParser.prototype.add_section = function() {
+DynamoDbGrammarParser.prototype.add_section = function () {
 
+    // @ts-ignore
     var localctx = new Add_sectionContext(this, this._ctx, this.state);
     this.enterRule(localctx, 18, DynamoDbGrammarParser.RULE_add_section);
     var _la = 0; // Token type
@@ -1431,7 +1483,7 @@ DynamoDbGrammarParser.prototype.add_section = function() {
         this.state = 143;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
-        while(_la===DynamoDbGrammarParser.T__0) {
+        while (_la === DynamoDbGrammarParser.T__0) {
             this.state = 139;
             this.match(DynamoDbGrammarParser.T__0);
             this.state = 140;
@@ -1441,13 +1493,13 @@ DynamoDbGrammarParser.prototype.add_section = function() {
             _la = this._input.LA(1);
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1455,13 +1507,13 @@ DynamoDbGrammarParser.prototype.add_section = function() {
 };
 
 function Add_actionContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_add_action;
     return this;
@@ -1470,24 +1522,26 @@ function Add_actionContext(parser, parent, invokingState) {
 Add_actionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Add_actionContext.prototype.constructor = Add_actionContext;
 
-Add_actionContext.prototype.path = function() {
-    return this.getTypedRuleContext(PathContext,0);
+Add_actionContext.prototype.path = function () {
+    return this.getTypedRuleContext(PathContext, 0);
 };
 
-Add_actionContext.prototype.literal = function() {
-    return this.getTypedRuleContext(LiteralContext,0);
+Add_actionContext.prototype.literal = function () {
+    return this.getTypedRuleContext(LiteralContext, 0);
 };
 
-Add_actionContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Add_actionContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterAdd_action(this);
-	}
+    }
 };
 
-Add_actionContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Add_actionContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitAdd_action(this);
-	}
+    }
 };
 
 
@@ -1495,8 +1549,9 @@ Add_actionContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Add_actionContext = Add_actionContext;
 
-DynamoDbGrammarParser.prototype.add_action = function() {
+DynamoDbGrammarParser.prototype.add_action = function () {
 
+    // @ts-ignore
     var localctx = new Add_actionContext(this, this._ctx, this.state);
     this.enterRule(localctx, 20, DynamoDbGrammarParser.RULE_add_action);
     try {
@@ -1506,13 +1561,13 @@ DynamoDbGrammarParser.prototype.add_action = function() {
         this.state = 147;
         this.literal();
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1520,13 +1575,13 @@ DynamoDbGrammarParser.prototype.add_action = function() {
 };
 
 function Delete_sectionContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_delete_section;
     return this;
@@ -1535,31 +1590,33 @@ function Delete_sectionContext(parser, parent, invokingState) {
 Delete_sectionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Delete_sectionContext.prototype.constructor = Delete_sectionContext;
 
-Delete_sectionContext.prototype.DELETE = function() {
+Delete_sectionContext.prototype.DELETE = function () {
     return this.getToken(DynamoDbGrammarParser.DELETE, 0);
 };
 
-Delete_sectionContext.prototype.delete_action = function(i) {
-    if(i===undefined) {
+Delete_sectionContext.prototype.delete_action = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(Delete_actionContext);
     } else {
-        return this.getTypedRuleContext(Delete_actionContext,i);
+        return this.getTypedRuleContext(Delete_actionContext, i);
     }
 };
 
-Delete_sectionContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Delete_sectionContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterDelete_section(this);
-	}
+    }
 };
 
-Delete_sectionContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Delete_sectionContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitDelete_section(this);
-	}
+    }
 };
 
 
@@ -1567,8 +1624,9 @@ Delete_sectionContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Delete_sectionContext = Delete_sectionContext;
 
-DynamoDbGrammarParser.prototype.delete_section = function() {
+DynamoDbGrammarParser.prototype.delete_section = function () {
 
+    // @ts-ignore
     var localctx = new Delete_sectionContext(this, this._ctx, this.state);
     this.enterRule(localctx, 22, DynamoDbGrammarParser.RULE_delete_section);
     var _la = 0; // Token type
@@ -1581,7 +1639,7 @@ DynamoDbGrammarParser.prototype.delete_section = function() {
         this.state = 155;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
-        while(_la===DynamoDbGrammarParser.T__0) {
+        while (_la === DynamoDbGrammarParser.T__0) {
             this.state = 151;
             this.match(DynamoDbGrammarParser.T__0);
             this.state = 152;
@@ -1591,13 +1649,13 @@ DynamoDbGrammarParser.prototype.delete_section = function() {
             _la = this._input.LA(1);
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1605,13 +1663,13 @@ DynamoDbGrammarParser.prototype.delete_section = function() {
 };
 
 function Delete_actionContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_delete_action;
     return this;
@@ -1620,24 +1678,26 @@ function Delete_actionContext(parser, parent, invokingState) {
 Delete_actionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Delete_actionContext.prototype.constructor = Delete_actionContext;
 
-Delete_actionContext.prototype.path = function() {
-    return this.getTypedRuleContext(PathContext,0);
+Delete_actionContext.prototype.path = function () {
+    return this.getTypedRuleContext(PathContext, 0);
 };
 
-Delete_actionContext.prototype.literal = function() {
-    return this.getTypedRuleContext(LiteralContext,0);
+Delete_actionContext.prototype.literal = function () {
+    return this.getTypedRuleContext(LiteralContext, 0);
 };
 
-Delete_actionContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Delete_actionContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterDelete_action(this);
-	}
+    }
 };
 
-Delete_actionContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Delete_actionContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitDelete_action(this);
-	}
+    }
 };
 
 
@@ -1645,8 +1705,9 @@ Delete_actionContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Delete_actionContext = Delete_actionContext;
 
-DynamoDbGrammarParser.prototype.delete_action = function() {
+DynamoDbGrammarParser.prototype.delete_action = function () {
 
+    // @ts-ignore
     var localctx = new Delete_actionContext(this, this._ctx, this.state);
     this.enterRule(localctx, 24, DynamoDbGrammarParser.RULE_delete_action);
     try {
@@ -1656,13 +1717,13 @@ DynamoDbGrammarParser.prototype.delete_action = function() {
         this.state = 159;
         this.literal();
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1670,13 +1731,13 @@ DynamoDbGrammarParser.prototype.delete_action = function() {
 };
 
 function Remove_sectionContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_remove_section;
     return this;
@@ -1685,31 +1746,33 @@ function Remove_sectionContext(parser, parent, invokingState) {
 Remove_sectionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Remove_sectionContext.prototype.constructor = Remove_sectionContext;
 
-Remove_sectionContext.prototype.REMOVE = function() {
+Remove_sectionContext.prototype.REMOVE = function () {
     return this.getToken(DynamoDbGrammarParser.REMOVE, 0);
 };
 
-Remove_sectionContext.prototype.remove_action = function(i) {
-    if(i===undefined) {
+Remove_sectionContext.prototype.remove_action = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(Remove_actionContext);
     } else {
-        return this.getTypedRuleContext(Remove_actionContext,i);
+        return this.getTypedRuleContext(Remove_actionContext, i);
     }
 };
 
-Remove_sectionContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Remove_sectionContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterRemove_section(this);
-	}
+    }
 };
 
-Remove_sectionContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Remove_sectionContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitRemove_section(this);
-	}
+    }
 };
 
 
@@ -1717,8 +1780,9 @@ Remove_sectionContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Remove_sectionContext = Remove_sectionContext;
 
-DynamoDbGrammarParser.prototype.remove_section = function() {
+DynamoDbGrammarParser.prototype.remove_section = function () {
 
+    // @ts-ignore
     var localctx = new Remove_sectionContext(this, this._ctx, this.state);
     this.enterRule(localctx, 26, DynamoDbGrammarParser.RULE_remove_section);
     var _la = 0; // Token type
@@ -1731,7 +1795,7 @@ DynamoDbGrammarParser.prototype.remove_section = function() {
         this.state = 167;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
-        while(_la===DynamoDbGrammarParser.T__0) {
+        while (_la === DynamoDbGrammarParser.T__0) {
             this.state = 163;
             this.match(DynamoDbGrammarParser.T__0);
             this.state = 164;
@@ -1741,13 +1805,13 @@ DynamoDbGrammarParser.prototype.remove_section = function() {
             _la = this._input.LA(1);
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1755,13 +1819,13 @@ DynamoDbGrammarParser.prototype.remove_section = function() {
 };
 
 function Remove_actionContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_remove_action;
     return this;
@@ -1770,20 +1834,22 @@ function Remove_actionContext(parser, parent, invokingState) {
 Remove_actionContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Remove_actionContext.prototype.constructor = Remove_actionContext;
 
-Remove_actionContext.prototype.path = function() {
-    return this.getTypedRuleContext(PathContext,0);
+Remove_actionContext.prototype.path = function () {
+    return this.getTypedRuleContext(PathContext, 0);
 };
 
-Remove_actionContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Remove_actionContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterRemove_action(this);
-	}
+    }
 };
 
-Remove_actionContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Remove_actionContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitRemove_action(this);
-	}
+    }
 };
 
 
@@ -1791,8 +1857,9 @@ Remove_actionContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Remove_actionContext = Remove_actionContext;
 
-DynamoDbGrammarParser.prototype.remove_action = function() {
+DynamoDbGrammarParser.prototype.remove_action = function () {
 
+    // @ts-ignore
     var localctx = new Remove_actionContext(this, this._ctx, this.state);
     this.enterRule(localctx, 28, DynamoDbGrammarParser.RULE_remove_action);
     try {
@@ -1800,13 +1867,13 @@ DynamoDbGrammarParser.prototype.remove_action = function() {
         this.state = 170;
         this.path();
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1814,13 +1881,13 @@ DynamoDbGrammarParser.prototype.remove_action = function() {
 };
 
 function Set_valueContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_set_value;
     return this;
@@ -1830,14 +1897,14 @@ Set_valueContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Set_valueContext.prototype.constructor = Set_valueContext;
 
 
- 
-Set_valueContext.prototype.copyFrom = function(ctx) {
+
+Set_valueContext.prototype.copyFrom = function (ctx) {
     antlr4.ParserRuleContext.prototype.copyFrom.call(this, ctx);
 };
 
 
 function ArithmeticValueContext(parser, ctx) {
-	Set_valueContext.call(this, parser);
+    Set_valueContext.call(this, parser);
     Set_valueContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -1847,24 +1914,26 @@ ArithmeticValueContext.prototype.constructor = ArithmeticValueContext;
 
 DynamoDbGrammarParser.ArithmeticValueContext = ArithmeticValueContext;
 
-ArithmeticValueContext.prototype.arithmetic = function() {
-    return this.getTypedRuleContext(ArithmeticContext,0);
+ArithmeticValueContext.prototype.arithmetic = function () {
+    return this.getTypedRuleContext(ArithmeticContext, 0);
 };
-ArithmeticValueContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ArithmeticValueContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterArithmeticValue(this);
-	}
+    }
 };
 
-ArithmeticValueContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ArithmeticValueContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitArithmeticValue(this);
-	}
+    }
 };
 
 
 function OperandValueContext(parser, ctx) {
-	Set_valueContext.call(this, parser);
+    Set_valueContext.call(this, parser);
     Set_valueContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -1874,57 +1943,62 @@ OperandValueContext.prototype.constructor = OperandValueContext;
 
 DynamoDbGrammarParser.OperandValueContext = OperandValueContext;
 
-OperandValueContext.prototype.operand = function() {
-    return this.getTypedRuleContext(OperandContext,0);
+OperandValueContext.prototype.operand = function () {
+    return this.getTypedRuleContext(OperandContext, 0);
 };
-OperandValueContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+OperandValueContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterOperandValue(this);
-	}
+    }
 };
 
-OperandValueContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+OperandValueContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitOperandValue(this);
-	}
+    }
 };
 
 
 
 DynamoDbGrammarParser.Set_valueContext = Set_valueContext;
 
-DynamoDbGrammarParser.prototype.set_value = function() {
+DynamoDbGrammarParser.prototype.set_value = function () {
 
+    // @ts-ignore
     var localctx = new Set_valueContext(this, this._ctx, this.state);
     this.enterRule(localctx, 30, DynamoDbGrammarParser.RULE_set_value);
     try {
         this.state = 174;
         this._errHandler.sync(this);
-        var la_ = this._interp.adaptivePredict(this._input,11,this._ctx);
-        switch(la_) {
-        case 1:
-            localctx = new OperandValueContext(this, localctx);
-            this.enterOuterAlt(localctx, 1);
-            this.state = 172;
-            this.operand();
-            break;
+        var la_ = this._interp.adaptivePredict(this._input, 11, this._ctx);
+        switch (la_) {
+            case 1:
+                // @ts-ignore
+                localctx = new OperandValueContext(this, localctx);
+                this.enterOuterAlt(localctx, 1);
+                this.state = 172;
+                this.operand();
+                break;
 
-        case 2:
-            localctx = new ArithmeticValueContext(this, localctx);
-            this.enterOuterAlt(localctx, 2);
-            this.state = 173;
-            this.arithmetic();
-            break;
+            case 2:
+                // @ts-ignore
+                localctx = new ArithmeticValueContext(this, localctx);
+                this.enterOuterAlt(localctx, 2);
+                this.state = 173;
+                this.arithmetic();
+                break;
 
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -1932,13 +2006,13 @@ DynamoDbGrammarParser.prototype.set_value = function() {
 };
 
 function ArithmeticContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_arithmetic;
     this.hasOuterParens = false
@@ -1949,15 +2023,15 @@ ArithmeticContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 ArithmeticContext.prototype.constructor = ArithmeticContext;
 
 
- 
-ArithmeticContext.prototype.copyFrom = function(ctx) {
+
+ArithmeticContext.prototype.copyFrom = function (ctx) {
     antlr4.ParserRuleContext.prototype.copyFrom.call(this, ctx);
     this.hasOuterParens = ctx.hasOuterParens;
 };
 
 
 function PlusMinusContext(parser, ctx) {
-	ArithmeticContext.call(this, parser);
+    ArithmeticContext.call(this, parser);
     ArithmeticContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -1967,31 +2041,33 @@ PlusMinusContext.prototype.constructor = PlusMinusContext;
 
 DynamoDbGrammarParser.PlusMinusContext = PlusMinusContext;
 
-PlusMinusContext.prototype.operand = function(i) {
-    if(i===undefined) {
+PlusMinusContext.prototype.operand = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(OperandContext);
     } else {
-        return this.getTypedRuleContext(OperandContext,i);
+        return this.getTypedRuleContext(OperandContext, i);
     }
 };
-PlusMinusContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+PlusMinusContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterPlusMinus(this);
-	}
+    }
 };
 
-PlusMinusContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+PlusMinusContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitPlusMinus(this);
-	}
+    }
 };
 
 
 function ArithmeticParensContext(parser, ctx) {
-	ArithmeticContext.call(this, parser);
+    ArithmeticContext.call(this, parser);
     this.a = null; // ArithmeticContext;
     ArithmeticContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2002,76 +2078,81 @@ ArithmeticParensContext.prototype.constructor = ArithmeticParensContext;
 
 DynamoDbGrammarParser.ArithmeticParensContext = ArithmeticParensContext;
 
-ArithmeticParensContext.prototype.arithmetic = function() {
-    return this.getTypedRuleContext(ArithmeticContext,0);
+ArithmeticParensContext.prototype.arithmetic = function () {
+    return this.getTypedRuleContext(ArithmeticContext, 0);
 };
-ArithmeticParensContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ArithmeticParensContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterArithmeticParens(this);
-	}
+    }
 };
 
-ArithmeticParensContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ArithmeticParensContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitArithmeticParens(this);
-	}
+    }
 };
 
 
 
 DynamoDbGrammarParser.ArithmeticContext = ArithmeticContext;
 
-DynamoDbGrammarParser.prototype.arithmetic = function() {
+DynamoDbGrammarParser.prototype.arithmetic = function () {
 
+    // @ts-ignore
     var localctx = new ArithmeticContext(this, this._ctx, this.state);
     this.enterRule(localctx, 32, DynamoDbGrammarParser.RULE_arithmetic);
     var _la = 0; // Token type
     try {
         this.state = 185;
         this._errHandler.sync(this);
-        var la_ = this._interp.adaptivePredict(this._input,12,this._ctx);
-        switch(la_) {
-        case 1:
-            localctx = new PlusMinusContext(this, localctx);
-            this.enterOuterAlt(localctx, 1);
-            this.state = 176;
-            this.operand();
-            this.state = 177;
-            _la = this._input.LA(1);
-            if(!(_la===DynamoDbGrammarParser.PLUS || _la===DynamoDbGrammarParser.MINUS)) {
-            this._errHandler.recoverInline(this);
-            }
-            else {
-                this.consume();
-            }
-            this.state = 178;
-            this.operand();
-            break;
+        var la_ = this._interp.adaptivePredict(this._input, 12, this._ctx);
+        switch (la_) {
+            case 1:
+                // @ts-ignore
+                localctx = new PlusMinusContext(this, localctx);
+                this.enterOuterAlt(localctx, 1);
+                this.state = 176;
+                this.operand();
+                this.state = 177;
+                _la = this._input.LA(1);
+                if (!(_la === DynamoDbGrammarParser.PLUS || _la === DynamoDbGrammarParser.MINUS)) {
+                    this._errHandler.recoverInline(this);
+                }
+                else {
+                    this.consume();
+                }
+                this.state = 178;
+                this.operand();
+                break;
 
-        case 2:
-            localctx = new ArithmeticParensContext(this, localctx);
-            this.enterOuterAlt(localctx, 2);
-            this.state = 180;
-            this.match(DynamoDbGrammarParser.T__1);
-            this.state = 181;
-            localctx.a = this.arithmetic();
-            this.state = 182;
-            this.match(DynamoDbGrammarParser.T__2);
+            case 2:
+                // @ts-ignore
+                localctx = new ArithmeticParensContext(this, localctx);
+                this.enterOuterAlt(localctx, 2);
+                this.state = 180;
+                this.match(DynamoDbGrammarParser.T__1);
+                this.state = 181;
+                localctx.a = this.arithmetic();
+                this.state = 182;
+                this.match(DynamoDbGrammarParser.T__2);
 
-                        this.validateRedundantParentheses(localctx.a.hasOuterParens);
-                        localctx.hasOuterParens = true
-                    
-            break;
+                this.validateRedundantParentheses(localctx.a.hasOuterParens);
+                localctx.hasOuterParens = true
+
+                break;
 
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -2079,13 +2160,13 @@ DynamoDbGrammarParser.prototype.arithmetic = function() {
 };
 
 function OperandContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_operand;
     this.hasOuterParens = false
@@ -2096,15 +2177,15 @@ OperandContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 OperandContext.prototype.constructor = OperandContext;
 
 
- 
-OperandContext.prototype.copyFrom = function(ctx) {
+
+OperandContext.prototype.copyFrom = function (ctx) {
     antlr4.ParserRuleContext.prototype.copyFrom.call(this, ctx);
     this.hasOuterParens = ctx.hasOuterParens;
 };
 
 
 function PathOperandContext(parser, ctx) {
-	OperandContext.call(this, parser);
+    OperandContext.call(this, parser);
     OperandContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -2114,24 +2195,26 @@ PathOperandContext.prototype.constructor = PathOperandContext;
 
 DynamoDbGrammarParser.PathOperandContext = PathOperandContext;
 
-PathOperandContext.prototype.path = function() {
-    return this.getTypedRuleContext(PathContext,0);
+PathOperandContext.prototype.path = function () {
+    return this.getTypedRuleContext(PathContext, 0);
 };
-PathOperandContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+PathOperandContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterPathOperand(this);
-	}
+    }
 };
 
-PathOperandContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+PathOperandContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitPathOperand(this);
-	}
+    }
 };
 
 
 function LiteralOperandContext(parser, ctx) {
-	OperandContext.call(this, parser);
+    OperandContext.call(this, parser);
     OperandContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -2141,24 +2224,26 @@ LiteralOperandContext.prototype.constructor = LiteralOperandContext;
 
 DynamoDbGrammarParser.LiteralOperandContext = LiteralOperandContext;
 
-LiteralOperandContext.prototype.literal = function() {
-    return this.getTypedRuleContext(LiteralContext,0);
+LiteralOperandContext.prototype.literal = function () {
+    return this.getTypedRuleContext(LiteralContext, 0);
 };
-LiteralOperandContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+LiteralOperandContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterLiteralOperand(this);
-	}
+    }
 };
 
-LiteralOperandContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+LiteralOperandContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitLiteralOperand(this);
-	}
+    }
 };
 
 
 function FunctionOperandContext(parser, ctx) {
-	OperandContext.call(this, parser);
+    OperandContext.call(this, parser);
     OperandContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -2168,24 +2253,26 @@ FunctionOperandContext.prototype.constructor = FunctionOperandContext;
 
 DynamoDbGrammarParser.FunctionOperandContext = FunctionOperandContext;
 
-FunctionOperandContext.prototype.func = function() {
-    return this.getTypedRuleContext(FuncContext,0);
+FunctionOperandContext.prototype.func = function () {
+    return this.getTypedRuleContext(FuncContext, 0);
 };
-FunctionOperandContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+FunctionOperandContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterFunctionOperand(this);
-	}
+    }
 };
 
-FunctionOperandContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+FunctionOperandContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitFunctionOperand(this);
-	}
+    }
 };
 
 
 function ParenOperandContext(parser, ctx) {
-	OperandContext.call(this, parser);
+    OperandContext.call(this, parser);
     this.o = null; // OperandContext;
     OperandContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2196,79 +2283,86 @@ ParenOperandContext.prototype.constructor = ParenOperandContext;
 
 DynamoDbGrammarParser.ParenOperandContext = ParenOperandContext;
 
-ParenOperandContext.prototype.operand = function() {
-    return this.getTypedRuleContext(OperandContext,0);
+ParenOperandContext.prototype.operand = function () {
+    return this.getTypedRuleContext(OperandContext, 0);
 };
-ParenOperandContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ParenOperandContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterParenOperand(this);
-	}
+    }
 };
 
-ParenOperandContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ParenOperandContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitParenOperand(this);
-	}
+    }
 };
 
 
 
 DynamoDbGrammarParser.OperandContext = OperandContext;
 
-DynamoDbGrammarParser.prototype.operand = function() {
+DynamoDbGrammarParser.prototype.operand = function () {
 
+    // @ts-ignore
     var localctx = new OperandContext(this, this._ctx, this.state);
     this.enterRule(localctx, 34, DynamoDbGrammarParser.RULE_operand);
     try {
         this.state = 195;
         this._errHandler.sync(this);
-        var la_ = this._interp.adaptivePredict(this._input,13,this._ctx);
-        switch(la_) {
-        case 1:
-            localctx = new PathOperandContext(this, localctx);
-            this.enterOuterAlt(localctx, 1);
-            this.state = 187;
-            this.path();
-            break;
+        var la_ = this._interp.adaptivePredict(this._input, 13, this._ctx);
+        switch (la_) {
+            case 1:
+                // @ts-ignore
+                localctx = new PathOperandContext(this, localctx);
+                this.enterOuterAlt(localctx, 1);
+                this.state = 187;
+                this.path();
+                break;
 
-        case 2:
-            localctx = new LiteralOperandContext(this, localctx);
-            this.enterOuterAlt(localctx, 2);
-            this.state = 188;
-            this.literal();
-            break;
+            case 2:
+                // @ts-ignore
+                localctx = new LiteralOperandContext(this, localctx);
+                this.enterOuterAlt(localctx, 2);
+                this.state = 188;
+                this.literal();
+                break;
 
-        case 3:
-            localctx = new FunctionOperandContext(this, localctx);
-            this.enterOuterAlt(localctx, 3);
-            this.state = 189;
-            this.func();
-            break;
+            case 3:
+                // @ts-ignore
+                localctx = new FunctionOperandContext(this, localctx);
+                this.enterOuterAlt(localctx, 3);
+                this.state = 189;
+                this.func();
+                break;
 
-        case 4:
-            localctx = new ParenOperandContext(this, localctx);
-            this.enterOuterAlt(localctx, 4);
-            this.state = 190;
-            this.match(DynamoDbGrammarParser.T__1);
-            this.state = 191;
-            localctx.o = this.operand();
-            this.state = 192;
-            this.match(DynamoDbGrammarParser.T__2);
+            case 4:
+                // @ts-ignore
+                localctx = new ParenOperandContext(this, localctx);
+                this.enterOuterAlt(localctx, 4);
+                this.state = 190;
+                this.match(DynamoDbGrammarParser.T__1);
+                this.state = 191;
+                localctx.o = this.operand();
+                this.state = 192;
+                this.match(DynamoDbGrammarParser.T__2);
 
-                        this.validateRedundantParentheses(localctx.o.hasOuterParens);
-                        localctx.hasOuterParens = true
-                    
-            break;
+                this.validateRedundantParentheses(localctx.o.hasOuterParens);
+                localctx.hasOuterParens = true
+
+                break;
 
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -2276,13 +2370,13 @@ DynamoDbGrammarParser.prototype.operand = function() {
 };
 
 function FuncContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_func;
     return this;
@@ -2292,14 +2386,14 @@ FuncContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 FuncContext.prototype.constructor = FuncContext;
 
 
- 
-FuncContext.prototype.copyFrom = function(ctx) {
+
+FuncContext.prototype.copyFrom = function (ctx) {
     antlr4.ParserRuleContext.prototype.copyFrom.call(this, ctx);
 };
 
 
 function FunctionCallContext(parser, ctx) {
-	FuncContext.call(this, parser);
+    FuncContext.call(this, parser);
     FuncContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -2309,42 +2403,46 @@ FunctionCallContext.prototype.constructor = FunctionCallContext;
 
 DynamoDbGrammarParser.FunctionCallContext = FunctionCallContext;
 
-FunctionCallContext.prototype.ID = function() {
+FunctionCallContext.prototype.ID = function () {
     return this.getToken(DynamoDbGrammarParser.ID, 0);
 };
 
-FunctionCallContext.prototype.operand = function(i) {
-    if(i===undefined) {
+FunctionCallContext.prototype.operand = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(OperandContext);
     } else {
-        return this.getTypedRuleContext(OperandContext,i);
+        return this.getTypedRuleContext(OperandContext, i);
     }
 };
-FunctionCallContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+FunctionCallContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterFunctionCall(this);
-	}
+    }
 };
 
-FunctionCallContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+FunctionCallContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitFunctionCall(this);
-	}
+    }
 };
 
 
 
 DynamoDbGrammarParser.FuncContext = FuncContext;
 
-DynamoDbGrammarParser.prototype.func = function() {
+DynamoDbGrammarParser.prototype.func = function () {
 
+    // @ts-ignore
     var localctx = new FuncContext(this, this._ctx, this.state);
     this.enterRule(localctx, 36, DynamoDbGrammarParser.RULE_func);
     var _la = 0; // Token type
     try {
+        // @ts-ignore
         localctx = new FunctionCallContext(this, localctx);
         this.enterOuterAlt(localctx, 1);
         this.state = 197;
@@ -2356,7 +2454,7 @@ DynamoDbGrammarParser.prototype.func = function() {
         this.state = 204;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
-        while(_la===DynamoDbGrammarParser.T__0) {
+        while (_la === DynamoDbGrammarParser.T__0) {
             this.state = 200;
             this.match(DynamoDbGrammarParser.T__0);
             this.state = 201;
@@ -2368,13 +2466,13 @@ DynamoDbGrammarParser.prototype.func = function() {
         this.state = 207;
         this.match(DynamoDbGrammarParser.T__2);
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -2382,13 +2480,13 @@ DynamoDbGrammarParser.prototype.func = function() {
 };
 
 function PathContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_path;
     return this;
@@ -2397,31 +2495,33 @@ function PathContext(parser, parent, invokingState) {
 PathContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 PathContext.prototype.constructor = PathContext;
 
-PathContext.prototype.id = function() {
-    return this.getTypedRuleContext(IdContext,0);
+PathContext.prototype.id = function () {
+    return this.getTypedRuleContext(IdContext, 0);
 };
 
-PathContext.prototype.dereference = function(i) {
-    if(i===undefined) {
+PathContext.prototype.dereference = function (i) {
+    if (i === undefined) {
         i = null;
     }
-    if(i===null) {
+    if (i === null) {
         return this.getTypedRuleContexts(DereferenceContext);
     } else {
-        return this.getTypedRuleContext(DereferenceContext,i);
+        return this.getTypedRuleContext(DereferenceContext, i);
     }
 };
 
-PathContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+PathContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterPath(this);
-	}
+    }
 };
 
-PathContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+PathContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitPath(this);
-	}
+    }
 };
 
 
@@ -2429,8 +2529,9 @@ PathContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.PathContext = PathContext;
 
-DynamoDbGrammarParser.prototype.path = function() {
+DynamoDbGrammarParser.prototype.path = function () {
 
+    // @ts-ignore
     var localctx = new PathContext(this, this._ctx, this.state);
     this.enterRule(localctx, 38, DynamoDbGrammarParser.RULE_path);
     try {
@@ -2439,25 +2540,25 @@ DynamoDbGrammarParser.prototype.path = function() {
         this.id();
         this.state = 213;
         this._errHandler.sync(this);
-        var _alt = this._interp.adaptivePredict(this._input,15,this._ctx)
-        while(_alt!=2 && _alt!=antlr4.atn.ATN.INVALID_ALT_NUMBER) {
-            if(_alt===1) {
+        var _alt = this._interp.adaptivePredict(this._input, 15, this._ctx)
+        while (_alt != 2 && _alt != antlr4.atn.ATN.INVALID_ALT_NUMBER) {
+            if (_alt === 1) {
                 this.state = 210;
-                this.dereference(); 
+                this.dereference();
             }
             this.state = 215;
             this._errHandler.sync(this);
-            _alt = this._interp.adaptivePredict(this._input,15,this._ctx);
+            _alt = this._interp.adaptivePredict(this._input, 15, this._ctx);
         }
 
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -2465,13 +2566,13 @@ DynamoDbGrammarParser.prototype.path = function() {
 };
 
 function IdContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_id;
     return this;
@@ -2480,24 +2581,26 @@ function IdContext(parser, parent, invokingState) {
 IdContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 IdContext.prototype.constructor = IdContext;
 
-IdContext.prototype.ID = function() {
+IdContext.prototype.ID = function () {
     return this.getToken(DynamoDbGrammarParser.ID, 0);
 };
 
-IdContext.prototype.ATTRIBUTE_NAME_SUB = function() {
+IdContext.prototype.ATTRIBUTE_NAME_SUB = function () {
     return this.getToken(DynamoDbGrammarParser.ATTRIBUTE_NAME_SUB, 0);
 };
 
-IdContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+IdContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterId(this);
-	}
+    }
 };
 
-IdContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+IdContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitId(this);
-	}
+    }
 };
 
 
@@ -2505,8 +2608,9 @@ IdContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.IdContext = IdContext;
 
-DynamoDbGrammarParser.prototype.id = function() {
+DynamoDbGrammarParser.prototype.id = function () {
 
+    // @ts-ignore
     var localctx = new IdContext(this, this._ctx, this.state);
     this.enterRule(localctx, 40, DynamoDbGrammarParser.RULE_id);
     var _la = 0; // Token type
@@ -2514,20 +2618,20 @@ DynamoDbGrammarParser.prototype.id = function() {
         this.enterOuterAlt(localctx, 1);
         this.state = 216;
         _la = this._input.LA(1);
-        if(!(_la===DynamoDbGrammarParser.ID || _la===DynamoDbGrammarParser.ATTRIBUTE_NAME_SUB)) {
-        this._errHandler.recoverInline(this);
+        if (!(_la === DynamoDbGrammarParser.ID || _la === DynamoDbGrammarParser.ATTRIBUTE_NAME_SUB)) {
+            this._errHandler.recoverInline(this);
         }
         else {
             this.consume();
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -2535,13 +2639,13 @@ DynamoDbGrammarParser.prototype.id = function() {
 };
 
 function DereferenceContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_dereference;
     return this;
@@ -2551,14 +2655,14 @@ DereferenceContext.prototype = Object.create(antlr4.ParserRuleContext.prototype)
 DereferenceContext.prototype.constructor = DereferenceContext;
 
 
- 
-DereferenceContext.prototype.copyFrom = function(ctx) {
+
+DereferenceContext.prototype.copyFrom = function (ctx) {
     antlr4.ParserRuleContext.prototype.copyFrom.call(this, ctx);
 };
 
 
 function ListAccessContext(parser, ctx) {
-	DereferenceContext.call(this, parser);
+    DereferenceContext.call(this, parser);
     DereferenceContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -2568,24 +2672,26 @@ ListAccessContext.prototype.constructor = ListAccessContext;
 
 DynamoDbGrammarParser.ListAccessContext = ListAccessContext;
 
-ListAccessContext.prototype.INDEX = function() {
+ListAccessContext.prototype.INDEX = function () {
     return this.getToken(DynamoDbGrammarParser.INDEX, 0);
 };
-ListAccessContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ListAccessContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterListAccess(this);
-	}
+    }
 };
 
-ListAccessContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+ListAccessContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitListAccess(this);
-	}
+    }
 };
 
 
 function MapAccessContext(parser, ctx) {
-	DereferenceContext.call(this, parser);
+    DereferenceContext.call(this, parser);
     DereferenceContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -2595,61 +2701,66 @@ MapAccessContext.prototype.constructor = MapAccessContext;
 
 DynamoDbGrammarParser.MapAccessContext = MapAccessContext;
 
-MapAccessContext.prototype.id = function() {
-    return this.getTypedRuleContext(IdContext,0);
+MapAccessContext.prototype.id = function () {
+    return this.getTypedRuleContext(IdContext, 0);
 };
-MapAccessContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+MapAccessContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterMapAccess(this);
-	}
+    }
 };
 
-MapAccessContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+MapAccessContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitMapAccess(this);
-	}
+    }
 };
 
 
 
 DynamoDbGrammarParser.DereferenceContext = DereferenceContext;
 
-DynamoDbGrammarParser.prototype.dereference = function() {
+DynamoDbGrammarParser.prototype.dereference = function () {
 
+    // @ts-ignore
     var localctx = new DereferenceContext(this, this._ctx, this.state);
     this.enterRule(localctx, 42, DynamoDbGrammarParser.RULE_dereference);
     try {
         this.state = 223;
-        switch(this._input.LA(1)) {
-        case DynamoDbGrammarParser.T__3:
-            localctx = new MapAccessContext(this, localctx);
-            this.enterOuterAlt(localctx, 1);
-            this.state = 218;
-            this.match(DynamoDbGrammarParser.T__3);
-            this.state = 219;
-            this.id();
-            break;
-        case DynamoDbGrammarParser.T__4:
-            localctx = new ListAccessContext(this, localctx);
-            this.enterOuterAlt(localctx, 2);
-            this.state = 220;
-            this.match(DynamoDbGrammarParser.T__4);
-            this.state = 221;
-            this.match(DynamoDbGrammarParser.INDEX);
-            this.state = 222;
-            this.match(DynamoDbGrammarParser.T__5);
-            break;
-        default:
-            throw new antlr4.error.NoViableAltException(this);
+        switch (this._input.LA(1)) {
+            case DynamoDbGrammarParser.T__3:
+                // @ts-ignore
+                localctx = new MapAccessContext(this, localctx);
+                this.enterOuterAlt(localctx, 1);
+                this.state = 218;
+                this.match(DynamoDbGrammarParser.T__3);
+                this.state = 219;
+                this.id();
+                break;
+            case DynamoDbGrammarParser.T__4:
+                // @ts-ignore
+                localctx = new ListAccessContext(this, localctx);
+                this.enterOuterAlt(localctx, 2);
+                this.state = 220;
+                this.match(DynamoDbGrammarParser.T__4);
+                this.state = 221;
+                this.match(DynamoDbGrammarParser.INDEX);
+                this.state = 222;
+                this.match(DynamoDbGrammarParser.T__5);
+                break;
+            default:
+                throw new antlr4.error.NoViableAltException(this);
         }
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -2657,13 +2768,13 @@ DynamoDbGrammarParser.prototype.dereference = function() {
 };
 
 function LiteralContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_literal;
     return this;
@@ -2673,14 +2784,14 @@ LiteralContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 LiteralContext.prototype.constructor = LiteralContext;
 
 
- 
-LiteralContext.prototype.copyFrom = function(ctx) {
+
+LiteralContext.prototype.copyFrom = function (ctx) {
     antlr4.ParserRuleContext.prototype.copyFrom.call(this, ctx);
 };
 
 
 function LiteralSubContext(parser, ctx) {
-	LiteralContext.call(this, parser);
+    LiteralContext.call(this, parser);
     LiteralContext.prototype.copyFrom.call(this, ctx);
     return this;
 }
@@ -2690,42 +2801,46 @@ LiteralSubContext.prototype.constructor = LiteralSubContext;
 
 DynamoDbGrammarParser.LiteralSubContext = LiteralSubContext;
 
-LiteralSubContext.prototype.LITERAL_SUB = function() {
+LiteralSubContext.prototype.LITERAL_SUB = function () {
     return this.getToken(DynamoDbGrammarParser.LITERAL_SUB, 0);
 };
-LiteralSubContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+LiteralSubContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterLiteralSub(this);
-	}
+    }
 };
 
-LiteralSubContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+LiteralSubContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitLiteralSub(this);
-	}
+    }
 };
 
 
 
 DynamoDbGrammarParser.LiteralContext = LiteralContext;
 
-DynamoDbGrammarParser.prototype.literal = function() {
+DynamoDbGrammarParser.prototype.literal = function () {
 
+    // @ts-ignore
     var localctx = new LiteralContext(this, this._ctx, this.state);
     this.enterRule(localctx, 44, DynamoDbGrammarParser.RULE_literal);
     try {
+        // @ts-ignore
         localctx = new LiteralSubContext(this, localctx);
         this.enterOuterAlt(localctx, 1);
         this.state = 225;
         this.match(DynamoDbGrammarParser.LITERAL_SUB);
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -2733,13 +2848,13 @@ DynamoDbGrammarParser.prototype.literal = function() {
 };
 
 function Expression_attr_names_subContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_expression_attr_names_sub;
     return this;
@@ -2748,24 +2863,26 @@ function Expression_attr_names_subContext(parser, parent, invokingState) {
 Expression_attr_names_subContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Expression_attr_names_subContext.prototype.constructor = Expression_attr_names_subContext;
 
-Expression_attr_names_subContext.prototype.ATTRIBUTE_NAME_SUB = function() {
+Expression_attr_names_subContext.prototype.ATTRIBUTE_NAME_SUB = function () {
     return this.getToken(DynamoDbGrammarParser.ATTRIBUTE_NAME_SUB, 0);
 };
 
-Expression_attr_names_subContext.prototype.EOF = function() {
+Expression_attr_names_subContext.prototype.EOF = function () {
     return this.getToken(DynamoDbGrammarParser.EOF, 0);
 };
 
-Expression_attr_names_subContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Expression_attr_names_subContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterExpression_attr_names_sub(this);
-	}
+    }
 };
 
-Expression_attr_names_subContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Expression_attr_names_subContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitExpression_attr_names_sub(this);
-	}
+    }
 };
 
 
@@ -2773,8 +2890,9 @@ Expression_attr_names_subContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Expression_attr_names_subContext = Expression_attr_names_subContext;
 
-DynamoDbGrammarParser.prototype.expression_attr_names_sub = function() {
+DynamoDbGrammarParser.prototype.expression_attr_names_sub = function () {
 
+    // @ts-ignore
     var localctx = new Expression_attr_names_subContext(this, this._ctx, this.state);
     this.enterRule(localctx, 46, DynamoDbGrammarParser.RULE_expression_attr_names_sub);
     try {
@@ -2784,13 +2902,13 @@ DynamoDbGrammarParser.prototype.expression_attr_names_sub = function() {
         this.state = 228;
         this.match(DynamoDbGrammarParser.EOF);
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -2798,13 +2916,13 @@ DynamoDbGrammarParser.prototype.expression_attr_names_sub = function() {
 };
 
 function Expression_attr_values_subContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_expression_attr_values_sub;
     return this;
@@ -2813,24 +2931,26 @@ function Expression_attr_values_subContext(parser, parent, invokingState) {
 Expression_attr_values_subContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 Expression_attr_values_subContext.prototype.constructor = Expression_attr_values_subContext;
 
-Expression_attr_values_subContext.prototype.LITERAL_SUB = function() {
+Expression_attr_values_subContext.prototype.LITERAL_SUB = function () {
     return this.getToken(DynamoDbGrammarParser.LITERAL_SUB, 0);
 };
 
-Expression_attr_values_subContext.prototype.EOF = function() {
+Expression_attr_values_subContext.prototype.EOF = function () {
     return this.getToken(DynamoDbGrammarParser.EOF, 0);
 };
 
-Expression_attr_values_subContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Expression_attr_values_subContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterExpression_attr_values_sub(this);
-	}
+    }
 };
 
-Expression_attr_values_subContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+Expression_attr_values_subContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitExpression_attr_values_sub(this);
-	}
+    }
 };
 
 
@@ -2838,8 +2958,9 @@ Expression_attr_values_subContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.Expression_attr_values_subContext = Expression_attr_values_subContext;
 
-DynamoDbGrammarParser.prototype.expression_attr_values_sub = function() {
+DynamoDbGrammarParser.prototype.expression_attr_values_sub = function () {
 
+    // @ts-ignore
     var localctx = new Expression_attr_values_subContext(this, this._ctx, this.state);
     this.enterRule(localctx, 48, DynamoDbGrammarParser.RULE_expression_attr_values_sub);
     try {
@@ -2849,13 +2970,13 @@ DynamoDbGrammarParser.prototype.expression_attr_values_sub = function() {
         this.state = 231;
         this.match(DynamoDbGrammarParser.EOF);
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -2863,13 +2984,13 @@ DynamoDbGrammarParser.prototype.expression_attr_values_sub = function() {
 };
 
 function UnknownContext(parser, parent, invokingState) {
-	if(parent===undefined) {
-	    parent = null;
-	}
-	if(invokingState===undefined || invokingState===null) {
-		invokingState = -1;
-	}
-	antlr4.ParserRuleContext.call(this, parent, invokingState);
+    if (parent === undefined) {
+        parent = null;
+    }
+    if (invokingState === undefined || invokingState === null) {
+        invokingState = -1;
+    }
+    antlr4.ParserRuleContext.call(this, parent, invokingState);
     this.parser = parser;
     this.ruleIndex = DynamoDbGrammarParser.RULE_unknown;
     return this;
@@ -2878,11 +2999,11 @@ function UnknownContext(parser, parent, invokingState) {
 UnknownContext.prototype = Object.create(antlr4.ParserRuleContext.prototype);
 UnknownContext.prototype.constructor = UnknownContext;
 
-UnknownContext.prototype.UNKNOWN = function(i) {
-	if(i===undefined) {
-		i = null;
-	}
-    if(i===null) {
+UnknownContext.prototype.UNKNOWN = function (i) {
+    if (i === undefined) {
+        i = null;
+    }
+    if (i === null) {
         return this.getTokens(DynamoDbGrammarParser.UNKNOWN);
     } else {
         return this.getToken(DynamoDbGrammarParser.UNKNOWN, i);
@@ -2890,16 +3011,18 @@ UnknownContext.prototype.UNKNOWN = function(i) {
 };
 
 
-UnknownContext.prototype.enterRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+UnknownContext.prototype.enterRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.enterUnknown(this);
-	}
+    }
 };
 
-UnknownContext.prototype.exitRule = function(listener) {
-    if(listener instanceof DynamoDbGrammarListener ) {
+UnknownContext.prototype.exitRule = function (listener) {
+    if (listener instanceof DynamoDbGrammarListener) {
+        // @ts-ignore
         listener.exitUnknown(this);
-	}
+    }
 };
 
 
@@ -2907,31 +3030,32 @@ UnknownContext.prototype.exitRule = function(listener) {
 
 DynamoDbGrammarParser.UnknownContext = UnknownContext;
 
-DynamoDbGrammarParser.prototype.unknown = function() {
+DynamoDbGrammarParser.prototype.unknown = function () {
 
+    // @ts-ignore
     var localctx = new UnknownContext(this, this._ctx, this.state);
     this.enterRule(localctx, 50, DynamoDbGrammarParser.RULE_unknown);
     var _la = 0; // Token type
     try {
         this.enterOuterAlt(localctx, 1);
-        this.state = 234; 
+        this.state = 234;
         this._errHandler.sync(this);
         _la = this._input.LA(1);
         do {
             this.state = 233;
             this.match(DynamoDbGrammarParser.UNKNOWN);
-            this.state = 236; 
+            this.state = 236;
             this._errHandler.sync(this);
             _la = this._input.LA(1);
-        } while(_la===DynamoDbGrammarParser.UNKNOWN);
+        } while (_la === DynamoDbGrammarParser.UNKNOWN);
     } catch (re) {
-    	if(re instanceof antlr4.error.RecognitionException) {
-	        localctx.exception = re;
-	        this._errHandler.reportError(this, re);
-	        this._errHandler.recover(this, re);
-	    } else {
-	    	throw re;
-	    }
+        if (re instanceof antlr4.error.RecognitionException) {
+            localctx.exception = re;
+            this._errHandler.reportError(this, re);
+            this._errHandler.recover(this, re);
+        } else {
+            throw re;
+        }
     } finally {
         this.exitRule();
     }
@@ -2939,25 +3063,23 @@ DynamoDbGrammarParser.prototype.unknown = function() {
 };
 
 
-DynamoDbGrammarParser.prototype.sempred = function(localctx, ruleIndex, predIndex) {
-	switch(ruleIndex) {
-	case 3:
-			return this.condition_sempred(localctx, predIndex);
-    default:
-        throw "No predicate with index:" + ruleIndex;
-   }
+DynamoDbGrammarParser.prototype.sempred = function (localctx, ruleIndex, predIndex) {
+    switch (ruleIndex) {
+        case 3:
+            return this.condition_sempred(localctx, predIndex);
+        default:
+            throw "No predicate with index:" + ruleIndex;
+    }
 };
 
-DynamoDbGrammarParser.prototype.condition_sempred = function(localctx, predIndex) {
-	switch(predIndex) {
-		case 0:
-			return this.precpred(this._ctx, 2);
-		case 1:
-			return this.precpred(this._ctx, 1);
-		default:
-			throw "No predicate with index:" + predIndex;
-	}
+DynamoDbGrammarParser.prototype.condition_sempred = function (localctx, predIndex) {
+    switch (predIndex) {
+        case 0:
+            return this.precpred(this._ctx, 2);
+        case 1:
+            return this.precpred(this._ctx, 1);
+        default:
+            throw "No predicate with index:" + predIndex;
+    }
 };
 
-
-exports.DynamoDbGrammarParser = DynamoDbGrammarParser;

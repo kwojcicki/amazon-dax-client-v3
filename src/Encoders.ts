@@ -14,15 +14,20 @@
  */
 'use strict';
 
-const StreamBuffer = require('./ByteStreamBuffer');
-const AttributeValueEncoder = require('./AttributeValueEncoder');
-const CborSExprGenerator = require('./CborSExprGenerator').CborSExprGenerator;
-const Constants = require('./Constants');
-const DocumentPath = require('./DocumentPath');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { Buffer } from 'buffer';
+import { ByteStreamBuffer as StreamBuffer } from './ByteStreamBuffer'
+import { AttributeValueEncoder } from './AttributeValueEncoder'
+import { CborSExprGenerator } from './CborSExprGenerator'
+import * as Constants from './Constants'
+import { DocumentPath } from './DocumentPath';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
 
-module.exports = class Encoders {
+export class Encoders {
+  _encoder: any;
+  _keySchema: any;
+  _attrNames: any;
+  _attrListId: any;
   constructor(encoder, keySchema, attrNames, attrListId) {
     this._encoder = encoder;
     this._keySchema = keySchema;
@@ -50,8 +55,8 @@ module.exports = class Encoders {
 
     buffer.write(cbor.encodeMapStreamHeader());
 
-    for(let attrName in key) {
-      if(Object.prototype.hasOwnProperty.call(key, attrName)) {
+    for (let attrName in key) {
+      if (Object.prototype.hasOwnProperty.call(key, attrName)) {
         buffer.write(cbor.encodeString(attrName));
         buffer.write(AttributeValueEncoder.encodeAttributeValue(key[attrName]));
       }
@@ -63,7 +68,7 @@ module.exports = class Encoders {
   }
 
   encodeValues(item) {
-    if(this._attrNames && this._attrNames.length > 0) {
+    if (this._attrNames && this._attrNames.length > 0) {
       return Encoders.encodeValuesWithNames(item, this._attrNames, this._attrListId, this._encoder);
     } else {
       return Encoders.encodeValuesWithKeys(item, this._keySchema, this._attrListId, this._encoder);
@@ -85,31 +90,31 @@ module.exports = class Encoders {
       eAttrNames, eAttrVals);
   }
 
-  static encodeExpressionAndKwargs(request, cbor, methodId, buffer) {
-    if(!buffer) {
+  static encodeExpressionAndKwargs(request, cbor, methodId?, buffer?) {
+    if (!buffer) {
       buffer = new StreamBuffer();
     }
     buffer.write(cbor.encodeMapStreamHeader());
-    if(request.ReturnConsumedCapacity && request.ReturnConsumedCapacity !== 'NONE') {
+    if (request.ReturnConsumedCapacity && request.ReturnConsumedCapacity !== 'NONE') {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.ReturnConsumedCapacity));
       buffer.write(cbor.encodeInt(Constants.ReturnConsumedCapacityValues[request.ReturnConsumedCapacity.toUpperCase()]));
     }
 
-    if(request.ReturnItemCollectionMetrics && request.ReturnItemCollectionMetrics !== 'NONE') {
+    if (request.ReturnItemCollectionMetrics && request.ReturnItemCollectionMetrics !== 'NONE') {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.ReturnItemCollectionMetrics));
       buffer.write(cbor.encodeInt(Constants.ReturnItemCollectionMetricsValue[request.ReturnItemCollectionMetrics.toUpperCase()]));
     }
 
-    if(request.ReturnValues && request.ReturnValues !== 'NONE') {
+    if (request.ReturnValues && request.ReturnValues !== 'NONE') {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.ReturnValues));
       buffer.write(cbor.encodeInt(Constants.ReturnValues[request.ReturnValues.toUpperCase()]));
     }
 
-    if(request.ConsistentRead !== undefined && request.ConsistentRead !== null) {
+    if (request.ConsistentRead !== undefined && request.ConsistentRead !== null) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.ConsistentRead));
       // Server side query/scan accept CR as int while get accept bool.
       // It's a hack now till we fix server side to allow both int and bool.
-      if(methodId === Constants.DaxMethodIds.query || methodId === Constants.DaxMethodIds.scan) {
+      if (methodId === Constants.DaxMethodIds.query || methodId === Constants.DaxMethodIds.scan) {
         buffer.write(cbor.encodeInt(request.ConsistentRead ? 1 : 0));
       } else {
         buffer.write(cbor.encodeBoolean(request.ConsistentRead));
@@ -117,45 +122,45 @@ module.exports = class Encoders {
     }
 
     // txn
-    if(request.ClientRequestToken) {
+    if (request.ClientRequestToken) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.ClientRequestToken));
       buffer.write(cbor.encodeString(request.ClientRequestToken));
     }
 
     // query
-    if(request.ScanIndexForward !== undefined && request.ScanIndexForward !== null) {
+    if (request.ScanIndexForward !== undefined && request.ScanIndexForward !== null) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.ScanIndexForward));
       buffer.write(cbor.encodeInt(request.ScanIndexForward ? 1 : 0));
     }
 
     // scan
-    if(request.TotalSegments !== undefined && request.TotalSegments !== null) {
+    if (request.TotalSegments !== undefined && request.TotalSegments !== null) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.TotalSegments));
       buffer.write(cbor.encodeInt(request.TotalSegments));
     }
 
-    if(request.Segment !== undefined && request.Segment !== null) {
+    if (request.Segment !== undefined && request.Segment !== null) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.Segment));
       buffer.write(cbor.encodeInt(request.Segment));
     }
 
     // query & scan
-    if(request.IndexName) {
+    if (request.IndexName) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.IndexName));
       buffer.write(cbor.encodeBinary(request.IndexName));
     }
 
-    if(request.Select) {
+    if (request.Select) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.Select));
       buffer.write(cbor.encodeInt(Constants.SelectValues[request.Select.toUpperCase()]));
     }
 
-    if(request.Limit !== undefined && request.Limit !== null) {
+    if (request.Limit !== undefined && request.Limit !== null) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.Limit));
       buffer.write(cbor.encodeInt(request.Limit));
     }
 
-    if(request.ExclusiveStartKey) {
+    if (request.ExclusiveStartKey) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.ExclusiveStartKey));
       // No cbor for map so use custom cbor
       buffer.write(Encoders.encode_ExclusiveStartKey(cbor, request.ExclusiveStartKey, request._keySchema, request.IndexName));
@@ -164,22 +169,22 @@ module.exports = class Encoders {
     // expressions
     let expressions = Encoders.encodeExpressions(request);
 
-    if(request.ConditionExpression) {
+    if (request.ConditionExpression) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.ConditionExpression));
       buffer.write(cbor.encodeBinary(expressions.Condition));
     }
 
-    if(request.FilterExpression) {
+    if (request.FilterExpression) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.FilterExpression));
       buffer.write(cbor.encodeBinary(expressions.Filter));
     }
 
-    if(request.UpdateExpression) {
+    if (request.UpdateExpression) {
       buffer.write(cbor.encodeInt(Constants.DaxDataRequestParam.UpdateExpression));
       buffer.write(cbor.encodeBinary(expressions.Update));
     }
 
-    if(request.ProjectionExpression) {
+    if (request.ProjectionExpression) {
       let projectionOrdinals = [];
       Encoders._prepareProjection(request.ProjectionExpression, request.ExpressionAttributeNames, projectionOrdinals);
       request._projectionOrdinals = projectionOrdinals;
@@ -201,20 +206,20 @@ module.exports = class Encoders {
   }
 
   static encodeKey(keyItem, keySchema, encoder) {
-    if(!keyItem) {
+    if (!keyItem) {
       throw new DaxClientError('Value null at \'keyItem\' failed to satisfy constraint: Member must not be null', DaxErrorCode.Validation, false);
     }
 
     // Extract only the key portion from the given object
     let key = {};
-    for(let keyFragment of keySchema) {
-      if(keyFragment.AttributeName in keyItem) {
+    for (let keyFragment of keySchema) {
+      if (keyFragment.AttributeName in keyItem) {
         key[keyFragment.AttributeName] = keyItem[keyFragment.AttributeName];
       }
     }
 
     let itemSize = Object.keys(key).length;
-    if(itemSize != keySchema.length) {
+    if (itemSize != keySchema.length) {
       throw new DaxClientError(
         'The number of conditions on the keys is invalid (got ' + itemSize + ', expected ' + keySchema.length + ')',
         DaxErrorCode.Validation, false);
@@ -233,7 +238,7 @@ module.exports = class Encoders {
   }
 
   static _encodeProjection(projExp, eAttrStrs) {
-    if(!projExp) { // null, undefined, length 0
+    if (!projExp) { // null, undefined, length 0
       return null;
     }
     // If names are null pass in empty map
@@ -245,17 +250,17 @@ module.exports = class Encoders {
   }
 
   static _prepareProjection(expression, attributeNames, ords) {
-    if(!expression) {
+    if (!expression) {
       return;
     }
     let projectionTerms = expression.split(',');
-    for(let i = 0; i < projectionTerms.length; ++i) {
+    for (let i = 0; i < projectionTerms.length; ++i) {
       ords[i] = DocumentPath.from(projectionTerms[i].trim(), attributeNames);
     }
   }
 
   static encode_ExclusiveStartKey(cbor, exclusiveStartKey, keySchema, isIndex) {
-    if(isIndex) {
+    if (isIndex) {
       return Encoders.encodeCompoundKey(exclusiveStartKey, cbor);
     } else {
       return Encoders.encodeKey(exclusiveStartKey, keySchema, cbor);

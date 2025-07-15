@@ -14,11 +14,16 @@
  */
 'use strict';
 
-class ControllablePromise {
+export class ControllablePromise {
+  _done: boolean;
+  _promise: Promise<unknown>;
+  _to: NodeJS.Timeout;
+  _resolve: (value: unknown) => void;
+  _reject: (reason?: any) => void;
   constructor(timeout, timeoutError) {
     this._done = false;
     this._promise = new Promise((resolve, reject) => {
-      if(timeout > 0) { // if timeout less or equal to 0, it means no timeout.
+      if (timeout > 0) { // if timeout less or equal to 0, it means no timeout.
         this._to = setTimeout(() => {
           this._done = true;
           return reject(timeoutError);
@@ -42,7 +47,7 @@ class ControllablePromise {
   }
 
   resolve(args) {
-    if(this._to) {
+    if (this._to) {
       clearTimeout(this._to);
     }
     this._done = true;
@@ -50,12 +55,10 @@ class ControllablePromise {
   }
 
   reject(err) {
-    if(this._to) {
+    if (this._to) {
       clearTimeout(this._to);
     }
     this._done = true;
     return this._reject(err);
   }
 }
-
-module.exports = ControllablePromise;

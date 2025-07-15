@@ -13,41 +13,42 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const BigInteger = require('bignumber.js');
-const BigDecimal = require('./BigDecimal');
+import { BigInteger } from 'bignumber.js';
+import { BigDecimal } from './BigDecimal';
+import { Buffer } from 'buffer';
 /** Byte to use for undefined, low ordering */
 const NULL_BYTE_LOW = 0;
 
 /** Byte to use for undefined, high ordering */
 const NULL_BYTE_HIGH = 0xff;
 
-class LexDecimal {
+export class LexDecimal {
   static compareUnsigned(a, b) {
     return LexDecimal._compareUnsigned(a, 0, a.length, b, 0, b.length);
   }
 
   static _compareUnsigned(a, aoff, alen, b, boff, blen) {
     let minLen = Math.min(alen, blen);
-    for(let i=0; i<minLen; i++) {
+    for (let i = 0; i < minLen; i++) {
       let ab = a[aoff + i];
       let bb = b[boff + i];
-      if(ab != bb) {
+      if (ab != bb) {
         return (ab & 0xff) - (bb & 0xff);
       }
     }
     return alen - blen;
   }
 
-  static encode(value, xorMask) {
-    if(xorMask === undefined) {
+  static encode(value, xorMask?) {
+    if (xorMask === undefined) {
       xorMask = 0;
     }
-    if(value === undefined) {
+    if (value === undefined) {
       return Buffer.from([NULL_BYTE_HIGH ^ xorMask]);
     }
     // throw new Error('NULL big decimal is not valid key value');
     let encoded;
-    if(value.unscaledValue.isZero()) {
+    if (value.unscaledValue.isZero()) {
       // Value is zero.
       encoded = Buffer.from([0x80 ^ xorMask]);
       return encoded;
@@ -56,7 +57,7 @@ class LexDecimal {
     encoded = Buffer.alloc(LexDecimal._estimateLength(value));
 
     let offset = LexDecimal._encode(value, encoded, 0, xorMask);
-    if(offset == encoded.length) {
+    if (offset == encoded.length) {
       return encoded;
     }
     return encoded.slice(0, offset);
@@ -79,7 +80,7 @@ class LexDecimal {
 
   static _encode(value, dst, dstOffset, xorMask) {
     // Do the header.
-    if(xorMask === undefined) {
+    if (xorMask === undefined) {
       xorMask = 0;
     }
 
@@ -87,11 +88,11 @@ class LexDecimal {
     let precision = unscaledValue.e + 1;
     let exponent = precision - value.scale;
 
-    if(unscaledValue.isNeg()) {
-      if(exponent >= -0x3e && exponent < 0x3e) {
+    if (unscaledValue.isNeg()) {
+      if (exponent >= -0x3e && exponent < 0x3e) {
         dst[dstOffset++] = ((0x3f - exponent) ^ xorMask);
       } else {
-        if(exponent < 0) {
+        if (exponent < 0) {
           dst[dstOffset] = (0x7e ^ xorMask);
         } else {
           dst[dstOffset] = (1 ^ xorMask);
@@ -100,10 +101,10 @@ class LexDecimal {
         dstOffset += 5;
       }
     } else {
-      if(exponent >= -0x3e && exponent < 0x3e) {
+      if (exponent >= -0x3e && exponent < 0x3e) {
         dst[dstOffset++] = ((exponent + 0xc0) ^ xorMask);
       } else {
-        if(exponent < 0) {
+        if (exponent < 0) {
           dst[dstOffset] = (0x81 ^ xorMask);
         } else {
           dst[dstOffset] = (0xfe ^ xorMask);
@@ -115,7 +116,7 @@ class LexDecimal {
 
     // Ensure a non-fractional amount of base-1000 digits.
     let terminator;
-    switch(precision % 3) {
+    switch (precision % 3) {
       case 0: default:
         terminator = 2;
         break;
@@ -133,7 +134,7 @@ class LexDecimal {
     // encoded as 12..1011. Digit values 0..11 and 1012..1023 are used for terminators.
 
     let digitAdjust;
-    if(!unscaledValue.isNeg()) {
+    if (!unscaledValue.isNeg()) {
       digitAdjust = 12;
     } else {
       digitAdjust = 999 + 12;
@@ -141,13 +142,13 @@ class LexDecimal {
     }
 
     let pos = Math.floor(Math.ceil((unscaledValue.e + 1) / Math.log(2) / 3 * Math.log(1000) + 9) / 10) + 1;
-    let digits = [];
+    let digits: any[] = [];
     digits[--pos] = terminator;
 
-    while(!unscaledValue.isZero()) {
+    while (!unscaledValue.isZero()) {
       let divrem = [unscaledValue.divToInt(1000), unscaledValue.mod(1000)];
 
-      if(--pos < 0) {
+      if (--pos < 0) {
         // Handle rare case when an extra digit is required.
         digits.unshift(0);
         pos = 0;
@@ -163,23 +164,23 @@ class LexDecimal {
 
     let accum = 0;
     let bits = 0;
-    for(let i=0; i<digits.length; i++) {
+    for (let i = 0; i < digits.length; i++) {
       accum = (accum << 10) | digits[i];
       bits += 10;
       do {
         dst[dstOffset++] = ((accum >> (bits -= 8)) ^ xorMask);
-      } while(bits >= 8);
+      } while (bits >= 8);
     }
 
-    if(bits != 0) {
+    if (bits != 0) {
       dst[dstOffset++] = ((accum << (8 - bits)) ^ xorMask);
     }
 
     return dstOffset;
   }
 
-  static decode(src, srcOffset, valueRef, xorMask) {
-    if(xorMask === undefined) {
+  static decode(src, srcOffset, valueRef, xorMask?) {
+    if (xorMask === undefined) {
       xorMask = 0;
     }
     const originalOffset = srcOffset;
@@ -191,7 +192,7 @@ class LexDecimal {
     let digitAdjust;
     let exponent;
 
-    switch(header) {
+    switch (header) {
       case (NULL_BYTE_HIGH & 0xff):
       case (NULL_BYTE_LOW & 0xff):
         valueRef[0] = undefined;
@@ -215,7 +216,7 @@ class LexDecimal {
 
       default:
         exponent = (src[srcOffset++] ^ xorMask) & 0xff;
-        if(exponent >= 0x82) {
+        if (exponent >= 0x82) {
           digitAdjust = 12;
           exponent -= 0xc0;
         } else {
@@ -232,19 +233,19 @@ class LexDecimal {
 
     let accum = 0;
     let bits = 0;
-    let lastDigit = undefined;
+    let lastDigit: BigInteger | undefined = undefined;
 
-    loop: while(true) {
+    loop: while (true) {
       accum = (accum << 8) | ((src[srcOffset++] ^ xorMask) & 0xff);
       bits += 8;
-      if(bits >= 10) {
+      if (bits >= 10) {
         let digit = (accum >> (bits - 10)) & 0x3ff;
 
-        switch(digit) {
+        switch (digit) {
           case 0:
           case 1023:
-            lastDigit = lastDigit.divToInt(100);
-            if(unscaledValue === undefined) {
+            lastDigit = lastDigit!.divToInt(100);
+            if (unscaledValue === undefined) {
               unscaledValue = lastDigit;
             } else {
               unscaledValue = unscaledValue.mul(10).add(lastDigit);
@@ -254,7 +255,7 @@ class LexDecimal {
           case 1:
           case 1022:
             lastDigit = lastDigit.divToInt(10);
-            if(unscaledValue === undefined) {
+            if (unscaledValue === undefined) {
               unscaledValue = lastDigit;
             } else {
               unscaledValue = unscaledValue.mul(100).add(lastDigit);
@@ -263,7 +264,7 @@ class LexDecimal {
             break loop;
           case 2:
           case 1021:
-            if(unscaledValue === undefined) {
+            if (unscaledValue === undefined) {
               unscaledValue = lastDigit;
             } else {
               unscaledValue = unscaledValue.mul(1000).add(lastDigit);
@@ -272,8 +273,8 @@ class LexDecimal {
             break loop;
 
           default:
-            if(unscaledValue === undefined) {
-              if((unscaledValue = lastDigit) !== undefined) {
+            if (unscaledValue === undefined) {
+              if ((unscaledValue = lastDigit) !== undefined) {
                 precision += 3;
               }
             } else {
@@ -291,5 +292,3 @@ class LexDecimal {
     return srcOffset - originalOffset;
   }
 }
-
-module.exports = LexDecimal;

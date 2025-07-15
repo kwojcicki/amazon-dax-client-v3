@@ -13,11 +13,13 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const ErrorListener = require('antlr4').error.ErrorListener;
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { ErrorListener } from 'antlr4';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
 
-class ExpressionErrorListener extends ErrorListener {
+export class ExpressionErrorListener extends ErrorListener {
+  _mExpression: any;
+  _mExpressionType: any;
   constructor(expression, expressionType) {
     super();
     this._mExpression = expression;
@@ -30,5 +32,3 @@ class ExpressionErrorListener extends ErrorListener {
       + token.text + '", near: line ' + line + ' char ' + column, DaxErrorCode.Validation, false);
   }
 }
-
-module.exports = ExpressionErrorListener;

@@ -13,37 +13,39 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const CborSExprGenerator = require('./CborSExprGenerator');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { CborSExprGenerator } from './CborSExprGenerator';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
 
 const MAX_EXPRESSION_SIZE = 4096;
 const MAX_PARAMETER_MAP_KEY_SIZE = 255;
 const MAX_PARAMETER_MAP_ENTRIES = 2097152;
 const MAX_ATTRIBUTENAME_SIZE = 65535;
 
-module.exports = class RequestValidator {
+export class RequestValidator {
   static validateTableName(tableName, key) {
-    if(!tableName) {
+    if (!tableName) {
       throw RequestValidator.newValidationException(
+        // @ts-ignore
         'Value null at \'', key, '\' failed to satisfy constraint: Member must not be null');
     }
   }
 
   static validateKey(item, keys) {
     // Check that item is not null
-    if(!item) {
+    if (!item) {
       throw RequestValidator.newValidationException('Value null at \'item\' failed to satisfy constraint: Member must not be null');
     }
 
     // Validating: item attributes must be on key attributes only, and on all key attributes
-    if(Object.keys(item).length !== keys.length) {
+    if (Object.keys(item).length !== keys.length) {
       throw RequestValidator.newValidationException('The number of conditions on the keys is invalid');
     }
   }
 
   static validateTransactItem(item, key) {
-    if(!item) {
+    if (!item) {
+      // @ts-ignore
       throw RequestValidator.newValidationException('1 validation error detected: Value ', item,
         ' at \'', key, '\' failed to satisfy constraint: Member must not be null');
     }
@@ -53,9 +55,10 @@ module.exports = class RequestValidator {
 
   static validateItem(item) {
     Object.keys(item).forEach((key) => {
-      if(!key) {
-        if(!item[key]) {
+      if (!key) {
+        if (!item[key]) {
           // For some reason DDB SDK accept (null: null) but deny (null: av). (null: null) doesn't represent anything in actual item.
+          // @ts-ignore
           throw newValidationException(
             'Unable to marshall request to JSON: Unable to marshall request to JSON: Unable to marshall request to JSON: Unable to marshall request to JSON');
         } else {
@@ -69,35 +72,37 @@ module.exports = class RequestValidator {
   static validateExprAttrNames(attrNames) {
     let attrNameMapSize = 0;
 
-    if(Object.keys(attrNames).length === 0) {
+    if (Object.keys(attrNames).length === 0) {
       throw RequestValidator.newValidationException('ExpressionAttributeNames must not be empty');
-    } else if(Object.keys(attrNames).length >= MAX_PARAMETER_MAP_ENTRIES) {
+    } else if (Object.keys(attrNames).length >= MAX_PARAMETER_MAP_ENTRIES) {
       throw RequestValidator.newValidationException('ExpressionAttributeNames exceeds max size');
     } else {
       Object.keys(attrNames).forEach((k) => {
         let v = attrNames[k];
-        if(k == null) {
+        if (k == null) {
+          // @ts-ignore
           throw new AmazonClientException('ExpressionAttributeNames contains invalid key: null');
         }
         attrNameMapSize += k.length;
-        if(v == null) {
+        if (v == null) {
           attrNameMapSize += 0;
-        } else if(v.length === 0) {
+        } else if (v.length === 0) {
           throw RequestValidator.newValidationException('ExpressionAttributeNames contains invalid value: for key ' + k);
-        } else if(v.length > MAX_ATTRIBUTENAME_SIZE) {
+        } else if (v.length > MAX_ATTRIBUTENAME_SIZE) {
           throw RequestValidator.newValidationException('Member must have length less than or equal to ' + MAX_ATTRIBUTENAME_SIZE +
-                                                 ', Member must have length greater than or equal to 0');
+            ', Member must have length greater than or equal to 0');
         } else {
           attrNameMapSize += v.length;
         }
-        if(k.length === 0) {
+        if (k.length === 0) {
           throw RequestValidator.newValidationException('ExpressionAttributeNames contains invalid key: The expression attribute map contains an empty key');
-        } else if(k[0] != CborSExprGenerator.ATTRIBUTE_NAME_PREFIX) {
+        } else if (k[0] != CborSExprGenerator.ATTRIBUTE_NAME_PREFIX) {
+          // @ts-ignore
           throw RequestValidator.newValidationException('Syntax error, ExpressionAttributeNames contains invalid key: "', k, '"');
-        } else if(k.length > MAX_PARAMETER_MAP_KEY_SIZE) {
+        } else if (k.length > MAX_PARAMETER_MAP_KEY_SIZE) {
           throw RequestValidator.newValidationException(
             'ExpressionAttributeNames contains invalid key: The expression attribute map contains a key that is too long');
-        } else if(!v) {
+        } else if (!v) {
           throw RequestValidator.newValidationException('ExpressionAttributeNames must not be empty');
         }
       });
@@ -107,23 +112,24 @@ module.exports = class RequestValidator {
 
   static validateExprAttrValues(attrVals) {
     let attrValuesMapSize = 0;
-    if(Object.keys(attrVals).length === 0) {
+    if (Object.keys(attrVals).length === 0) {
       throw RequestValidator.newValidationException('ExpressionAttributeValues must not be empty');
-    } else if(Object.keys(attrVals).length >= MAX_PARAMETER_MAP_ENTRIES) {
+    } else if (Object.keys(attrVals).length >= MAX_PARAMETER_MAP_ENTRIES) {
       throw RequestValidator.newValidationException('ExpressionAttributeValues exceeds max size');
     } else {
       Object.keys(attrVals).forEach((k) => {
-        if(k == null) {
+        if (k == null) {
+          // @ts-ignore
           throw new AmazonClientException('ExpressionAttributeValues contains invalid key: null');
         }
         let v = attrVals[k];
         attrValuesMapSize += k.length;
         attrValuesMapSize += RequestValidator.simpleAttrValLength(v);
-        if(k.length === 0) {
+        if (k.length === 0) {
           throw RequestValidator.newValidationException('ExpressionAttributeValues contains invalid key: The expression attribute map contains an empty key');
-        } else if(!k.startsWith(CborSExprGenerator.ATTRIBUTE_VALUE_PREFIX)) {
+        } else if (!k.startsWith(CborSExprGenerator.ATTRIBUTE_VALUE_PREFIX)) {
           throw RequestValidator.newValidationException('Syntax error, ExpressionAttributeValues contains invalid key: "' + k + '"');
-        } else if(k.length > MAX_PARAMETER_MAP_KEY_SIZE) {
+        } else if (k.length > MAX_PARAMETER_MAP_KEY_SIZE) {
           throw RequestValidator.newValidationException(
             'ExpressionAttributeValues contains invalid key: The expression attribute map contains a key that is too long');
         }
@@ -135,21 +141,21 @@ module.exports = class RequestValidator {
   }
 
   static simpleAttrValLength(v) {
-    if(v == null) {
+    if (v == null) {
       return 0;
     }
-    if(v.S) {
+    if (v.S) {
       return v.S.length;
     }
-    if(v.B) {
+    if (v.B) {
       return v.B.length;
     }
-    if(v.N) {
+    if (v.N) {
       return v.N.length;
     }
-    if(v.BS) {
+    if (v.BS) {
       let size = 0;
-      for(let b of v.BS) {
+      for (let b of v.BS) {
         size += b.length;
       }
       return size;
@@ -160,31 +166,31 @@ module.exports = class RequestValidator {
 
   static validateAttributeValue(attr) {
     // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-attributes
-    if(attr === null) {
+    if (attr === null) {
       return;
     }
 
-    if(attr.SS) {
-      if(attr.SS.length == 0) {
+    if (attr.SS) {
+      if (attr.SS.length == 0) {
         throw RequestValidator.newValidationException('One or more parameter values were invalid: An string set  may not be empty');
       }
-      for(let s of attr.SS) {
-        if(s == null) {
+      for (let s of attr.SS) {
+        if (s == null) {
           throw RequestValidator.newValidationException('One or more parameter values were invalid: An string set may not have a null string as a member');
         }
       }
-    } else if(attr.BS) {
-      if(attr.BS.length == 0) {
+    } else if (attr.BS) {
+      if (attr.BS.length == 0) {
         throw RequestValidator.newValidationException('One or more parameter values were invalid: Binary sets should not be empty');
       }
-    } else if(attr.NS) {
-      if(attr.NS.length == 0) {
+    } else if (attr.NS) {
+      if (attr.NS.length == 0) {
         throw RequestValidator.newValidationException('One or more parameter values were invalid: An number set  may not be empty');
       }
-    } else if(attr.M != null) {
+    } else if (attr.M != null) {
       RequestValidator.validateItem(attr.M);
-    } else if(attr.L != null) {
-      for(let av of attr.L) {
+    } else if (attr.L != null) {
+      for (let av of attr.L) {
         RequestValidator.validateAttributeValue(av);
       }
     }
@@ -205,141 +211,143 @@ module.exports = class RequestValidator {
     attrNames,
     attrVals) {
     let attrNameMapSize = 0;
-    if(attrNames) {
-      if(!condExpr && !updExpr && !projExpr && !filterExpr && !keyCondExpr) {
+    if (attrNames) {
+      if (!condExpr && !updExpr && !projExpr && !filterExpr && !keyCondExpr) {
         throw RequestValidator.newValidationException('ExpressionAttributeNames can only be specified when using expressions');
       }
       attrNameMapSize = RequestValidator.validateExprAttrNames(attrNames);
-      if(attrNameMapSize > MAX_PARAMETER_MAP_ENTRIES) {
+      if (attrNameMapSize > MAX_PARAMETER_MAP_ENTRIES) {
         throw RequestValidator.newValidationException('ExpressionAttributeNames exceeds max size');
       }
     }
     let attrValuesMapSize = 0;
-    if(attrVals) {
-      if(!condExpr && !updExpr && !filterExpr && !keyCondExpr) {
+    if (attrVals) {
+      if (!condExpr && !updExpr && !filterExpr && !keyCondExpr) {
         throw RequestValidator.newValidationException('ExpressionAttributeValues can only be specified when using expressions');
       }
 
       attrValuesMapSize = RequestValidator.validateExprAttrValues(attrVals);
-      if(attrValuesMapSize > MAX_PARAMETER_MAP_ENTRIES) {
+      if (attrValuesMapSize > MAX_PARAMETER_MAP_ENTRIES) {
         throw RequestValidator.newValidationException('ExpressionAttributeValues exceeds max size');
       }
     }
-    if((attrNameMapSize + attrValuesMapSize) > MAX_PARAMETER_MAP_ENTRIES) {
+    if ((attrNameMapSize + attrValuesMapSize) > MAX_PARAMETER_MAP_ENTRIES) {
       throw RequestValidator.newValidationException('Combined size of ExpressionAttributeNames and ExpressionAttributeValues exceeds max size');
     }
-    if(expAttrVals != null) {
+    if (expAttrVals != null) {
       Object.keys(expAttrVals).forEach((k) => {
         let v = expAttrVals[k];
-        if(v && v.Value && v.AttributeValueList) {
+        if (v && v.Value && v.AttributeValueList) {
           throw RequestValidator.newValidationException(
             'One or more parameter values were invalid: Value and AttributeValueList cannot be used together for Attribute: ' + k);
         }
       });
     }
-    if(condExpr || updExpr) {
-      if(attrUpdates || condOp || expAttrVals) {
+    if (condExpr || updExpr) {
+      if (attrUpdates || condOp || expAttrVals) {
         throw RequestValidator.newValidationException(
           'Can not use both expression and non-expression parameters in the same request');
       }
-      if(condExpr !== null && condExpr !== undefined) {
-        if(condExpr.length === 0) {
+      if (condExpr !== null && condExpr !== undefined) {
+        if (condExpr.length === 0) {
           throw RequestValidator.newValidationException('Invalid ConditionExpression: The expression can not be empty');
-        } else if(condExpr.length > MAX_EXPRESSION_SIZE) {
+        } else if (condExpr.length > MAX_EXPRESSION_SIZE) {
           throw RequestValidator.newValidationException(
+            // @ts-ignore
             'Invalid ConditionExpression: Expression size has exceeded the maximum allowed size (', MAX_EXPRESSION_SIZE, ')');
         }
       }
-      if(updExpr !== null && updExpr !== undefined) {
-        if(updExpr.length === 0) {
+      if (updExpr !== null && updExpr !== undefined) {
+        if (updExpr.length === 0) {
           throw RequestValidator.newValidationException('Invalid UpdateExpression: The expression can not be empty');
-        } else if(updExpr.length > MAX_EXPRESSION_SIZE) {
+        } else if (updExpr.length > MAX_EXPRESSION_SIZE) {
           throw RequestValidator.newValidationException(
+            // @ts-ignore
             'Invalid UpdateExpression: Expression size has exceeded the maximum allowed size (', MAX_EXPRESSION_SIZE, ')');
         }
       }
     }
 
-    if(keyCondExpr !== null && keyCondExpr !== undefined) {
-      if(keyCondExpr.length === 0) {
+    if (keyCondExpr !== null && keyCondExpr !== undefined) {
+      if (keyCondExpr.length === 0) {
         throw RequestValidator.newValidationException('Invalid KeyConditionExpression: The expression can not be empty');
-      } else if(keyCondExpr.length > MAX_EXPRESSION_SIZE) {
+      } else if (keyCondExpr.length > MAX_EXPRESSION_SIZE) {
         throw RequestValidator.newValidationException(
           'Invalid KeyConditionExpression: Expression size has exceeded the maximum allowed size (' + MAX_EXPRESSION_SIZE + ')');
       }
     }
 
-    if(projExpr !== null && projExpr !== undefined) {
-      if(projExpr.length === 0) {
+    if (projExpr !== null && projExpr !== undefined) {
+      if (projExpr.length === 0) {
         throw RequestValidator.newValidationException('Invalid ProjectionExpression: The expression can not be empty');
-      } else if(RequestValidator.expressionLength(projExpr, attrNames) > MAX_EXPRESSION_SIZE) {
+      } else if (RequestValidator.expressionLength(projExpr, attrNames) > MAX_EXPRESSION_SIZE) {
         throw RequestValidator.newValidationException(
           'Invalid ProjectionExpression: Expression size has exceeded the maximum allowed size (' + MAX_EXPRESSION_SIZE + ')');
       }
     }
 
-    if(filterExpr !== null && filterExpr !== undefined) {
-      if(filterExpr.length) {
+    if (filterExpr !== null && filterExpr !== undefined) {
+      if (filterExpr.length) {
         throw RequestValidator.newValidationException('Invalid FilterExpression: The expression can not be empty');
-      } else if(filterExpr.length > MAX_EXPRESSION_SIZE) {
+      } else if (filterExpr.length > MAX_EXPRESSION_SIZE) {
         throw RequestValidator.newValidationException(
           'Invalid FilterExpression: Expression size has exceeded the maximum allowed size (' + MAX_EXPRESSION_SIZE + ')');
       }
     }
 
-    if(projExpr || filterExpr || keyCondExpr) {
+    if (projExpr || filterExpr || keyCondExpr) {
       let nonExprParams;
       let exprParams;
 
       // This is required by some of the tests. Probably over-matching but whatever.
       // The order is important; don't re-arrange unless necessary
 
-      if(projExpr) {
+      if (projExpr) {
         exprParams = RequestValidator.appendParameterName(exprParams, 'ProjectionExpression');
       }
 
-      if(filterExpr) {
+      if (filterExpr) {
         exprParams = RequestValidator.appendParameterName(exprParams, 'FilterExpression');
       }
 
-      if(keyCondExpr) {
+      if (keyCondExpr) {
         exprParams = RequestValidator.appendParameterName(exprParams, 'KeyConditionExpression');
       }
 
-      if(attributesToGet) {
+      if (attributesToGet) {
         nonExprParams = RequestValidator.appendParameterName(nonExprParams, 'AttributesToGet');
       }
 
-      if(scanFilter) {
+      if (scanFilter) {
         nonExprParams = RequestValidator.appendParameterName(nonExprParams, 'ScanFilter');
       }
 
-      if(queryFilter) {
+      if (queryFilter) {
         nonExprParams = RequestValidator.appendParameterName(nonExprParams, 'QueryFilter');
       }
 
-      if(condOp) {
+      if (condOp) {
         nonExprParams = RequestValidator.appendParameterName(nonExprParams, 'ConditionalOperator');
       }
 
-      if(keyCondExpr && keyCondition) {
+      if (keyCondExpr && keyCondition) {
         nonExprParams = RequestValidator.appendParameterName(nonExprParams, 'KeyConditions');
       }
 
-      if(nonExprParams) {
+      if (nonExprParams) {
         throw RequestValidator.newValidationException(
           'Can not use both expression and non-expression parameters in the same request: Non-expression parameters: {'
-           + nonExprParams + '} Expression parameters: {' + exprParams + '}');
+          + nonExprParams + '} Expression parameters: {' + exprParams + '}');
       }
     }
 
-    if(condOp) {
-      if(!expAttrVals && !queryFilter && !scanFilter) {
+    if (condOp) {
+      if (!expAttrVals && !queryFilter && !scanFilter) {
         throw RequestValidator.newValidationException('ConditionalOperator cannot be used without Filter or Expected');
       }
 
-      if((expAttrVals && Object.keys(expAttrVals).length <= 1) ||
-                    ((queryFilter != null && Object.keys(queryFilter).length <= 1) || (scanFilter != null && Object.keys(scanFilter).length <= 1))) {
+      if ((expAttrVals && Object.keys(expAttrVals).length <= 1) ||
+        ((queryFilter != null && Object.keys(queryFilter).length <= 1) || (scanFilter != null && Object.keys(scanFilter).length <= 1))) {
         throw RequestValidator.newValidationException(
           'ConditionalOperator can only be used when Filter or Expected has two or more elements');
       }
@@ -351,16 +359,16 @@ module.exports = class RequestValidator {
   }
 
   static expressionLength(expr, subs) {
-    if(!expr) {
+    if (!expr) {
       return 0;
     }
-    if(!subs) {
+    if (!subs) {
       return expr.length;
     }
     let length = expr.length;
     Object.keys(subs).forEach((from) => {
       let to = subs[from];
-      if(from.length === 0) {
+      if (from.length === 0) {
         // this should never happen as 'from' always has prefix '#'.
         // checking the condition to make the code agnostic to other validations.
         return;

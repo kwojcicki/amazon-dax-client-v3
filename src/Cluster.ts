@@ -13,18 +13,18 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const SessionVersion = require('./SessionVersion');
-const Backend = require('./Backend');
-const Router = require('./Router');
-const DaxHealthAgent = require('./DaxHealthAgent');
-const Source = require('./Source');
+import { SessionVersion } from './SessionVersion';
+import { Backend } from './Backend';
+import { Router } from './Router';
+import { DaxHealthAgent } from './DaxHealthAgent';
+import { Source } from './Source';
 const SocketTubePool = require('./Tube').SocketTubePool;
 const ClientTube = require('./Tube').ClientTube;
 const Connector = require('./Tube').Connector;
-const Util = require('./Util');
-const { ENCRYPTED_SCHEME } = require('./Util');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { Util } from './Util';
+import { ENCRYPTED_SCHEME } from './Util';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
 
 const IDLE_CONNECTION_REAP_DELAY_MS = 5000;
 const ClusterHealthyEvent = 'health';
@@ -33,6 +33,13 @@ const LEADER_ROUTE_UPDATE_EVENT = 'Routes of Leader Update';
 
 // adapted from https://github.com/aws/aws-sdk-js/blob/880e811e857c34e4ad983c37837767cd5eddb98f/lib/credentials.js
 class StaticCredentialProvider {
+  expired: boolean;
+  expireTime: null;
+  refreshCallbacks: never[];
+  accessKeyId: any;
+  expiration: any;
+  secretAccessKey: any;
+  sessionToken: any;
   constructor() {
     this.expired = false;
     this.expireTime = null;
@@ -42,6 +49,7 @@ class StaticCredentialProvider {
   resolvePromise() {
     const outerThis = this;
     var EXPIRATION_MS = 3e5;
+    // @ts-ignore
     if (!this.accessKeyId || (this.expiration && this.expiration.getTime() - Date.now() < EXPIRATION_MS)) return this.creds().then((creds) => {
       // if (this.expiration && this.expiration.getTime() - Date.now() < EXPIRATION_MS) console.log("refreshing creds");
       this.accessKeyId = creds.accessKeyId;
@@ -55,8 +63,37 @@ class StaticCredentialProvider {
   }
 }
 
-class Cluster {
-  constructor(config, daxManufacturer, source) {
+export class Cluster {
+  _maxPendingConnectsPerHost: any;
+  _clusterUpdateThreshold: any;
+  _clusterUpdateInterval: any;
+  _connectTimeout: any;
+  _requestTimeout: any;
+  _healthCheckInterval: any;
+  _healthCheckTimeout: any;
+  _maxRetryDelay: any;
+  _threadKeepAlive: any;
+  _skipHostnameVerification: any;
+  _credProvider: StaticCredentialProvider;
+  _region: any;
+  _seeds: { host: any; port: number; scheme: any; }[] | null;
+  _isEncrypted: boolean;
+  _endpointHost: any;
+  _manufacturer: any;
+  _closed: boolean;
+  _source: any;
+  _alive: Set<unknown>;
+  _daxHealthAgent: DaxHealthAgent;
+  _pools: Set<unknown>;
+  _backends: {};
+  _startupComplete: boolean;
+  _refreshJob: NodeJS.Timeout;
+  _routes: any;
+  _reapJob: any;
+  _lastUpdate: number;
+  _cfg: any;
+  _leaderSessionId: any;
+  constructor(config, daxManufacturer, source?) {
     // config, just put it here, will delete unused part
     this._maxPendingConnectsPerHost = config.maxPendingConnectsPerHost ? config.maxPendingConnectsPerHost : 10;
     // Using a relatively high default interval (4 seconds, a little less
@@ -75,6 +112,7 @@ class Cluster {
     this._threadKeepAlive = config.threadKeepAlive || 10000;
     this._skipHostnameVerification = config.skipHostnameVerification != null ? config.skipHostnameVerification : false;
     if (config.credentials) {
+      // @ts-ignore
       this._credProvider = new StaticCredentialProvider(config.credentials);
     } else {
       throw new Error("Expecting DAX to use static credentials");
@@ -82,8 +120,10 @@ class Cluster {
     this._region = config.region || this._resolveRegion(); // FIXME default region
     this._seeds = config.endpoints ? Util.parseHostPorts(config.endpoints) : (config.endpoint ? Util.parseHostPorts(config.endpoint) : null);
     const containsSeed = this._seeds != null && this._seeds.length > 0; // This exists because many unit tests don't enumerate seeds.
+    // @ts-ignore
     const endpointScheme = containsSeed ? this._seeds[0].scheme : null;
     this._isEncrypted = endpointScheme == ENCRYPTED_SCHEME;
+    // @ts-ignore
     this._endpointHost = containsSeed ? this._seeds[0].host : null;
     this._manufacturer = daxManufacturer;
     this._closed = false;
@@ -220,6 +260,7 @@ class Cluster {
       if (be) {
         // update existing backends. node may have changed role or other
         // metadata affecting routing.
+        // @ts-ignore
         rebuild |= be.update(newbe);
         return;
       }
@@ -270,6 +311,7 @@ class Cluster {
       let waitjob = setInterval(() => {
         if ((routes = this._routes) && routes.size() >= minumum && routes.leadersCount() >= leadersMin) {
           clearInterval(waitjob);
+          // @ts-ignore
           return resolve();
         }
 
@@ -288,6 +330,7 @@ class Cluster {
       let polling = 0;
 
       let pollJob = setInterval(() => {
+        // @ts-ignore
         if (this._alive.has(be) ^ aliveOrDead) {
           if (++polling >= maxPolling) {
             clearInterval(pollJob);
@@ -295,6 +338,7 @@ class Cluster {
           }
         } else {
           clearInterval(pollJob);
+          // @ts-ignore
           return resolve();
         }
       }, 100);
@@ -347,7 +391,7 @@ class Cluster {
     healthCheck();
   }
 
-  _onHealthCheck(be, session, tube, e) {
+  _onHealthCheck(be, session, tube, e?) {
     let current = this._backends[be.addr + ':' + be.port];
     if (this._closed || current !== be) {
       // stale notification. backend no longer exists in the current known set.
@@ -409,11 +453,14 @@ class Cluster {
     }
 
     let ldr = 0;
-    let cs = [];
+    let cs: any[] = [];
     bes.forEach((be) => {
+      // @ts-ignore
       if (be.leader()) {
+        // @ts-ignore
         cs[ldr++] = be.client;
       } else {
+        // @ts-ignore
         cs[--sz] = be.client;
       }
     });
@@ -448,5 +495,3 @@ class Cluster {
     return backends;
   }
 }
-
-module.exports = Cluster;

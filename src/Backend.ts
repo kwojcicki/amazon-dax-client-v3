@@ -13,12 +13,24 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const Util = require('./Util');
-const SessionVersion = require('./SessionVersion');
+import { Util } from './Util';
+import { SessionVersion } from './SessionVersion';
 const MIN_ERROR_COUNT_FOR_UNHEALTHY = 5;
 
 /** A backend service destination. */
-class Backend {
+export class Backend {
+  errorCount: number;
+  _cluster: any;
+  _config: any;
+  addr: any;
+  port: any;
+  _errorCountForUnhealthy: number;
+  closed: any;
+  session: SessionVersion;
+  healthy: boolean;
+  connect: any;
+  active: any;
+  client: any;
   constructor(cluster, serviceEndpoint, maxPendingConnectionPerHost) {
     this.errorCount = 0;
     this._cluster = cluster;
@@ -35,7 +47,7 @@ class Backend {
    * returning true if there were changes.
    */
   update(newBe) {
-    if(!Util.objEqual(this._config, newBe._config)) {
+    if (!Util.objEqual(this._config, newBe._config)) {
       this._config = newBe._config;
       return true;
     }
@@ -43,7 +55,7 @@ class Backend {
   }
 
   close() {
-    if(this.closed) {
+    if (this.closed) {
       return;
     }
     this.closed = true;
@@ -51,7 +63,7 @@ class Backend {
     this.healthy = false;
 
     let dial = this.connect; // health check job. set by Cluster.
-    if(dial) {
+    if (dial) {
       clearInterval(dial);
     }
 
@@ -63,7 +75,7 @@ class Backend {
    * using the supplied client for access.
    */
   up(client) {
-    if(!this.active && !this.closed) {
+    if (!this.active && !this.closed) {
       this.active = true;
       this.client = client;
     }
@@ -75,13 +87,13 @@ class Backend {
    * and shutting down its client.
    */
   down() {
-    if(!this.active) {
+    if (!this.active) {
       return;
     }
 
     this._cluster.removeRoute(this);
     this.active = false;
-    if(this.client) {
+    if (this.client) {
       this._cluster.unregisterAndClose(this.client);
       this.client = null;
     }
@@ -92,13 +104,11 @@ class Backend {
   }
 
   onIoException() {
-    if(this.active) {
-      if(++this.errorCount > this._errorCountForUnhealthy) {
+    if (this.active) {
+      if (++this.errorCount > this._errorCountForUnhealthy) {
         this.healthy = false;
         this.down();
       }
     }
   }
 }
-
-module.exports = Backend;

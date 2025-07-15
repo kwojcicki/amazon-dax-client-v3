@@ -14,11 +14,11 @@
  */
 'use strict';
 
-const CborDecoder = require('./CborDecoder');
-const DaxCborTypes = require('./DaxCborTypes');
+import { CborDecoder } from './CborDecoder';
+import * as DaxCborTypes from './DaxCborTypes';
 
-class DaxCborDecoder extends CborDecoder {
-  constructor(buffer, start, end) {
+export class DaxCborDecoder extends CborDecoder {
+  constructor(buffer, start?, end?) {
     super(buffer, start, end, {});
 
     this.tagHandlers[DaxCborTypes.TAG_DDB_STRING_SET] = (tag) => this._decodeStringSet(tag);
@@ -38,6 +38,3 @@ class DaxCborDecoder extends CborDecoder {
     return new DaxCborTypes._DdbSet('BS', this.buildArray(() => this.decodeBytes()));
   }
 }
-
-module.exports = DaxCborDecoder;
-

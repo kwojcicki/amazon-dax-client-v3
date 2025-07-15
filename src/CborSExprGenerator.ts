@@ -13,34 +13,34 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const antlr4 = require('antlr4');
+import antlr4 from 'antlr4';
 const DynamoDbGrammarListener = require('./DynamoDbGrammarListener').DynamoDbGrammarListener;
-const AttributeValueEncoder = require('./AttributeValueEncoder');
-const StreamBuffer = require('./ByteStreamBuffer');
-const CborEncoder = require('./CborEncoder');
-const DaxCborTypes = require('./DaxCborTypes');
-const DynamoDbExpressionParser = require('./DynamoDbExpressionParser');
-const ExpressionErrorListener = require('./ExpressionErrorListener');
-const DaxClientError = require('./DaxClientError');
-const DaxErrorCode = require('./DaxErrorCode');
+import { AttributeValueEncoder } from './AttributeValueEncoder';
+import { ByteStreamBuffer as StreamBuffer } from './ByteStreamBuffer';
+import { CborEncoder } from './CborEncoder';
+import * as DaxCborTypes from './DaxCborTypes';
+import { DynamoDbExpressionParser } from './DynamoDbExpressionParser';
+import { ExpressionErrorListener } from './ExpressionErrorListener';
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
 
 const ENCODING_FORMAT = 1;
-const ATTRIBUTE_VALUE_PREFIX = ':';
-const ATTRIBUTE_NAME_PREFIX = '#';
+export const ATTRIBUTE_VALUE_PREFIX = ':';
+export const ATTRIBUTE_NAME_PREFIX = '#';
 
-class CborSExprGenerator extends DynamoDbGrammarListener {
+export class CborSExprGenerator extends DynamoDbGrammarListener {
   constructor(expressionAttributeNames, expressionAttributeValues) {
     super();
     this._mStack = [];
     this._mExpressionAttributeNames = expressionAttributeNames;
     this._mExpressionAttributeValues = expressionAttributeValues;
 
-    if(expressionAttributeNames) {
+    if (expressionAttributeNames) {
       this._mUnusedExpressionAttributeNames = new Set(Object.keys(expressionAttributeNames));
     } else {
       this._mUnusedExpressionAttributeNames = new Set();
     }
-    if(expressionAttributeValues) {
+    if (expressionAttributeValues) {
       this._mUnusedExpressionAttributeValues = new Set(Object.keys(expressionAttributeValues));
       this._mVariableNameById = {};
       this._mVariableValues = [];
@@ -84,14 +84,15 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
   }
 
   static encodeExpressions(condExpr, keyCondExpr, filterExpr, updExpr, projExpr, eAttrNames, eAttrVals) {
-    let exprs = {};
-    exprs.Condition = condExpr;
-    exprs.KeyCondition = keyCondExpr;
-    exprs.Filter = filterExpr;
-    exprs.Update = updExpr;
-    exprs.Projection = projExpr;
+    const exprs = { Condition: condExpr, KeyCondition: keyCondExpr, Filter: filterExpr, Update: updExpr, Projection: projExpr };
 
-    let output = {};
+    let output: { Condition: any, KeyCondition: any, Filter: any, Update: any, Projection: any } = {
+      Condition: null,
+      KeyCondition: null,
+      Filter: null,
+      Update: null,
+      Projection: null
+    };
 
     let generator = new CborSExprGenerator(eAttrNames, eAttrVals);
     let buffer = new StreamBuffer();
@@ -99,15 +100,15 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
 
     Object.keys(exprs).forEach((type) => {
       let expr = exprs[type];
-      if(!expr) {
+      if (!expr) {
         output[type] = null;
         return;
       }
       let typeStr = type + 'Expression';
-      let tree = null;
+      let tree: any = null;
       let exprArrayLength = 3;
       try {
-        switch(type) {
+        switch (type) {
           case 'Condition':
           case 'Filter':
           case 'KeyCondition':
@@ -126,8 +127,8 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
               .parseUpdate(expr, new ExpressionErrorListener(expr, typeStr));
             break;
         }
-      } catch(err) {
-        if(err instanceof DaxClientError) {
+      } catch (err) {
+        if (err instanceof DaxClientError) {
           throw err;
         } else {
           throw new DaxClientError(err + '\nInvalid ' + typeStr + ': The expression has redundant parentheses',
@@ -144,9 +145,9 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
       buffer.write(encoder.encodeArrayHeader(exprArrayLength));
       buffer.write(encoder.encodeInt(ENCODING_FORMAT));
       buffer.write(spec);
-      if('Projection' !== type) {
+      if ('Projection' !== type) {
         buffer.write(encoder.encodeArrayHeader(generator._mVariableValues.length));
-        for(let varVal of generator._mVariableValues) {
+        for (let varVal of generator._mVariableValues) {
           buffer.write(varVal);
         }
       }
@@ -159,29 +160,29 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
   }
 
   _validateIntermediateState() {
-    if(this._mStack.length !== 1) {
+    if (this._mStack.length !== 1) {
       throw new DaxClientError('Invalid ' + this._mType + 'Expression, Stack size = ' + this._mStack.length, DaxErrorCode.Validation, false);
     }
 
-    if(this._mNestingLevel !== 0) {
+    if (this._mNestingLevel !== 0) {
       throw new DaxClientError('Invalid ' + this._mType + 'Expression, Nesting level = ' + this._mNestingLevel, DaxErrorCode.Validation, false);
     }
   }
 
   _validateFinalState() {
-    if(this._mUnusedExpressionAttributeNames.size !== 0) {
+    if (this._mUnusedExpressionAttributeNames.size !== 0) {
       let names = this._joinMissingNames(this._mUnusedExpressionAttributeNames);
       throw new DaxClientError('Value provided in ExpressionAttributeNames unused in expressions: keys: {' + names + '}', DaxErrorCode.Validation, false);
     }
-    if(this._mUnusedExpressionAttributeValues.size !== 0) {
+    if (this._mUnusedExpressionAttributeValues.size !== 0) {
       let names = this._joinMissingNames(this._mUnusedExpressionAttributeValues);
       throw new DaxClientError('Value provided in ExpressionAttributeValues unused in expressions: keys: {' + names + '}', DaxErrorCode.Validation, false);
     }
   }
 
   _validateNotEquals(expType, actual, notExpected) {
-    for(let n of notExpected) {
-      if(actual.toLowerCase() === n.toLowerCase()) {
+    for (let n of notExpected) {
+      if (actual.toLowerCase() === n.toLowerCase()) {
         let expTypeStr = (!expType ? '' : expType);
         throw new DaxClientError('Invalid ' + expTypeStr + 'Expression: The function is not allowed in a ' + expTypeStr.toLowerCase() + ' expression',
           DaxErrorCode.Validation, false);
@@ -191,7 +192,7 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
 
   _joinMissingNames(names) {
     let result = null;
-    for(let name of names) {
+    for (let name of names) {
       result = (result === null ? name : result + ', ' + name);
     }
 
@@ -211,8 +212,8 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
   }
 
   exitComparator_symbol(ctx) {
-    let func = null;
-    switch(ctx.getText()) {
+    let func: any = null;
+    switch (ctx.getText()) {
       case '=':
         func = Func.Equal;
         break;
@@ -238,8 +239,8 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
   }
 
   exitPath(ctx) {
-    let components = [];
-    for(let i=ctx.getChildCount()-1; i>=0; i--) {
+    let components: any[] = [];
+    for (let i = ctx.getChildCount() - 1; i >= 0; i--) {
       components[i] = this._mStack.pop();
     }
     this._mStack.push(this._encodeFunction(Func.DocumentPath, components));
@@ -250,22 +251,22 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
     try {
       let ordinal = parseInt(value.substr(1, value.length - 2)); // get rid of []
       this._mStack.push(this._encodeListAccess(ordinal));
-    } catch(err) {
+    } catch (err) {
       throw new DaxClientError('Invalid ' + this._mType
-                + 'Expression: List index is not within the allowable range', DaxErrorCode.Validation, false);
+        + 'Expression: List index is not within the allowable range', DaxErrorCode.Validation, false);
     }
   }
 
   exitId(ctx) {
     let id = ctx.getText();
-    if(id[0] === ATTRIBUTE_NAME_PREFIX) {
+    if (id[0] === ATTRIBUTE_NAME_PREFIX) {
       let sub = this._mExpressionAttributeNames[id];
-      if(!sub) {
+      if (!sub) {
         throw new DaxClientError('Invalid ' + this._mType + 'Expression. Substitution value not provided for ' + id,
           DaxErrorCode.Validation, false);
       }
       this._mUnusedExpressionAttributeNames.delete(id);
-      this._mStack.push(this._encodeAttributeValue({'S': sub}));
+      this._mStack.push(this._encodeAttributeValue({ 'S': sub }));
     } else {
       this._mStack.push(this._encodeDocumentPathElement(id)); // FIXME Should this be a function?
     }
@@ -299,9 +300,9 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
 
   exitIn(ctx) {
     let numArgs = 1 + (ctx.getChildCount() - 3) / 2; // arg + IN + ( + args*2-1 + )
-    let args = [];
-    while(numArgs-- > 1) {
-      args[numArgs-1] = this._mStack.pop();
+    let args: any[] = [];
+    while (numArgs-- > 1) {
+      args[numArgs - 1] = this._mStack.pop();
     }
     let arg1 = this._mStack.pop();
     // a in (b,c,d) =>  (In a (b c d))
@@ -325,25 +326,25 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
 
   enterFunctionCall(ctx) {
     let funcName = ctx.ID().getText();
-    if(this._mType) {
-      switch(this._mType) {
+    if (this._mType) {
+      switch (this._mType) {
         case 'Update':
           this._validateNotEquals(this._mType, funcName, ['attribute_exists', 'attribute_not_exists',
             'attribute_type', 'begins_with', 'contains', 'size']);
-          if(this._mNestingLevel > 0 && !(funcName.toLowerCase() === 'if_not_exists')) {
+          if (this._mNestingLevel > 0 && !(funcName.toLowerCase() === 'if_not_exists')) {
             throw new DaxClientError('Only if_not_exists() function can be nested', DaxErrorCode.Validation, false);
           }
           break;
         case 'Filter':
         case 'Condition':
-        // If nesting level is 0, function should return type boolean (which is all functions other than size)
-        // If nesting level > 0, only size function is allowed
+          // If nesting level is 0, function should return type boolean (which is all functions other than size)
+          // If nesting level > 0, only size function is allowed
           this._validateNotEquals(this._mType, funcName, ['if_not_exists', 'list_append']);
-          if(this._mNestingLevel === 0 && (funcName.toLowerCase() === 'size')) {
+          if (this._mNestingLevel === 0 && (funcName.toLowerCase() === 'size')) {
             let expTypeStr = (!this._mType) ? '' : this._mType;
             throw new DaxClientError('Invalid ' + expTypeStr + 'Expression: The function is not allowed to be used this way in an expression',
               DaxErrorCode.Validation, false);
-          } else if(this._mNestingLevel > 0 && !(funcName.toLowerCase() === 'size')) {
+          } else if (this._mNestingLevel > 0 && !(funcName.toLowerCase() === 'size')) {
             throw new DaxClientError('Only size() function is allowed to be nested', DaxErrorCode.Validation, false);
           }
           break;
@@ -356,8 +357,8 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
 
   exitFunctionCall(ctx) {
     let funcName = ctx.ID().getText();
-    let func = null;
-    switch(funcName.toLowerCase()) {
+    let func: any = null;
+    switch (funcName.toLowerCase()) {
       case 'attribute_exists':
         func = Func.AttributeExists;
         break;
@@ -368,7 +369,7 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
         func = Func.AttributeType;
         break;
       case 'begins_with':
-      // FIXME validate argument type is string for BeginsWith
+        // FIXME validate argument type is string for BeginsWith
         func = Func.BeginsWith;
         break;
       case 'contains':
@@ -389,8 +390,8 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
     }
 
     let numArgs = (ctx.getChildCount() - 2) / 2; // children = fname + ( + numOperands*2-1 +)
-    let args = [];
-    while(numArgs-- > 0) {
+    let args: any[] = [];
+    while (numArgs-- > 0) {
       args[numArgs] = this._mStack.pop();
     }
     // func(a,b,c,..) => (func a b c ..)
@@ -400,17 +401,17 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
 
   exitProjection(ctx) {
     let numPaths = (ctx.getChildCount() + 1) / 2; // path, path, ... path
-    let paths = [];
-    while(numPaths-->0) {
+    let paths: any[] = [];
+    while (numPaths-- > 0) {
       paths[numPaths] = this._mStack.pop();
     }
     this._mStack.push(this._encodeArray(paths));
   }
 
   exitUpdate(ctx) {
-    let updates = [];
+    let updates: any[] = [];
     let remaining = this._mStack.length;
-    while(remaining > 0) {
+    while (remaining > 0) {
       updates[--remaining] = this._mStack.pop();
     }
     this._mStack.push(this._encodeArray(updates));
@@ -447,9 +448,9 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
     let op2 = this._mStack.pop();
     let op1 = this._mStack.pop();
 
-    let func = null;
+    let func: any = null;
     let operator = ctx.getChild(1).getText();
-    switch(operator) {
+    switch (operator) {
       case '+': func = Func.Plus; break;
       case '-': func = Func.Minus; break;
       default:
@@ -471,7 +472,7 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
     let encoder = new CborEncoder();
     let buffer = new StreamBuffer();
     buffer.write(encoder.encodeArrayHeader(arr.length));
-    for(let obj of arr) {
+    for (let obj of arr) {
       buffer.write(obj);
     }
     return buffer.read();
@@ -484,9 +485,9 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
   _encodeFunction(func, args) {
     let encoder = new CborEncoder();
     let buffer = new StreamBuffer();
-    buffer.write(encoder.encodeArrayHeader(args.length+1));
+    buffer.write(encoder.encodeArrayHeader(args.length + 1));
     buffer.write(encoder.encodeInt(func));
-    for(let i = 0; i < args.length; ++i) {
+    for (let i = 0; i < args.length; ++i) {
       buffer.write(args[i]);
     }
     return buffer.read();
@@ -503,14 +504,14 @@ class CborSExprGenerator extends DynamoDbGrammarListener {
   _encodeVariable(varName) {
     let fullName = ATTRIBUTE_VALUE_PREFIX + varName;
     let val = this._mExpressionAttributeValues[fullName];
-    if(!val) {
+    if (!val) {
       throw new DaxClientError('Invalid ' + this._mType
-                + 'Expression: An expression attribute value used in expression is not defined: attribute value: '
-                + fullName, DaxErrorCode.Validation, false);
+        + 'Expression: An expression attribute value used in expression is not defined: attribute value: '
+        + fullName, DaxErrorCode.Validation, false);
     }
     this._mUnusedExpressionAttributeValues.delete(fullName);
     let varId = this._mVariableNameById[varName];
-    if(!varId) {
+    if (!varId) {
       varId = this._mVariableValues.length;
       this._mVariableNameById[varName] = varId;
       this._mVariableValues.push(this._encodeAttributeValue(val));
@@ -568,10 +569,4 @@ const Func = {
   ListAppend: 24,
   Plus: 25,
   Minus: 26,
-};
-
-module.exports = {
-  CborSExprGenerator: CborSExprGenerator,
-  ATTRIBUTE_VALUE_PREFIX: ATTRIBUTE_VALUE_PREFIX,
-  ATTRIBUTE_NAME_PREFIX: ATTRIBUTE_NAME_PREFIX,
 };

@@ -13,17 +13,17 @@
  * permissions and limitations under the License.
  */
 'use strict';
-const EventEmitter = require('events');
+import EventEmitter from 'events';
 
 const MaxListenersPerEvent = 1000000;
 
-class DaxHealthAgent extends EventEmitter {
+export class DaxHealthAgent extends EventEmitter {
   constructor() {
     super();
     this.setMaxListeners(MaxListenersPerEvent);
   }
 
-  resolveEvent(event, args) {
+  resolveEvent(event, args?) {
     this.emit(event, args);
   }
 
@@ -41,5 +41,3 @@ class DaxHealthAgent extends EventEmitter {
     });
   }
 }
-
-module.exports = DaxHealthAgent;
