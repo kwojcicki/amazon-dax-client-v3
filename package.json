@@ -31,5 +31,9 @@
   },
   "engines": {
     "node": ">= 4.8.0"
+  },
+  "devDependencies": {
+    "@types/antlr4": "^4.12.0",
+    "@types/node": "^24.0.14"
   }
 }
