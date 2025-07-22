@@ -15,11 +15,12 @@
  */
 'use strict';
 
-const Constants = require('../src/Constants');
-const Encoders = require('../src/Encoders');
+import { DaxClientError } from './DaxClientError';
+import { DaxErrorCode } from './DaxErrorCode';
+import { Encoders } from './Encoders';
 
 
-exports.write_authorizeConnection_1489122155_1 = function(accessKeyId, signature, stringToSign, sessionToken, userAgent, tube) {
+export const write_authorizeConnection_1489122155_1 = function (accessKeyId, signature, stringToSign, sessionToken, userAgent, tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor);
 
@@ -39,14 +40,14 @@ exports.write_authorizeConnection_1489122155_1 = function(accessKeyId, signature
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;
   });
 };
 
-exports.write_defineAttributeList_670678385_1 = function(attributeListId, tube) {
+export const write_defineAttributeList_670678385_1 = function (attributeListId, tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor);
 
@@ -58,14 +59,14 @@ exports.write_defineAttributeList_670678385_1 = function(attributeListId, tube) 
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;
   });
 };
 
-exports.write_defineAttributeListId_N1230579644_1 = function(attributeNames, tube) {
+export const write_defineAttributeListId_N1230579644_1 = function (attributeNames, tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor);
 
@@ -77,14 +78,14 @@ exports.write_defineAttributeListId_N1230579644_1 = function(attributeNames, tub
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;
   });
 };
 
-exports.write_defineKeySchema_N742646399_1 = function(tableName, tube) {
+export const write_defineKeySchema_N742646399_1 = function (tableName, tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor);
 
@@ -96,14 +97,14 @@ exports.write_defineKeySchema_N742646399_1 = function(tableName, tube) {
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;
   });
 };
 
-exports.write_deleteItem_1013539361_1 = function(request, tube) {
+export const write_deleteItem_1013539361_1 = function (request, tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor, request._keySchema);
 
@@ -114,8 +115,8 @@ exports.write_deleteItem_1013539361_1 = function(request, tube) {
     tube.write(encoder.encodeKey(request.Key));
 
     let hasKwargs = request.ReturnValues || request.ReturnConsumedCapacity || request.ReturnItemCollectionMetrics || request.ConditionExpression || request.ExpressionAttributeNames || request.ExpressionAttributeValues;
-    if(hasKwargs) {
-    // This operation has expressions, so deal with those together
+    if (hasKwargs) {
+      // This operation has expressions, so deal with those together
       tube.write(Encoders.encodeExpressionAndKwargs(request, tube.cbor, 1013539361).kwargs);
     } else {
       tube.write(tube.cbor.encodeNull());
@@ -125,14 +126,14 @@ exports.write_deleteItem_1013539361_1 = function(request, tube) {
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;
   });
 };
 
-exports.write_endpoints_455855874_1 = function(tube) {
+export const write_endpoints_455855874_1 = function (tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor);
 
@@ -142,14 +143,14 @@ exports.write_endpoints_455855874_1 = function(tube) {
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;
   });
 };
 
-exports.write_getItem_263244906_1 = function(request, tube) {
+export const write_getItem_263244906_1 = function (request, tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor, request._keySchema);
 
@@ -160,8 +161,8 @@ exports.write_getItem_263244906_1 = function(request, tube) {
     tube.write(encoder.encodeKey(request.Key));
 
     let hasKwargs = request.ConsistentRead || request.ReturnConsumedCapacity || request.ProjectionExpression || request.ExpressionAttributeNames;
-    if(hasKwargs) {
-    // This operation has expressions, so deal with those together
+    if (hasKwargs) {
+      // This operation has expressions, so deal with those together
       tube.write(Encoders.encodeExpressionAndKwargs(request, tube.cbor, 263244906).kwargs);
     } else {
       tube.write(tube.cbor.encodeNull());
@@ -171,14 +172,14 @@ exports.write_getItem_263244906_1 = function(request, tube) {
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;
   });
 };
 
-exports.write_putItem_N2106490455_1 = function(request, tube) {
+export const write_putItem_N2106490455_1 = function (request, tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor, request._keySchema, request._attrNames, request._attrListId);
 
@@ -191,8 +192,8 @@ exports.write_putItem_N2106490455_1 = function(request, tube) {
     tube.write(encoder.encodeValues(request.Item));
 
     let hasKwargs = request.ReturnValues || request.ReturnConsumedCapacity || request.ReturnItemCollectionMetrics || request.ConditionExpression || request.ExpressionAttributeNames || request.ExpressionAttributeValues;
-    if(hasKwargs) {
-    // This operation has expressions, so deal with those together
+    if (hasKwargs) {
+      // This operation has expressions, so deal with those together
       tube.write(Encoders.encodeExpressionAndKwargs(request, tube.cbor, -2106490455).kwargs);
     } else {
       tube.write(tube.cbor.encodeNull());
@@ -202,14 +203,14 @@ exports.write_putItem_N2106490455_1 = function(request, tube) {
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;
   });
 };
 
-exports.write_query_N931250863_1 = function(request, tube) {
+export const write_query_N931250863_1 = function (request, tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor, request._keySchema);
 
@@ -218,16 +219,16 @@ exports.write_query_N931250863_1 = function(request, tube) {
     tube.write(encoder.encodeTableName(request.TableName));
 
     let exprResult = Encoders.encodeExpressionAndKwargs(request, tube.cbor, -931250863);
-    if(exprResult.keyCondBytes !== null) {
+    if (exprResult.keyCondBytes !== null) {
       tube.write(exprResult.keyCondBytes);
     } else {
       tube.write(tube.cbor.encodeNull());
     }
 
     let hasKwargs = request.IndexName || request.Select || request.Limit || request.ConsistentRead || request.ScanIndexForward || request.ExclusiveStartKey || request.ReturnConsumedCapacity || request.ProjectionExpression || request.FilterExpression || request.ExpressionAttributeNames || request.ExpressionAttributeValues;
-    if(hasKwargs) {
-    // This operation has expressions, so deal with those together
-    // For Query, the expressions are already eval'd for KeyCondExpr
+    if (hasKwargs) {
+      // This operation has expressions, so deal with those together
+      // For Query, the expressions are already eval'd for KeyCondExpr
       tube.write(exprResult.kwargs);
     } else {
       tube.write(tube.cbor.encodeNull());
@@ -237,14 +238,14 @@ exports.write_query_N931250863_1 = function(request, tube) {
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;
   });
 };
 
-exports.write_scan_N1875390620_1 = function(request, tube) {
+export const write_scan_N1875390620_1 = function (request, tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor, request._keySchema);
 
@@ -253,8 +254,8 @@ exports.write_scan_N1875390620_1 = function(request, tube) {
     tube.write(encoder.encodeTableName(request.TableName));
 
     let hasKwargs = request.IndexName || request.Limit || request.Select || request.ExclusiveStartKey || request.ReturnConsumedCapacity || request.TotalSegments || request.Segment || request.ProjectionExpression || request.FilterExpression || request.ExpressionAttributeNames || request.ExpressionAttributeValues || request.ConsistentRead;
-    if(hasKwargs) {
-    // This operation has expressions, so deal with those together
+    if (hasKwargs) {
+      // This operation has expressions, so deal with those together
       tube.write(Encoders.encodeExpressionAndKwargs(request, tube.cbor, -1875390620).kwargs);
     } else {
       tube.write(tube.cbor.encodeNull());
@@ -264,14 +265,14 @@ exports.write_scan_N1875390620_1 = function(request, tube) {
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;
   });
 };
 
-exports.write_updateItem_1425579023_1 = function(request, tube) {
+export const write_updateItem_1425579023_1 = function (request, tube) {
   return Promise.resolve().then(() => {
     let encoder = new Encoders(tube.cbor, request._keySchema);
 
@@ -282,8 +283,8 @@ exports.write_updateItem_1425579023_1 = function(request, tube) {
     tube.write(encoder.encodeKey(request.Key));
 
     let hasKwargs = request.ReturnValues || request.ReturnConsumedCapacity || request.ReturnItemCollectionMetrics || request.UpdateExpression || request.ConditionExpression || request.ExpressionAttributeNames || request.ExpressionAttributeValues;
-    if(hasKwargs) {
-    // This operation has expressions, so deal with those together
+    if (hasKwargs) {
+      // This operation has expressions, so deal with those together
       tube.write(Encoders.encodeExpressionAndKwargs(request, tube.cbor, 1425579023).kwargs);
     } else {
       tube.write(tube.cbor.encodeNull());
@@ -293,7 +294,7 @@ exports.write_updateItem_1425579023_1 = function(request, tube) {
   }).catch((err) => {
     tube.close();
     // For IO exception, make it retryable.
-    if(err && err.code === 'EPIPE') {
+    if (err && err.code === 'EPIPE') {
       throw new DaxClientError(err.message, DaxErrorCode.Connection, true);
     }
     throw err;

@@ -19,7 +19,7 @@ import { Util } from './Util';
 import { DaxClientError } from './DaxClientError';
 import { DaxErrorCode } from './DaxErrorCode';
 
-exports.Custom_defineKeySchema_N742646399_1_Assembler = class Custom_defineKeySchema_N742646399_1_Assembler extends Assembler {
+export const Custom_defineKeySchema_N742646399_1_Assembler = class Custom_defineKeySchema_N742646399_1_Assembler extends Assembler {
   _assembleResult() {
     let schema: any[] = [];
     this.dec.processMap(() => {
@@ -31,19 +31,19 @@ exports.Custom_defineKeySchema_N742646399_1_Assembler = class Custom_defineKeySc
   }
 };
 
-exports.Custom_defineAttributeList_670678385_1_Assembler = class Custom_defineAttributeList_670678385_1_Assembler extends Assembler {
+export const Custom_defineAttributeList_670678385_1_Assembler = class Custom_defineAttributeList_670678385_1_Assembler extends Assembler {
   _assembleResult() {
     return this.dec.decodeObject();
   }
 };
 
-exports.Custom_defineAttributeListId_N1230579644_1_Assembler = class Custom_defineAttributeListId_N1230579644_1_Assembler extends Assembler {
+export const Custom_defineAttributeListId_N1230579644_1_Assembler = class Custom_defineAttributeListId_N1230579644_1_Assembler extends Assembler {
   _assembleResult() {
     return this.dec.decodeInt();
   }
 };
 
-exports.Custom_endpoints_455855874_1_Assembler = class Custom_endpoints_455855874_1_Assembler extends Assembler {
+export const Custom_endpoints_455855874_1_Assembler = class Custom_endpoints_455855874_1_Assembler extends Assembler {
   _assembleResult() {
     let result = this.dec.decodeObject();
     let eps: any[] = [];
@@ -58,7 +58,7 @@ exports.Custom_endpoints_455855874_1_Assembler = class Custom_endpoints_45585587
   }
 };
 
-exports.Custom_batchGetItem_N697851100_1_Assembler = class Custom_batchGetItem_N697851100_1_Assembler extends Assembler {
+export const Custom_batchGetItem_N697851100_1_Assembler = class Custom_batchGetItem_N697851100_1_Assembler extends Assembler {
   _expectedResponseValues() {
     // Due to a mistake in the server-side response serialization, the response for BatchGetItem
     // consists of *two* top-level CBOR values instead of just one. The server side declares an
@@ -135,7 +135,7 @@ exports.Custom_batchGetItem_N697851100_1_Assembler = class Custom_batchGetItem_N
   }
 };
 
-exports.Custom_batchWriteItem_116217951_1_Assembler = class Custom_batchWriteItem_116217951_1_Assembler extends Assembler {
+export const Custom_batchWriteItem_116217951_1_Assembler = class Custom_batchWriteItem_116217951_1_Assembler extends Assembler {
   _expectedResponseValues() {
     // Server response is three separate values: unprocessed items, consumed capacity and item collection metrics
     return 3;

@@ -28,7 +28,7 @@ export class Encoders {
   _keySchema: any;
   _attrNames: any;
   _attrListId: any;
-  constructor(encoder, keySchema, attrNames, attrListId) {
+  constructor(encoder, keySchema?, attrNames?, attrListId?) {
     this._encoder = encoder;
     this._keySchema = keySchema;
     this._attrNames = attrNames;

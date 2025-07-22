@@ -1,7 +1,12 @@
 /test/node_modules/*
+/test/dist/*
 /test-old/*
 /test/*.js
 /node_modules/*
 /test-typescript/*
 deployment.zip
 /src-ts/*
+/dist/*
+/test/lambda-esm.zip
+/test/lambda-cjs.zip
+!/zip-lambda.js

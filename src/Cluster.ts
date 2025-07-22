@@ -40,16 +40,17 @@ class StaticCredentialProvider {
   expiration: any;
   secretAccessKey: any;
   sessionToken: any;
+  creds: any;
   constructor() {
     this.expired = false;
     this.expireTime = null;
     this.refreshCallbacks = [];
+    this.creds = arguments[0];
   }
 
   resolvePromise() {
     const outerThis = this;
     var EXPIRATION_MS = 3e5;
-    // @ts-ignore
     if (!this.accessKeyId || (this.expiration && this.expiration.getTime() - Date.now() < EXPIRATION_MS)) return this.creds().then((creds) => {
       // if (this.expiration && this.expiration.getTime() - Date.now() < EXPIRATION_MS) console.log("refreshing creds");
       this.accessKeyId = creds.accessKeyId;

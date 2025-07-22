@@ -15,17 +15,16 @@
  */
 'use strict';
 
-const BaseOperations = require('../src/BaseOperations');
-const CborDecoder = require('../src/CborDecoder');
-const AttributeValueEncoder = require('../src/AttributeValueEncoder');
-const Stubs = require('./Stubs');
-const Assembler = require('../src/Assembler');
-const CustomAssemblers = require('../src/CustomAssemblers');
-const DaxMethodIds = require('../src/Constants').DaxMethodIds;
-const DynamoDBV1Converter = require('../src/DynamoDBV1Converter');
+import { BaseOperations } from './BaseOperations';
+import { AttributeValueEncoder } from './AttributeValueEncoder';
+import * as Stubs from './Stubs';
+import { Assembler } from './Assembler';
+import * as CustomAssemblers from './CustomAssemblers';
+const DaxMethodIds = require('./Constants').DaxMethodIds;
+import { DynamoDBV1Converter } from './DynamoDBV1Converter';
 
 
-module.exports = class Operations extends BaseOperations {
+export class Operations extends BaseOperations {
   constructor(keyCache, attrListCache, attrListIdCache, tubePool, requestTimeout) {
     super(keyCache, attrListCache, attrListIdCache, tubePool, requestTimeout);
   }
@@ -46,6 +45,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new CustomAssemblers.Custom_batchGetItem_N697851100_1_Assembler(request, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -77,6 +77,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new CustomAssemblers.Custom_batchWriteItem_116217951_1_Assembler(request, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -104,6 +105,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new CustomAssemblers.Custom_defineAttributeList_670678385_1_Assembler(null, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -131,6 +133,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new CustomAssemblers.Custom_defineAttributeListId_N1230579644_1_Assembler(null, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -158,6 +161,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new CustomAssemblers.Custom_defineKeySchema_N742646399_1_Assembler(null, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -192,6 +196,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new Assembler(request, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -219,6 +224,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new CustomAssemblers.Custom_endpoints_455855874_1_Assembler(null, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -253,6 +259,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new Assembler(request, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -293,6 +300,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new Assembler(request, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -327,6 +335,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new Assembler(request, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -361,6 +370,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new Assembler(request, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -392,6 +402,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new CustomAssemblers.Custom_transactGetItems_1866287579_1_Assembler(request, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -423,6 +434,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new CustomAssemblers.Custom_transactWriteItems_N1160037738_1_Assembler(request, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.
@@ -457,6 +469,7 @@ module.exports = class Operations extends BaseOperations {
             return this.reauth(t);
           })
           .then(() => {
+            // @ts-ignore
             let assembler = new Assembler(request, tube.responseBuffer);
 
             // everything needs to be wrapped into promise chain in order to catch exception and avoid leak.

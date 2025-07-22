@@ -1,6 +1,6 @@
 {
   "name": "amazon-dax-client-sdkv3",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "Amazon DAX Client for JavaScript",
   "license": "Apache-2.0",
   "homepage": "https://github.com/kwojcicki/amazon-dax-client-v3",
@@ -14,13 +14,25 @@
     "cache",
     "amazon"
   ],
-  "main": "src/AmazonDaxClient.js",
+  "main": "dist/cjs/AmazonDaxClient.js",
+  "module": "dist/esm/AmazonDaxClient.js",
   "types": "src/AmazonDaxClient.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/AmazonDaxClient.js",
+      "require": "./dist/cjs/AmazonDaxClient.js",
+      "types": "./dist/cjs/AmazonDaxClient.d.ts"
+    }
+  },
   "files": [
-    "src",
-    "generated-src"
+    "dist",
+    "src/AmazonDaxClient.d.ts"
   ],
-  "scripts": {},
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc",
+    "build:esm": "tsc -p tsconfig.esm.json && echo '{\"type\":\"module\"}' > dist/esm/package.json"
+  },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.585.0",
     "@aws-sdk/lib-dynamodb": "^3.585.0",
@@ -33,7 +45,7 @@
     "node": ">= 4.8.0"
   },
   "devDependencies": {
-    "@types/antlr4": "^4.12.0",
-    "@types/node": "^24.0.14"
+    "@types/node": "^24.0.14",
+    "typescript": "^5.5.3"
   }
 }

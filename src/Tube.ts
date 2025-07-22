@@ -27,9 +27,7 @@ import tls from 'tls';
 
 const MAGIC_STRING = 'J7yne5G';
 const USER_AGENT_STRING = 'UserAgent';
-import packageJson from '../package.json';
-// TODO: should probably replace this with the actual DAX user agent string
-const USER_AGENT = 'DaxJSClient-' + packageJson.version;
+const USER_AGENT = 'DaxJSClient-1.2.9';
 const WINDOW_SCALAR = 0.1;
 const DAX_ADDR = 'https://dax.amazonaws.com';
 const BUFFER_ZERO = Buffer.from([0]);
@@ -161,7 +159,11 @@ class ClientTube {
       return this._credProvider.resolvePromise().then((creds) => {
         this._checkAndUpdateAccessKeyId(creds.accessKeyId);
         this._lastPoolAuth = currTime;
-        this._authExp = Math.min(currTime + this._authTTLMillis, creds.expiration.getTime());
+        if (creds.expiration) {
+          this._authExp = Math.min(currTime + this._authTTLMillis, creds.expiration.getTime());
+        } else {
+          this._authExp = currTime + this._authTTLMillis;
+        }
 
         this._authHandler(creds);
 

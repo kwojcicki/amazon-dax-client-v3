@@ -1,57 +1,14 @@
 
 import * as ddb from "@aws-sdk/client-dynamodb";
 import * as libddb from "@aws-sdk/lib-dynamodb";
+import { Client, SmithyResolvedConfiguration } from "@smithy/smithy-client";
 import * as smithyTypes from "@smithy/types";
+import { MetadataBearer, MiddlewareStack } from "@smithy/types";
 
-type allowServiceInputTypes = ddb.BatchGetItemCommandInput |
-  ddb.BatchWriteItemCommandInput |
-  ddb.DeleteItemCommandInput |
-  ddb.GetItemCommandInput |
-  ddb.PutItemCommandInput |
-  ddb.QueryCommandInput |
-  ddb.ScanCommandInput |
-  ddb.TransactGetItemsCommandInput |
-  ddb.UpdateItemCommandInput |
-  libddb.BatchGetCommandInput |
-  libddb.BatchWriteCommandInput |
-  libddb.DeleteCommandInput |
-  libddb.GetCommandInput |
-  libddb.PutCommandInput |
-  libddb.QueryCommandInput |
-  libddb.ScanCommandInput |
-  libddb.TransactGetCommandInput |
-  libddb.UpdateCommandInput
-
-type allowedServiceOutputTypes = ddb.BatchGetItemCommandOutput |
-  ddb.BatchWriteItemCommandOutput |
-  ddb.DeleteItemCommandOutput |
-  ddb.GetItemCommandOutput |
-  ddb.PutItemCommandOutput |
-  ddb.QueryCommandOutput |
-  ddb.ScanCommandOutput |
-  ddb.TransactGetItemsCommandOutput |
-  ddb.UpdateItemCommandOutput |
-  libddb.BatchGetCommandOutput |
-  libddb.BatchWriteCommandOutput |
-  libddb.DeleteCommandOutput |
-  libddb.GetCommandOutput |
-  libddb.PutCommandOutput |
-  libddb.QueryCommandOutput |
-  libddb.ScanCommandOutput |
-  libddb.TransactGetCommandOutput |
-  libddb.UpdateCommandOutput
-
-export declare class Client<HandlerOptions, ClientInput extends object, ClientOutput extends MetadataBearer, ResolvedClientConfiguration extends SmithyResolvedConfiguration<HandlerOptions>> implements smithyTypes.Client<ClientInput, ClientOutput, ResolvedClientConfiguration> {
-  middlewareStack: MiddlewareStack<ddb.ServiceInputTypes, ddb.ServiceOutputTypes>;
-  readonly config: ResolvedClientConfiguration;
-  constructor(config: ResolvedClientConfiguration);
-  send<InputType extends ClientInput, OutputType extends ClientOutput>(command: smithyTypes.Command<ddb.ServiceInputTypes, InputType, ddb.ServiceOutputTypes, OutputType, SmithyResolvedConfiguration<HandlerOptions>>, options?: HandlerOptions): Promise<OutputType>;
-  send<InputType extends ClientInput, OutputType extends ClientOutput>(command: smithyTypes.Command<ddb.ServiceInputTypes, InputType, ddb.ServiceOutputTypes, OutputType, SmithyResolvedConfiguration<HandlerOptions>>, cb: (err: any, data?: OutputType) => void): void;
-  send<InputType extends ClientInput, OutputType extends ClientOutput>(command: smithyTypes.Command<ddb.ServiceInputTypes, InputType, ddb.ServiceOutputTypes, OutputType, SmithyResolvedConfiguration<HandlerOptions>>, options: HandlerOptions, cb: (err: any, data?: OutputType) => void): void;
-  destroy(): void;
-}
-
-declare class AmazonDaxClient extends Client<any, allowServiceInputTypes, allowedServiceOutputTypes, any> {
+// TODO: ideally we trim down the ServiceInputTypes and ServiceOutputTypes to what DAX allows
+// but I don't know how to do that yet given the Client's 2nd and 3rd parameters seem to have to match exactly
+// to the 4th and 5th parameters of the commands CommandImpl interface
+export declare class AmazonDaxClient extends Client<any, ddb.ServiceInputTypes, ddb.ServiceOutputTypes, any> {
   constructor(props: {
     client: ddb.DynamoDBClient | libddb.DynamoDBDocumentClient,
     config?: {
@@ -118,4 +75,4 @@ declare class AmazonDaxClient extends Client<any, allowServiceInputTypes, allowe
   paginateQuery: (config: { startingToken?: string | undefined, pageSize?: number | undefined }, input: libddb.QueryCommandInput, ...additionalArguments: any) => AsyncGenerator<libddb.QueryCommandOutput>;
 }
 
-export = AmazonDaxClient;
+export default AmazonDaxClient;

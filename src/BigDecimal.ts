@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 'use strict';
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 import { DaxClientError } from './DaxClientError'
 import { DaxErrorCode } from './DaxErrorCode'
 const TEN = new BigNumber(10);

@@ -13,11 +13,11 @@
  * permissions and limitations under the License.
  */
 'use strict';
-import { ErrorListener } from 'antlr4';
+import { error } from 'antlr4';
 import { DaxClientError } from './DaxClientError';
 import { DaxErrorCode } from './DaxErrorCode';
 
-export class ExpressionErrorListener extends ErrorListener {
+export class ExpressionErrorListener extends error.ErrorListener {
   _mExpression: any;
   _mExpressionType: any;
   constructor(expression, expressionType) {

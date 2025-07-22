@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 'use strict';
-import { BigInteger } from 'bignumber.js';
+import BigInteger from 'bignumber.js';
 import { BigDecimal } from './BigDecimal';
 import { Buffer } from 'buffer';
 /** Byte to use for undefined, low ordering */

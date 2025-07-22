@@ -278,7 +278,7 @@ DynamoDbGrammarParser.RULE_expression_attr_names_sub = 23;
 DynamoDbGrammarParser.RULE_expression_attr_values_sub = 24;
 DynamoDbGrammarParser.RULE_unknown = 25;
 
-function Projection_Context(parser, parent, invokingState) {
+export function Projection_Context(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -346,7 +346,7 @@ DynamoDbGrammarParser.prototype.projection_ = function () {
     return localctx;
 };
 
-function ProjectionContext(parser, parent, invokingState) {
+export function ProjectionContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -428,7 +428,7 @@ DynamoDbGrammarParser.prototype.projection = function () {
     return localctx;
 };
 
-function Condition_Context(parser, parent, invokingState) {
+export function Condition_Context(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -520,7 +520,7 @@ ConditionContext.prototype.copyFrom = function (ctx) {
     this.hasOuterParens = ctx.hasOuterParens;
 };
 
-function OrContext(parser, ctx) {
+export function OrContext(parser, ctx) {
     ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -560,7 +560,7 @@ OrContext.prototype.exitRule = function (listener) {
 };
 
 
-function NegationContext(parser, ctx) {
+export function NegationContext(parser, ctx) {
     ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -593,7 +593,7 @@ NegationContext.prototype.exitRule = function (listener) {
 };
 
 
-function InContext(parser, ctx) {
+export function InContext(parser, ctx) {
     ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -633,7 +633,7 @@ InContext.prototype.exitRule = function (listener) {
 };
 
 
-function AndContext(parser, ctx) {
+export function AndContext(parser, ctx) {
     ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -673,7 +673,7 @@ AndContext.prototype.exitRule = function (listener) {
 };
 
 
-function BetweenContext(parser, ctx) {
+export function BetweenContext(parser, ctx) {
     ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -717,7 +717,7 @@ BetweenContext.prototype.exitRule = function (listener) {
 };
 
 
-function FunctionConditionContext(parser, ctx) {
+export function FunctionConditionContext(parser, ctx) {
     ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -746,7 +746,7 @@ FunctionConditionContext.prototype.exitRule = function (listener) {
 };
 
 
-function ComparatorContext(parser, ctx) {
+export function ComparatorContext(parser, ctx) {
     ConditionContext.call(this, parser);
     ConditionContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -786,7 +786,7 @@ ComparatorContext.prototype.exitRule = function (listener) {
 };
 
 
-function ConditionGroupingContext(parser, ctx) {
+export function ConditionGroupingContext(parser, ctx) {
     ConditionContext.call(this, parser);
     this.c = null; // ConditionContext;
     ConditionContext.prototype.copyFrom.call(this, ctx);
@@ -996,7 +996,7 @@ DynamoDbGrammarParser.prototype.condition = function (_p) {
     return localctx;
 };
 
-function Comparator_symbolContext(parser, parent, invokingState) {
+export function Comparator_symbolContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1062,7 +1062,7 @@ DynamoDbGrammarParser.prototype.comparator_symbol = function () {
     return localctx;
 };
 
-function Update_Context(parser, parent, invokingState) {
+export function Update_Context(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1130,7 +1130,7 @@ DynamoDbGrammarParser.prototype.update_ = function () {
     return localctx;
 };
 
-function UpdateContext(parser, parent, invokingState) {
+export function UpdateContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1260,7 +1260,7 @@ DynamoDbGrammarParser.prototype.update = function () {
     return localctx;
 };
 
-function Set_sectionContext(parser, parent, invokingState) {
+export function Set_sectionContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1348,7 +1348,7 @@ DynamoDbGrammarParser.prototype.set_section = function () {
     return localctx;
 };
 
-function Set_actionContext(parser, parent, invokingState) {
+export function Set_actionContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1418,7 +1418,7 @@ DynamoDbGrammarParser.prototype.set_action = function () {
     return localctx;
 };
 
-function Add_sectionContext(parser, parent, invokingState) {
+export function Add_sectionContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1506,7 +1506,7 @@ DynamoDbGrammarParser.prototype.add_section = function () {
     return localctx;
 };
 
-function Add_actionContext(parser, parent, invokingState) {
+export function Add_actionContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1574,7 +1574,7 @@ DynamoDbGrammarParser.prototype.add_action = function () {
     return localctx;
 };
 
-function Delete_sectionContext(parser, parent, invokingState) {
+export function Delete_sectionContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1662,7 +1662,7 @@ DynamoDbGrammarParser.prototype.delete_section = function () {
     return localctx;
 };
 
-function Delete_actionContext(parser, parent, invokingState) {
+export function Delete_actionContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1730,7 +1730,7 @@ DynamoDbGrammarParser.prototype.delete_action = function () {
     return localctx;
 };
 
-function Remove_sectionContext(parser, parent, invokingState) {
+export function Remove_sectionContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1818,7 +1818,7 @@ DynamoDbGrammarParser.prototype.remove_section = function () {
     return localctx;
 };
 
-function Remove_actionContext(parser, parent, invokingState) {
+export function Remove_actionContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1880,7 +1880,7 @@ DynamoDbGrammarParser.prototype.remove_action = function () {
     return localctx;
 };
 
-function Set_valueContext(parser, parent, invokingState) {
+export function Set_valueContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -1903,7 +1903,7 @@ Set_valueContext.prototype.copyFrom = function (ctx) {
 };
 
 
-function ArithmeticValueContext(parser, ctx) {
+export function ArithmeticValueContext(parser, ctx) {
     Set_valueContext.call(this, parser);
     Set_valueContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -1932,7 +1932,7 @@ ArithmeticValueContext.prototype.exitRule = function (listener) {
 };
 
 
-function OperandValueContext(parser, ctx) {
+export function OperandValueContext(parser, ctx) {
     Set_valueContext.call(this, parser);
     Set_valueContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2005,7 +2005,7 @@ DynamoDbGrammarParser.prototype.set_value = function () {
     return localctx;
 };
 
-function ArithmeticContext(parser, parent, invokingState) {
+export function ArithmeticContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -2030,7 +2030,7 @@ ArithmeticContext.prototype.copyFrom = function (ctx) {
 };
 
 
-function PlusMinusContext(parser, ctx) {
+export function PlusMinusContext(parser, ctx) {
     ArithmeticContext.call(this, parser);
     ArithmeticContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2066,7 +2066,7 @@ PlusMinusContext.prototype.exitRule = function (listener) {
 };
 
 
-function ArithmeticParensContext(parser, ctx) {
+export function ArithmeticParensContext(parser, ctx) {
     ArithmeticContext.call(this, parser);
     this.a = null; // ArithmeticContext;
     ArithmeticContext.prototype.copyFrom.call(this, ctx);
@@ -2159,7 +2159,7 @@ DynamoDbGrammarParser.prototype.arithmetic = function () {
     return localctx;
 };
 
-function OperandContext(parser, parent, invokingState) {
+export function OperandContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -2184,7 +2184,7 @@ OperandContext.prototype.copyFrom = function (ctx) {
 };
 
 
-function PathOperandContext(parser, ctx) {
+export function PathOperandContext(parser, ctx) {
     OperandContext.call(this, parser);
     OperandContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2213,7 +2213,7 @@ PathOperandContext.prototype.exitRule = function (listener) {
 };
 
 
-function LiteralOperandContext(parser, ctx) {
+export function LiteralOperandContext(parser, ctx) {
     OperandContext.call(this, parser);
     OperandContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2242,7 +2242,7 @@ LiteralOperandContext.prototype.exitRule = function (listener) {
 };
 
 
-function FunctionOperandContext(parser, ctx) {
+export function FunctionOperandContext(parser, ctx) {
     OperandContext.call(this, parser);
     OperandContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2271,7 +2271,7 @@ FunctionOperandContext.prototype.exitRule = function (listener) {
 };
 
 
-function ParenOperandContext(parser, ctx) {
+export function ParenOperandContext(parser, ctx) {
     OperandContext.call(this, parser);
     this.o = null; // OperandContext;
     OperandContext.prototype.copyFrom.call(this, ctx);
@@ -2369,7 +2369,7 @@ DynamoDbGrammarParser.prototype.operand = function () {
     return localctx;
 };
 
-function FuncContext(parser, parent, invokingState) {
+export function FuncContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -2392,7 +2392,7 @@ FuncContext.prototype.copyFrom = function (ctx) {
 };
 
 
-function FunctionCallContext(parser, ctx) {
+export function FunctionCallContext(parser, ctx) {
     FuncContext.call(this, parser);
     FuncContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2479,7 +2479,7 @@ DynamoDbGrammarParser.prototype.func = function () {
     return localctx;
 };
 
-function PathContext(parser, parent, invokingState) {
+export function PathContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -2565,7 +2565,7 @@ DynamoDbGrammarParser.prototype.path = function () {
     return localctx;
 };
 
-function IdContext(parser, parent, invokingState) {
+export function IdContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -2638,7 +2638,7 @@ DynamoDbGrammarParser.prototype.id = function () {
     return localctx;
 };
 
-function DereferenceContext(parser, parent, invokingState) {
+export function DereferenceContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -2661,7 +2661,7 @@ DereferenceContext.prototype.copyFrom = function (ctx) {
 };
 
 
-function ListAccessContext(parser, ctx) {
+export function ListAccessContext(parser, ctx) {
     DereferenceContext.call(this, parser);
     DereferenceContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2690,7 +2690,7 @@ ListAccessContext.prototype.exitRule = function (listener) {
 };
 
 
-function MapAccessContext(parser, ctx) {
+export function MapAccessContext(parser, ctx) {
     DereferenceContext.call(this, parser);
     DereferenceContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2767,7 +2767,7 @@ DynamoDbGrammarParser.prototype.dereference = function () {
     return localctx;
 };
 
-function LiteralContext(parser, parent, invokingState) {
+export function LiteralContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -2790,7 +2790,7 @@ LiteralContext.prototype.copyFrom = function (ctx) {
 };
 
 
-function LiteralSubContext(parser, ctx) {
+export function LiteralSubContext(parser, ctx) {
     LiteralContext.call(this, parser);
     LiteralContext.prototype.copyFrom.call(this, ctx);
     return this;
@@ -2847,7 +2847,7 @@ DynamoDbGrammarParser.prototype.literal = function () {
     return localctx;
 };
 
-function Expression_attr_names_subContext(parser, parent, invokingState) {
+export function Expression_attr_names_subContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -2915,7 +2915,7 @@ DynamoDbGrammarParser.prototype.expression_attr_names_sub = function () {
     return localctx;
 };
 
-function Expression_attr_values_subContext(parser, parent, invokingState) {
+export function Expression_attr_values_subContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }
@@ -2983,7 +2983,7 @@ DynamoDbGrammarParser.prototype.expression_attr_values_sub = function () {
     return localctx;
 };
 
-function UnknownContext(parser, parent, invokingState) {
+export function UnknownContext(parser, parent, invokingState) {
     if (parent === undefined) {
         parent = null;
     }

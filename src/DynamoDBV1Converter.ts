@@ -24,7 +24,7 @@ import { Util } from './Util';
 const NAME_PREFIX = '#key';
 const VALUE_PREFIX = ':val';
 
-class DynamoDBV1Converter {
+export class DynamoDBV1Converter {
   /**
   * Checks If given DDB request is a V1 request which needs conversion
   */
@@ -684,5 +684,3 @@ class DynamoDBV1Converter {
     return (prefix + suffix);
   }
 }
-
-module.exports = DynamoDBV1Converter;

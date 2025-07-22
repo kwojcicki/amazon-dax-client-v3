@@ -16,7 +16,7 @@
 
 import { RefreshingCache } from './RefreshingCache';
 import { SimpleCache } from './SimpleCache';
-import Operations from '../generated-src/Operations';
+import { Operations } from './Operations';
 const CacheType = require('./Cache').CacheType;
 
 const CACHE_SIZE = 250;

@@ -55,7 +55,7 @@ export class BaseOperations {
     this._requestTimeout = requestTimeout || 0;
   }
 
-  _getReturnHandler(tube, assembler, name) {
+  _getReturnHandler(tube, assembler, name?) {
     let endListener;
     return new Promise((resolve, reject) => {
       // Listen on end event to avoid the situation that server close
@@ -914,8 +914,8 @@ export class BaseOperations {
       Promise.resolve({})
     );
 
-    // @ts-ignore
     return keySchemasForTablesPromise
+      // @ts-ignore
       .then((keySchemasForTables) => {
         // Now we can validate the keys against their table schema
         this._validate_transactgetitems_keys(items, keySchemasForTables);
