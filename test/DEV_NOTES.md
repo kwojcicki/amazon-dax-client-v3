@@ -1,11 +1,17 @@
 You probably don't need/want to be looking at this :) notes to myself for developing this middleware dumpster fire
 
 
+Developing:
+
 Split terminal (main library and test)
 
 npm run build && npm link
 
 npm link amazon-dax-client-sdkv3
+
+Publishing:
+
+npm login && npm run build && npm publish
 
 operation not allowed add kms to DaxtoDDB role
 
