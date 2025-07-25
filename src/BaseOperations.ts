@@ -27,7 +27,7 @@ const DaxMethodIds = require('./Constants').DaxMethodIds;
 const Operation = require('./Constants').Operation;
 const ReturnValueOnConditionCheckFailure = require('./Constants').ReturnValueOnConditionCheckFailure;
 import { RequestValidator } from './RequestValidator';
-import UUID from 'uuid';
+import { v4 } from 'uuid';
 
 const MAX_WRITE_BATCH_SIZE = 25;
 const MAX_READ_BATCH_SIZE = 100;
@@ -683,7 +683,7 @@ export class BaseOperations {
       request._keysPerTable = keysPerTable;
       request._keysPerRequest = keysPerRequest;
       if (!request.ClientRequestToken) {
-        request.ClientRequestToken = UUID.v4();
+        request.ClientRequestToken = v4();
       }
       request._stubData = {
         operations: operationsBuffer.read(),

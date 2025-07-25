@@ -491,7 +491,7 @@ const _AmazonDaxClient = inherit({
 });
 
 // Exists only to work with DocumentClient
-const AmazonDaxClient = inherit(_AmazonDaxClient, {});
+export const AmazonDaxClient = inherit(_AmazonDaxClient, {});
 
 class RetryHandler {
   _cluster: any;
@@ -720,4 +720,4 @@ class DaxRequest extends EventEmitter {
   }
 }
 
-module.exports = AmazonDaxClient;
+export default AmazonDaxClient;

@@ -16,7 +16,7 @@
 import { BigDecimal } from './BigDecimal';
 import BigNumber from 'bignumber.js';
 import { CborDecoder } from './CborDecoder';
-import { CborSkipper, skipCbor } from './CborSkipper';
+import { skipCbor } from './CborSkipper';
 import * as CborTypes from './CborTypes';
 import * as Constants from './Constants';
 import { DaxCborDecoder } from './DaxCborDecoder';

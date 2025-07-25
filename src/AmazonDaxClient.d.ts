@@ -1,9 +1,7 @@
 
 import * as ddb from "@aws-sdk/client-dynamodb";
 import * as libddb from "@aws-sdk/lib-dynamodb";
-import { Client, SmithyResolvedConfiguration } from "@smithy/smithy-client";
-import * as smithyTypes from "@smithy/types";
-import { MetadataBearer, MiddlewareStack } from "@smithy/types";
+import { Client } from "@smithy/smithy-client";
 
 // TODO: ideally we trim down the ServiceInputTypes and ServiceOutputTypes to what DAX allows
 // but I don't know how to do that yet given the Client's 2nd and 3rd parameters seem to have to match exactly

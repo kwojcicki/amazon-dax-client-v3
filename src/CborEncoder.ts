@@ -16,7 +16,7 @@
 import { Buffer } from 'buffer';
 import { ByteStreamBuffer as StreamBuffer } from './ByteStreamBuffer';
 import * as CborTypes from './CborTypes';
-import { BigNumber } from 'bignumber.js';
+import BigNumber from 'bignumber.js';
 import { BigDecimal } from './BigDecimal';
 import { DaxClientError } from './DaxClientError';
 import { DaxErrorCode } from './DaxErrorCode';

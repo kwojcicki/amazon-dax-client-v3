@@ -41,9 +41,7 @@ export class TimeoutError extends DaxClientError {
   }
 }
 
-exports.USER_AGENT = USER_AGENT;
-
-class ClientTube {
+export class ClientTube {
   cbor: CborEncoder;
   static ENCODED_INIT_PREFIX: any;
   socket: any;
@@ -213,7 +211,7 @@ class ClientTube {
   }
 }
 
-class Connector {
+export class Connector {
   _connectOps: { host: any; port: any; checkServerIdentity: any; };
   _protocol: typeof tls | typeof net;
   constructor(isEncrypted, host, port, skipHostnameVerification, endpointHost) {
@@ -238,7 +236,7 @@ class Connector {
   }
 }
 
-class SocketTubePool {
+export class SocketTubePool {
   _hostname: any;
   _port: any;
   _headTube: ClientTube | null;
@@ -477,10 +475,3 @@ class SocketTubePool {
     // if we get here the tube was not found, but ignore it
   }
 }
-
-module.exports = {
-  ClientTube: ClientTube,
-  SocketTubePool: SocketTubePool,
-  TimeoutError: TimeoutError,
-  Connector: Connector,
-};

@@ -207,7 +207,7 @@ function verifyBatchConsumedCapacity(consumedCapacityByTable, tables) {
   return consumedCapacityByTable;
 }
 
-exports.Custom_transactGetItems_1866287579_1_Assembler = class Custom_transactGetItems_1866287579_1_Assembler extends Assembler {
+export const Custom_transactGetItems_1866287579_1_Assembler = class Custom_transactGetItems_1866287579_1_Assembler extends Assembler {
   _assembleResult() {
     // Assume the error response has already been handled
     let result = {} as any;
@@ -260,7 +260,7 @@ exports.Custom_transactGetItems_1866287579_1_Assembler = class Custom_transactGe
   }
 };
 
-exports.Custom_transactWriteItems_N1160037738_1_Assembler = class Custom_transactWriteItems_N1160037738_1_Assembler extends Assembler {
+export const Custom_transactWriteItems_N1160037738_1_Assembler = class Custom_transactWriteItems_N1160037738_1_Assembler extends Assembler {
   _assembleResult() {
     let arrayLen = this.dec.decodeArrayLength();
     if (arrayLen !== 3) {
